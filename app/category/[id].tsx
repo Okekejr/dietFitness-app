@@ -14,8 +14,7 @@ import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { API_URL } from "@/constants/apiUrl";
 import FilterModal from "@/components/modal/filterModal";
 import WorkoutCard from "@/components/workout/workoutCard";
-import { CategoryT } from "@/types/category";
-import { WorkoutsT } from "@/types/workout";
+import { CategoryT, WorkoutsT } from "@/types";
 
 const { height } = Dimensions.get("window");
 

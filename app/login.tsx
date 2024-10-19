@@ -59,13 +59,18 @@ export default function LoginScreen() {
   // Helper function to check if the user exists
   const checkIfUserExists = async (userId: string) => {
     try {
-      const response = await fetch(`${API_URL}/api/user/${userId}`);
-      const userExists = response.status === 200; // User found
+      const response = await fetch(`${API_URL}/api/users/${userId}`);
 
-      if (userExists) {
-        router.replace("/(tabs)/"); // Redirect to home
+      if (response.ok) {
+        const userData = await response.json();
+        console.log("User exists:", userData);
+        router.replace("/"); // User found
+      } else if (response.status === 404) {
+        console.log("User not found.");
+        router.replace("/personalInfo");
       } else {
-        router.replace("/personalInfo"); // Start onboarding
+        console.error("Failed to fetch user:", response.statusText);
+        return false;
       }
     } catch (error) {
       console.error("Error checking user existence:", error);

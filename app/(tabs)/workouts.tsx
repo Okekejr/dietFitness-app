@@ -12,9 +12,8 @@ import CategoriesComp from "@/components/Categories/CategoriesComp";
 import { useQuery } from "@tanstack/react-query";
 import { API_URL } from "@/constants/apiUrl";
 import WorkoutCompCard from "@/components/workout/workoutCompCard";
-import { WorkoutsT } from "@/types/workout";
-import { CategoryT } from "@/types/category";
 import { FlatList } from "react-native";
+import { CategoryT, WorkoutsT } from "@/types";
 
 // Fetch function
 const fetchCategories = async () => {

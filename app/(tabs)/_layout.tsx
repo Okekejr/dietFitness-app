@@ -4,7 +4,6 @@ import { Tabs, useRouter } from "expo-router";
 import { useTheme } from "react-native-paper";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import SuperTokens from "supertokens-react-native";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import "../../config/supertokens";
 import { getIconName } from "@/utils";
 

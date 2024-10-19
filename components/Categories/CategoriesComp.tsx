@@ -1,8 +1,7 @@
 import React, { FC, memo } from "react";
 import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
-import { CategoryT } from "@/types/category";
-
+import { CategoryT } from "@/types";
 interface CategoriesCompProps {
   category: CategoryT;
 }
