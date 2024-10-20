@@ -1,34 +1,23 @@
 import { useUserData } from "@/context/userDataContext";
 import { getInitials } from "@/utils";
 import { useRouter } from "expo-router";
-import React from "react";
+import React, { useEffect } from "react";
 import {
   View,
   StyleSheet,
-  Alert,
-  Button,
   SafeAreaView,
   TouchableOpacity,
   Image,
 } from "react-native";
 import { Text } from "react-native-paper";
-import SuperTokens from "supertokens-react-native";
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { userData } = useUserData();
+  const { userData, refetchUserData } = useUserData();
 
-  const handleSignOut = async () => {
-    try {
-      await SuperTokens.signOut();
-      Alert.alert("Signed Out", "You have been signed out successfully.");
-
-      // Redirect to the login page
-      router.replace("/login");
-    } catch (error) {
-      Alert.alert("Sign Out Failed", (error as Error).message);
-    }
-  };
+  useEffect(() => {
+    refetchUserData();
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -51,7 +40,6 @@ export default function HomeScreen() {
       </TouchableOpacity>
       {/* Add other components for the Home Screen here */}
       <Text variant="headlineMedium">Welcome to the Home Screen</Text>
-      <Button title="Sign Out" onPress={handleSignOut} />
     </SafeAreaView>
   );
 }

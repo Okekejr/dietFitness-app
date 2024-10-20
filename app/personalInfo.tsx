@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   formGroup: {
-    marginBottom: 20,
+    marginBottom: 15,
   },
   label: {
     fontSize: 16,
@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#000",
     paddingVertical: 15,
     borderRadius: 8,
-    marginTop: 20,
+    marginTop: 5,
   },
   buttonText: {
     color: "#fff",

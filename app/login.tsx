@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   TextInput,
@@ -18,6 +18,7 @@ import * as WebBrowser from "expo-web-browser";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { API_URL } from "@/constants/apiUrl";
+import Divider from "@/components/ui/divider";
 
 // Open the browser session correctly (required for standalone apps)
 WebBrowser.maybeCompleteAuthSession();
@@ -53,8 +54,32 @@ export default function LoginScreen() {
   const [isPasswordVisible, setPasswordVisible] = useState(false);
   const emailInputRef = useRef<TextInput>(null);
   const passwordInputRef = useRef<TextInput>(null);
+  const [errors, setErrors] = useState({ email: "", password: "" });
+  const [isButtonDisabled, setButtonDisabled] = useState(true);
 
   const router = useRouter();
+
+  useEffect(() => {
+    // Enable button only if both fields are filled
+    setButtonDisabled(!(email && password));
+  }, [email, password]);
+
+  const validateInputs = () => {
+    const newErrors = { email: "", password: "" };
+    let isValid = true;
+
+    if (!email) {
+      newErrors.email = "Please provide your email.";
+      isValid = false;
+    }
+    if (!password) {
+      newErrors.password = "Please provide your password.";
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
 
   // Helper function to check if the user exists
   const checkIfUserExists = async (userId: string) => {
@@ -63,7 +88,7 @@ export default function LoginScreen() {
 
       if (response.ok) {
         const userData = await response.json();
-        console.log("User exists:", userData);
+        console.log("User exists:", userData.name);
         router.replace("/"); // User found
       } else if (response.status === 404) {
         console.log("User not found.");
@@ -78,11 +103,14 @@ export default function LoginScreen() {
     }
   };
 
-  const handleLogin = async () => {
+  const handleLogin = async (email: string, password: string) => {
+    if (!validateInputs()) return; // Ensure inputs are valid
+
     try {
       const response = await fetch(`${API_URL}/api/auth/signin`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include", // Include session cookies
         body: JSON.stringify({
           formFields: [
             { id: "email", value: email },
@@ -93,29 +121,20 @@ export default function LoginScreen() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        const errorMessage =
-          errorData.message || "Invalid email or password. Please try again.";
-        throw new Error(errorMessage);
+        throw new Error(errorData.message || "Invalid email or password.");
       }
 
       const data = await response.json();
       const userId = data?.user?.id;
       console.log("User ID:", userId);
 
-      if (!userId) {
-        throw new Error("User data not found. Please try again.");
-      }
+      if (!userId) throw new Error("User not found. Please sign up.");
 
-      // Save the user ID or access token
       await AsyncStorage.setItem("accessToken", userId);
-
-      // Fetch the stored token to confirm it was saved
       const storedToken = await AsyncStorage.getItem("accessToken");
-      console.log("Stored access token:", storedToken);
 
       if (storedToken) {
         Alert.alert("Login Successful");
-        // Check if user exists and route accordingly
         checkIfUserExists(userId);
       } else {
         throw new Error("Failed to store access token.");
@@ -123,9 +142,7 @@ export default function LoginScreen() {
     } catch (error) {
       console.error("Login Error:", error);
       const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "An unexpected error occurred.";
+        error instanceof Error ? error.message : "Unexpected error.";
       Alert.alert("Login Failed", errorMessage);
     }
   };
@@ -160,6 +177,7 @@ export default function LoginScreen() {
           contentContainerStyle={styles.container}
           keyboardShouldPersistTaps="handled"
         >
+          <Text style={styles.headerText}>Log in to our app</Text>
           {/* OAuth Buttons */}
           <View style={styles.oauthContainer}>
             <TouchableOpacity
@@ -169,7 +187,7 @@ export default function LoginScreen() {
               <Ionicons
                 name="logo-google"
                 size={20}
-                color="black"
+                color="#fff"
                 style={styles.oauthIcon}
               />
               <Text style={styles.oauthButtonText}>Login with Google</Text>
@@ -182,7 +200,7 @@ export default function LoginScreen() {
               <Ionicons
                 name="logo-github"
                 size={20}
-                color="black"
+                color="#fff"
                 style={styles.oauthIcon}
               />
               <Text style={styles.oauthButtonText}>Login with GitHub</Text>
@@ -194,27 +212,38 @@ export default function LoginScreen() {
             <Text style={styles.label}>Email</Text>
             <TextInput
               ref={emailInputRef}
-              style={styles.input}
+              style={[styles.input, errors.email ? styles.errorInput : null]}
               placeholder="Email Address"
               placeholderTextColor="#c7c7c7"
               value={email}
-              onChangeText={setEmail}
+              onChangeText={(text) => setEmail(text.trim())}
               onSubmitEditing={() => passwordInputRef.current?.focus()}
             />
+            {errors.email ? (
+              <Text style={styles.errorText}>{errors.email}</Text>
+            ) : null}
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Password</Text>
+            <View style={styles.passwordstyle}>
+              <Text style={styles.passwordLabel}>Password</Text>
+              <TouchableOpacity onPress={() => router.push("/signup")}>
+                <Text style={styles.signupLink}>Forgot password?</Text>
+              </TouchableOpacity>
+            </View>
             <View style={styles.passwordInputContainer}>
               <TextInput
                 ref={passwordInputRef}
-                style={styles.passwordInput}
+                style={[
+                  styles.passwordInput,
+                  errors.password ? styles.errorInput : null,
+                ]}
                 placeholder="Password"
                 placeholderTextColor="#c7c7c7"
                 secureTextEntry={!isPasswordVisible}
                 value={password}
                 onChangeText={setPassword}
-                onSubmitEditing={handleLogin}
+                onSubmitEditing={() => handleLogin(email, password)}
               />
               {/* Eye icon inside input */}
               <TouchableOpacity
@@ -228,17 +257,29 @@ export default function LoginScreen() {
                 />
               </TouchableOpacity>
             </View>
+            {errors.password ? (
+              <Text style={styles.errorText}>{errors.password}</Text>
+            ) : null}
           </View>
 
-          <TouchableOpacity onPress={() => router.push("/signup")}>
-            <Text style={styles.signupLink}>
-              Don't have an account? Sign up
-            </Text>
+          {/* Login Button */}
+          <TouchableOpacity
+            style={[
+              styles.loginButton,
+              isButtonDisabled && styles.disabledButton,
+            ]}
+            onPress={() => handleLogin(email, password)}
+          >
+            <Text style={styles.loginButtonText}>Log In</Text>
           </TouchableOpacity>
 
-          {/* Login Button */}
-          <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-            <Text style={styles.loginButtonText}>Login</Text>
+          <Divider text="OR" />
+
+          <TouchableOpacity
+            style={styles.signUpButton}
+            onPress={() => router.push("/signup")}
+          >
+            <Text style={styles.loginButtonText}>New to our app? Sign up</Text>
           </TouchableOpacity>
         </ScrollView>
       </TouchableWithoutFeedback>
@@ -250,7 +291,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "center",
-    backgroundColor: "#fff",
+    backgroundColor: "#F5F7FA",
     padding: 20,
   },
   passwordInputContainer: {
@@ -262,12 +303,37 @@ const styles = StyleSheet.create({
     height: 50,
     paddingHorizontal: 10,
   },
+  headerText: {
+    fontWeight: "bold",
+    marginBottom: 30,
+    fontSize: 20,
+    color: "#000",
+  },
   passwordInput: {
     flex: 1,
     color: "#000",
   },
+  errorInput: {
+    borderColor: "red",
+  },
+  errorText: {
+    color: "red",
+    fontSize: 12,
+    marginTop: 5,
+  },
   eyeIcon: {
     marginLeft: 10,
+  },
+  passwordLabel: {
+    fontSize: 14,
+    color: "#000",
+  },
+  passwordstyle: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 5,
   },
   title: {
     fontSize: 24,
@@ -282,7 +348,7 @@ const styles = StyleSheet.create({
   oauthButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fff",
+    backgroundColor: "#000",
     borderColor: "#000",
     borderWidth: 1,
     borderRadius: 5,
@@ -297,7 +363,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     flex: 1, // Center text inside the button
     fontSize: 16,
-    color: "#000",
+    color: "#fff",
   },
   inputContainer: {
     marginBottom: 15,
@@ -316,14 +382,23 @@ const styles = StyleSheet.create({
     color: "#000",
   },
   loginButton: {
-    backgroundColor: "#000",
+    backgroundColor: "#4F46E5",
     paddingVertical: 15,
     borderRadius: 5,
     marginTop: 10,
+  },
+  disabledButton: {
+    backgroundColor: "#A0A0A0",
   },
   loginButtonText: {
     color: "#fff",
     textAlign: "center",
     fontSize: 16,
+  },
+  signUpButton: {
+    paddingVertical: 15,
+    borderRadius: 5,
+    marginTop: 10,
+    backgroundColor: "#000",
   },
 });

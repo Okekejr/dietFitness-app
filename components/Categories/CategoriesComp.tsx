@@ -32,7 +32,7 @@ const CategoriesComp: FC<CategoriesCompProps> = ({ category }) => {
 const styles = StyleSheet.create({
   card: {
     marginBottom: 10,
-    borderRadius: 5,
+    borderRadius: 3,
     overflow: "hidden",
     elevation: 3,
     backgroundColor: "#fff",
@@ -43,7 +43,7 @@ const styles = StyleSheet.create({
   },
   image: {
     width: "100%",
-    height: 150,
+    height: 160,
     borderRadius: 5,
   },
   textContainer: {

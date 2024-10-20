@@ -11,7 +11,6 @@ import {
   Platform,
   ScrollView,
   TouchableOpacity,
-  ActivityIndicator,
   SafeAreaView,
   KeyboardAvoidingView,
 } from "react-native";
@@ -21,6 +20,7 @@ import * as ImagePicker from "expo-image-picker";
 import { API_URL } from "@/constants/apiUrl";
 import { useUserData } from "@/context/userDataContext";
 import { Ionicons } from "@expo/vector-icons";
+import * as FileSystem from "expo-file-system";
 
 export default function EditProfileScreen() {
   const { userData, refetchUserData } = useUserData();
@@ -79,7 +79,30 @@ export default function EditProfileScreen() {
     });
 
     if (!result.canceled) {
-      setProfilePicture(result.assets[0].uri);
+      const { uri } = result.assets[0];
+
+      try {
+        const fileInfo = await FileSystem.getInfoAsync(uri);
+
+        // Check if the file exists and has a size
+        if (
+          fileInfo.exists &&
+          fileInfo.size &&
+          fileInfo.size > 3 * 1024 * 1024
+        ) {
+          Alert.alert(
+            "Error",
+            "File size exceeds 3MB limit. Please select a smaller image."
+          );
+          return;
+        }
+
+        // If valid, set the image
+        setProfilePicture(uri);
+      } catch (error) {
+        console.error("Error getting file info:", error);
+        Alert.alert("Error", "Could not get image file info.");
+      }
     }
   };
 
@@ -100,37 +123,33 @@ export default function EditProfileScreen() {
     try {
       setLoading(true);
 
-      // Upload profile picture if it was changed
       if (profilePicture && profilePicture !== userData?.profile_picture) {
         const formData = new FormData();
-
         formData.append("profilePicture", {
           uri: profilePicture,
           type: "image/jpeg",
           name: `${userData?.user_id}.jpg`,
         } as any);
 
-        try {
-          const response = await fetch(
-            `${API_URL}/upload-profile-picture/${userData?.user_id}`,
-            {
-              method: "POST",
-              body: formData,
-              headers: {
-                "Content-Type": "multipart/form-data",
-              },
-            }
-          );
-
-          if (!response.ok) {
-            throw new Error("Failed to upload profile picture.");
+        const response = await fetch(
+          `${API_URL}/api/upload-profile-picture/${userData?.user_id}`,
+          {
+            method: "POST",
+            body: formData,
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
           }
-        } catch (error) {
-          console.error("Error uploading profile picture:", error);
+        );
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(
+            errorData.error || "Failed to upload profile picture."
+          );
         }
       }
 
-      // Update user data
       await fetch(`${API_URL}/api/users/${userData?.user_id}`, {
         method: "PUT",
         headers: {
@@ -147,7 +166,7 @@ export default function EditProfileScreen() {
       refetchUserData();
       router.back();
     } catch (error) {
-      console.error("Error updating profile:", error);
+      console.error("Error:", error);
       Alert.alert("Error", "Failed to update profile.");
     } finally {
       setLoading(false);
@@ -246,6 +265,7 @@ export default function EditProfileScreen() {
             <Text style={styles.label}>Allergies (comma-separated)</Text>
             <TextInput
               placeholder="e.g., peanuts, shellfish"
+              placeholderTextColor= "#686D76"
               value={allergies.join(", ")}
               onChangeText={handleAllergiesChange}
               style={styles.input}
@@ -278,7 +298,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   avatarContainer: {
-    marginBottom: 15,
+    marginBottom: 5,
   },
   avatar: {
     width: 100,

@@ -1,14 +1,34 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
+import {
+  View,
+  Alert,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+} from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { getInitials } from "@/utils";
 import { useUserData } from "@/context/userDataContext";
+import SuperTokens from "supertokens-react-native";
 
 export default function ProfileScreen() {
   const router = useRouter();
   const { userData } = useUserData();
+
+  const handleSignOut = async () => {
+    try {
+      await SuperTokens.signOut();
+      Alert.alert("Signed Out", "You have been signed out successfully.");
+
+      // Redirect to the login page
+      router.replace("/login");
+    } catch (error) {
+      Alert.alert("Sign Out Failed", (error as Error).message);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -49,6 +69,11 @@ export default function ProfileScreen() {
         <Ionicons name="help-circle-outline" size={24} color="#000" />
         <Text style={styles.boxText}>Help and Info</Text>
         <Ionicons name="chevron-forward" size={24} color="#000" />
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.box} onPress={handleSignOut}>
+        <Text style={styles.boxText}>Sign out</Text>
+        <Ionicons name="log-out-outline" size={24} color="#000" />
       </TouchableOpacity>
     </SafeAreaView>
   );
