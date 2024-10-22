@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   FlatList,
@@ -13,10 +13,10 @@ import { useRouter } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import { API_URL } from "@/constants/apiUrl";
 import WorkoutCard from "@/components/workout/workoutCard";
-import { getUserId } from "supertokens-react-native";
 import { WorkoutsT } from "@/types/workout";
 import { Ionicons } from "@expo/vector-icons";
 import FilterModal from "@/components/modal/filterModal";
+import { useUserData } from "@/context/userDataContext";
 
 async function fetchWorkouts(): Promise<WorkoutsT[]> {
   const response = await fetch(`${API_URL}/api/workouts`);
@@ -26,6 +26,7 @@ async function fetchWorkouts(): Promise<WorkoutsT[]> {
 
 export default function AllWorkoutsScreen() {
   const router = useRouter();
+  const { userData } = useUserData();
   const {
     data: workouts = [],
     isLoading,
@@ -46,14 +47,12 @@ export default function AllWorkoutsScreen() {
   });
 
   // Fetch user ID from SuperTokens
-  React.useEffect(() => {
-    const fetchUserId = async () => {
-      const userId = await getUserId();
-      setUserId(userId);
-    };
-
-    fetchUserId();
+  useEffect(() => {
     setFilteredWorkouts(workouts);
+
+    if (userData) {
+      setUserId(userData.user_id);
+    }
   }, []);
 
   const applyFilters = (newFilters: any) => {
@@ -127,15 +126,17 @@ export default function AllWorkoutsScreen() {
         </TouchableOpacity>
       </View>
 
-      <FlatList
-        data={filteredWorkouts}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
-          <WorkoutCard workout={item} userId={userId} />
-        )}
-        contentContainerStyle={styles.listContent}
-        ListEmptyComponent={<Text>No workouts available</Text>}
-      />
+      <View style={styles.cardAlign}>
+        <FlatList
+          data={filteredWorkouts}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => (
+            <WorkoutCard workout={item} userId={userId} />
+          )}
+          contentContainerStyle={styles.listContent}
+          ListEmptyComponent={<Text>No workouts available</Text>}
+        />
+      </View>
 
       <FilterModal
         visible={filterModalVisible}
@@ -152,6 +153,9 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 20,
     backgroundColor: "#fff",
+  },
+  cardAlign: {
+    paddingHorizontal: 16,
   },
   workoutCount: {
     fontSize: 18,

@@ -14,6 +14,8 @@ import { API_URL } from "@/constants/apiUrl";
 import WorkoutCompCard from "@/components/workout/workoutCompCard";
 import { FlatList } from "react-native";
 import { CategoryT, WorkoutsT } from "@/types";
+import FeaturedWorkoutsComp from "@/components/featuredWorkout/featuredWorkout";
+import { useUserData } from "@/context/userDataContext";
 
 // Fetch function
 const fetchCategories = async () => {
@@ -23,13 +25,67 @@ const fetchCategories = async () => {
   return data.slice(0, 5);
 };
 
-async function fetchWorkouts(): Promise<WorkoutsT[]> {
+const fetchWorkouts = async (): Promise<WorkoutsT[]> => {
   const response = await fetch(`${API_URL}/api/workouts`);
   if (!response.ok) throw new Error("Failed to fetch workouts");
   return response.json();
-}
+};
 
 export default function WorkoutsScreen() {
+  const { userData } = useUserData();
+
+  const fetchCompletedWorkouts = async (): Promise<WorkoutsT[]> => {
+    if (!userData) return [];
+
+    if (userData) {
+      const userId = userData.user_id;
+
+      try {
+        const response = await fetch(
+          `${API_URL}/api/completedWorkouts?userId=${userId}`
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch completed workouts");
+        }
+
+        return await response.json();
+      } catch (error) {
+        console.error("Error fetching completed workouts:", error);
+        throw error;
+      }
+    } else {
+      console.warn("No user data available.");
+      return [];
+    }
+  };
+
+  const fetchFavoritedWorkouts = async (): Promise<WorkoutsT[]> => {
+    if (!userData) return [];
+
+    if (userData) {
+      const userId = userData.user_id;
+
+      try {
+        const response = await fetch(
+          `${API_URL}/api/favorites?userId=${userId}`
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch favorited workouts");
+        }
+
+        return await response.json();
+      } catch (error) {
+        console.error("Error fetching favorited workouts:", error);
+        throw error;
+      }
+    } else {
+      console.warn("No user data available.");
+      return [];
+    }
+  };
+
   const {
     data: categories,
     isLoading,
@@ -50,14 +106,32 @@ export default function WorkoutsScreen() {
     queryFn: fetchWorkouts,
   });
 
-  useFocusEffect(
-    React.useCallback(() => {
-      refetch();
-      refetchWorkouts();
-    }, [refetch, refetchWorkouts])
-  );
+  const {
+    data: completed = [],
+    isLoading: isCompletedLoading,
+    isError: isCompletedError,
+    refetch: refetchCompletedWorkouts,
+  } = useQuery({
+    queryKey: ["completedWorkouts"],
+    queryFn: fetchCompletedWorkouts,
+  });
 
-  if (isLoading || isWorkoutsLoading) {
+  const {
+    data: favorited = [],
+    isLoading: isFavoritedLoading,
+    isError: isFavoritedError,
+    refetch: refetchFavoritedWorkouts,
+  } = useQuery({
+    queryKey: ["favoritedWorkouts"],
+    queryFn: fetchFavoritedWorkouts,
+  });
+
+  if (
+    isLoading ||
+    isWorkoutsLoading ||
+    isCompletedLoading ||
+    isFavoritedLoading
+  ) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" />
@@ -65,7 +139,7 @@ export default function WorkoutsScreen() {
     );
   }
 
-  if (isError || isWorkoutsError) {
+  if (isError || isWorkoutsError || isCompletedError || isFavoritedError) {
     return (
       <View style={styles.errorContainer}>
         <Text style={styles.errorText}>Error fetching data</Text>
@@ -84,6 +158,7 @@ export default function WorkoutsScreen() {
   const workoutCardsConfig = [
     {
       key: "favoriteWorkouts",
+      data: favorited,
       cardName: "Favorites",
       bgImgLink: require("../../assets/img/completed.png"),
       cardLink: "/favoriteWorkouts",
@@ -97,6 +172,7 @@ export default function WorkoutsScreen() {
     },
     {
       key: "completedWorkouts",
+      data: completed,
       cardName: "Completed",
       bgImgLink: require("../../assets/img/favImg.png"),
       cardLink: "/completedWorkouts",
@@ -106,6 +182,9 @@ export default function WorkoutsScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
+        {/* Featured Workouts */}
+        <FeaturedWorkoutsComp />
+
         {/* Categories Section */}
         <View style={styles.header}>
           <Text style={styles.heading}>Browse by Category</Text>

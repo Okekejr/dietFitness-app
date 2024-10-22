@@ -1,7 +1,6 @@
 import Divider from "@/components/ui/divider";
 import { handleLogin, validateEmail, validatePassword } from "@/utils";
 import { Ionicons } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -16,7 +15,6 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   View,
-  ActivityIndicator,
 } from "react-native";
 
 export default function SignupScreen() {

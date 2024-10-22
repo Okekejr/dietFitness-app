@@ -8,21 +8,25 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Dimensions,
+  ScrollView,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import { API_URL } from "@/constants/apiUrl";
 import FilterModal from "@/components/modal/filterModal";
 import WorkoutCard from "@/components/workout/workoutCard";
 import { CategoryT, WorkoutsT } from "@/types";
+import { useUserData } from "@/context/userDataContext";
 
 const { height } = Dimensions.get("window");
 
 export default function CategoryScreen() {
   const { id } = useLocalSearchParams();
+  const { userData } = useUserData();
   const router = useRouter();
   const [category, setCategory] = useState<CategoryT | null>(null);
   const [workouts, setWorkouts] = useState<WorkoutsT[]>([]);
+  const [userId, setUserId] = useState<string>("");
   const [filteredWorkouts, setFilteredWorkouts] = useState<WorkoutsT[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterModalVisible, setFilterModalVisible] = useState(false);
@@ -55,7 +59,10 @@ export default function CategoryScreen() {
       }
     };
 
-    if (id) fetchCategoryAndWorkouts();
+    if (id && userData) {
+      fetchCategoryAndWorkouts();
+      setUserId(userData.user_id);
+    }
   }, [id]);
 
   const applyFilters = (newFilters: any) => {
@@ -140,12 +147,15 @@ export default function CategoryScreen() {
       </View>
 
       {/* Workouts List */}
-      <FlatList
-        data={filteredWorkouts}
-        renderItem={({ item }) => (
-          <WorkoutCard workout={item} userId="user-id" />
-        )}
-      />
+      <ScrollView style={styles.cardAlign}>
+        <FlatList
+          data={filteredWorkouts}
+          scrollEnabled={false}
+          renderItem={({ item }) => (
+            <WorkoutCard workout={item} userId={userId} />
+          )}
+        />
+      </ScrollView>
 
       <FilterModal
         visible={filterModalVisible}
@@ -161,6 +171,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
+  },
+  cardAlign: {
+    paddingHorizontal: 16,
+    marginVertical: 10,
   },
   loadingContainer: {
     flex: 1,

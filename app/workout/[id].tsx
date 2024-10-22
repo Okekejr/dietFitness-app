@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -8,29 +8,63 @@ import {
   ActivityIndicator,
   Dimensions,
   ScrollView,
+  Modal,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { API_URL } from "@/constants/apiUrl";
 import { WorkoutsT } from "@/types/workout";
-import YoutubePlayer from "react-native-youtube-iframe";
+import YoutubePlayer, { YoutubeIframeRef } from "react-native-youtube-iframe";
 import { getWorkoutPageIcons, getYouTubeVideoId, workoutInfoT } from "@/utils";
+import LottieView from "lottie-react-native";
+import { useUserData } from "@/context/userDataContext";
+import { useQueryClient } from "@tanstack/react-query";
 
 const { height } = Dimensions.get("window");
 
-interface WorkoutDetailsScreenProps {
-  userId: string;
-}
-
-const WorkoutDetailsScreen: FC<WorkoutDetailsScreenProps> = ({ userId }) => {
+const WorkoutDetailsScreen = () => {
   const { id } = useLocalSearchParams();
+  const { userData } = useUserData();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [workout, setWorkout] = useState<WorkoutsT | null>(null);
   const [loading, setLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [userId, setUserId] = useState<string>("");
   const videoId = getYouTubeVideoId(workout ? workout?.video_url : "");
-  const video = useRef(null);
+  const video = useRef<YoutubeIframeRef>(null);
+  const [isModalVisible, setModalVisible] = useState(false);
+
+  const handleCompleteWorkout = async () => {
+    if (workout && userId) {
+      console.log(workout.id, userId);
+
+      try {
+        const request = await fetch(`${API_URL}/api/completedWorkouts`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId, workoutId: workout?.id }),
+        });
+
+        if (request.ok) {
+          setIsCompleted(true);
+          setModalVisible(true);
+          queryClient.invalidateQueries({ queryKey: ["completedWorkouts"] });
+        }
+      } catch (error) {
+        console.error("Error marking workout as completed", error);
+      }
+    }
+  };
+
+  const handleStateChange = (state: string) => {
+    if (state === "ended") {
+      handleCompleteWorkout();
+    }
+  };
+
+  const closeModal = () => setModalVisible(false);
 
   useEffect(() => {
     const fetchWorkoutDetails = async () => {
@@ -44,8 +78,16 @@ const WorkoutDetailsScreen: FC<WorkoutDetailsScreenProps> = ({ userId }) => {
         const completedResponse = await fetch(
           `${API_URL}/api/completedWorkouts?userId=${userId}`
         );
-        const completedData = await completedResponse.json();
-        setIsCompleted(completedData.includes(data.id));
+
+        if (completedResponse.ok) {
+          const completedData = await completedResponse.json();
+
+          // Check if the workout ID is in the completed workouts
+          const isWorkoutCompleted = completedData.some(
+            (workout: WorkoutsT) => workout.id === data.id
+          );
+          setIsCompleted(isWorkoutCompleted);
+        }
 
         setLoading(false);
       } catch (error) {
@@ -54,7 +96,10 @@ const WorkoutDetailsScreen: FC<WorkoutDetailsScreenProps> = ({ userId }) => {
       }
     };
 
-    if (id) fetchWorkoutDetails();
+    if (id && userData) {
+      fetchWorkoutDetails();
+      setUserId(userData.user_id);
+    }
   }, [id]);
 
   const handleFavorite = async () => {
@@ -72,19 +117,6 @@ const WorkoutDetailsScreen: FC<WorkoutDetailsScreenProps> = ({ userId }) => {
       }
     } catch (error) {
       console.error("Error updating favorite status:", error);
-    }
-  };
-
-  const handleCompleteWorkout = async () => {
-    try {
-      await fetch(`${API_URL}/api/completedWorkouts`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, workoutId: workout?.id }),
-      });
-      setIsCompleted(true);
-    } catch (error) {
-      console.error("Error marking workout as completed", error);
     }
   };
 
@@ -117,7 +149,7 @@ const WorkoutDetailsScreen: FC<WorkoutDetailsScreenProps> = ({ userId }) => {
         />
         <Text style={styles.infoText}>
           {text === workoutInfo.duration &&
-            `${workout.duration + "mins, " + workout.activity_level}`}
+            `${workout.duration + " mins, " + workout.activity_level}`}
           {text === workoutInfo.tag && `${workout.tag + " workout"}`}
           {text === workout.intensity && `${workout.intensity + " intensity"}`}
           {text === workout.calories_burned &&
@@ -131,7 +163,10 @@ const WorkoutDetailsScreen: FC<WorkoutDetailsScreenProps> = ({ userId }) => {
     <ScrollView style={styles.container}>
       {/* Workout Image with Back Button and Favorite Icon */}
       <View style={styles.imageContainer}>
-        <Image source={{ uri: workout.image_url }} style={styles.image} />
+        <Image
+          source={{ uri: workout.image_url, cache: "force-cache" }}
+          style={styles.image}
+        />
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => router.push(`/category/${workout.category_id}`)}
@@ -155,11 +190,9 @@ const WorkoutDetailsScreen: FC<WorkoutDetailsScreenProps> = ({ userId }) => {
         {workoutIconsTexts({ duration: workout.duration }, workout.duration)}
         {workoutIconsTexts({ tag: workout.tag }, workout.tag)}
         {workoutIconsTexts({ intensity: workout.intensity }, workout.intensity)}
-        {workoutIconsTexts({ calories_burned: workout.calories_burned }, workout.calories_burned)}
-        <Text style={styles.description}>{workout.description}</Text>
-
-        {videoId != "" && (
-          <YoutubePlayer ref={video} height={300} videoId={videoId} />
+        {workoutIconsTexts(
+          { calories_burned: workout.calories_burned },
+          workout.calories_burned
         )}
 
         {isCompleted && (
@@ -168,6 +201,42 @@ const WorkoutDetailsScreen: FC<WorkoutDetailsScreenProps> = ({ userId }) => {
             <Text style={styles.completedText}>Completed</Text>
           </View>
         )}
+
+        <Text style={styles.description}>{workout.description}</Text>
+
+        {videoId != "" && (
+          <YoutubePlayer
+            ref={video}
+            height={300}
+            videoId={videoId}
+            onChangeState={handleStateChange}
+          />
+        )}
+
+        {/* Completion Modal */}
+        <Modal
+          visible={isModalVisible}
+          transparent
+          animationType="fade"
+          onRequestClose={closeModal}
+        >
+          <View style={styles.modalOverlay}>
+            {/* Close Button */}
+            <TouchableOpacity style={styles.closeButton} onPress={closeModal}>
+              <Ionicons name="close" size={28} color="white" />
+            </TouchableOpacity>
+
+            {/* Lottie Animation */}
+            <LottieView
+              source={require("../../assets/try1.json")}
+              autoPlay
+              loop
+              style={styles.animation}
+            />
+
+            <Text style={styles.modalText}>Workout Complete!</Text>
+          </View>
+        </Modal>
       </View>
     </ScrollView>
   );
@@ -259,6 +328,48 @@ const styles = StyleSheet.create({
     marginTop: 50,
     fontSize: 18,
     color: "red",
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContent: {
+    width: "90%",
+    height: "80%",
+    display: "flex",
+    justifyContent: "center",
+    backgroundColor: "transparent",
+    borderRadius: 10,
+    padding: 20,
+    alignItems: "center",
+    elevation: 5, // Add shadow on Android
+    shadowColor: "#000", // Add shadow on iOS
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+  },
+  closeButton: {
+    position: "absolute",
+    top: 60,
+    left: 10,
+    zIndex: 1,
+  },
+  closeButtonText: {
+    fontSize: 18,
+    color: "#fff",
+    fontWeight: "bold",
+  },
+  animation: {
+    width: 200,
+    height: 200,
+  },
+  modalText: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginTop: 10,
+    color: "#fff",
   },
 });
 

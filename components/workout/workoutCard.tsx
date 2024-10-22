@@ -3,7 +3,8 @@ import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { API_URL } from "@/constants/apiUrl";
 import { WorkoutsT } from "@/types/workout";
-import { Href, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface WorkoutCardProps {
   workout: WorkoutsT;
@@ -11,43 +12,67 @@ interface WorkoutCardProps {
 }
 
 const WorkoutCard: FC<WorkoutCardProps> = ({ workout, userId }) => {
-  const [isFavorite, setIsFavorite] = useState(workout.isFavorite);
+  const [isFavorite, setIsFavorite] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const queryClient = useQueryClient();
 
   const router = useRouter();
 
-  // // Fetch the completed status of the workout
-  // useEffect(() => {
-  //   const fetchCompletedStatus = async () => {
-  //     try {
-  //       const response = await fetch(
-  //         `${API_URL}/api/completedWorkouts?userId=${userId}`
-  //       );
-  //       if (!response.ok) {
-  //         console.error("Failed to fetch completed workouts:", response.status);
-  //         return;
-  //       }
+  const fetchCompletedStatus = async () => {
+    if (userId) {
+      try {
+        const response = await fetch(
+          `${API_URL}/api/completedWorkouts?userId=${userId}`
+        );
 
-  //       const completedWorkouts = await response.json();
+        if (response.ok) {
+          const completedWorkouts = await response.json();
 
-  //       // Check if the response is an array
-  //       if (Array.isArray(completedWorkouts)) {
-  //         setIsCompleted(completedWorkouts.includes(workout.id));
-  //       } else {
-  //         console.warn("Unexpected response format:", completedWorkouts);
-  //         setIsCompleted(false);
-  //       }
-  //     } catch (error) {
-  //       console.error("Failed to fetch completed status:", error);
-  //     }
-  //   };
+          // Check if the workout ID is in the completed workouts
+          const isWorkoutCompleted = completedWorkouts.some(
+            (work: WorkoutsT) => work.id === workout.id
+          );
+          setIsCompleted(isWorkoutCompleted);
+        }
+      } catch (error) {
+        console.error("Failed to fetch completed status:", error);
+      }
+    }
+  };
 
-  //   fetchCompletedStatus();
-  // }, [workout.id, userId]);
+  const fetchFavoritesStatus = async () => {
+    if (userId) {
+      try {
+        const response = await fetch(
+          `${API_URL}/api/favorites?userId=${userId}`
+        );
+
+        if (response.ok) {
+          const favoritedWorkouts = await response.json();
+
+          // Check if the workout ID is in the favorited workouts
+          const isworkoutFavorited = favoritedWorkouts.some(
+            (work: WorkoutsT) => work.id === workout.id
+          );
+          setIsFavorite(isworkoutFavorited);
+        }
+      } catch (error) {
+        console.error("Failed to fetch completed status:", error);
+      }
+    }
+  };
+
+  // Fetch the completed status of the workout
+  useEffect(() => {
+    fetchCompletedStatus();
+    fetchFavoritesStatus();
+  }, [workout.id, userId, isFavorite]);
 
   const handleFavorite = async () => {
     setLoading(true);
+
+    console.log(userId, workout.id, isFavorite);
     try {
       const response = await fetch(`${API_URL}/api/favorites`, {
         method: "POST",
@@ -61,6 +86,9 @@ const WorkoutCard: FC<WorkoutCardProps> = ({ workout, userId }) => {
 
       if (response.ok) {
         setIsFavorite(!isFavorite);
+        // Invalidate relevant queries to refetch and update UI
+        queryClient.invalidateQueries({ queryKey: ["favoritedWorkouts"] });
+        queryClient.invalidateQueries({ queryKey: ["allWorkouts"] });
       } else {
         console.error(
           "Failed to update favorite status:",
@@ -117,7 +145,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-start",
     borderRadius: 10,
-    paddingHorizontal: 16,
     marginBottom: 20,
   },
   workoutImage: {
@@ -138,7 +165,9 @@ const styles = StyleSheet.create({
     color: "#686D76",
   },
   completedContainer: {
-    marginTop: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 2,
   },
 });
 
