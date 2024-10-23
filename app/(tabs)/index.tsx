@@ -30,7 +30,7 @@ export default function HomeScreen() {
   const [workoutSchedule, setWorkoutSchedule] = useState<AssignedWorkoutT[]>(
     []
   );
-  const [selectedDay, setSelectedDay] = useState<number>(); // Default to today's day
+  const [selectedDay, setSelectedDay] = useState<number>();
   const [loading, setLoading] = useState(false);
   const { streak, streakNumber } = useStreak(userId);
 
@@ -287,6 +287,7 @@ export default function HomeScreen() {
           {workoutsForDay.length > 0 ? (
             <FlatList
               data={workoutsForDay}
+              scrollEnabled={false}
               keyExtractor={(item) => item.workout.id.toString()}
               renderItem={renderWorkout}
             />
@@ -347,6 +348,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 10,
     borderRadius: 5,
+    color: "red",
   },
   calendar: {
     flexDirection: "row",
@@ -369,7 +371,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   selectedCalendarCard: {
-    backgroundColor: "#E6F7E8", // Light green background for selected card
+    backgroundColor: "#E6F7E8",
     borderColor: "#4CAF50",
   },
   dayButton: {
@@ -396,13 +398,12 @@ const styles = StyleSheet.create({
   dayText: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#4F46E5", // Indigo color for the text
   },
   workoutName: {
     fontSize: 18,
     fontWeight: "600",
     marginBottom: 4,
-    color: "#000", // Black for visibility
+    color: "#000",
   },
   workoutDetails: {
     marginTop: 5,
@@ -413,7 +414,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 16,
-    color: "#A0A0A0", // Light gray for subtle text
+    color: "#A0A0A0",
     textAlign: "center",
     marginTop: 20,
   },

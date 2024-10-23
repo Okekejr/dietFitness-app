@@ -1,11 +1,15 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 
-const Divider = ({ text = "OR" }) => {
+interface Props {
+  text?: string;
+}
+
+const Divider = ({ text }: Props) => {
   return (
     <View style={styles.dividerContainer}>
       <View style={styles.line} />
-      <Text style={styles.text}>{text}</Text>
+      {text && <Text style={styles.text}>{text}</Text>}
       <View style={styles.line} />
     </View>
   );

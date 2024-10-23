@@ -9,8 +9,8 @@ export const getIconName = (
     case "index":
       return focused ? "home" : "home-outline";
     case "workouts":
-      return focused ? "barbell" : "barbell-outline";
-    case "activity":
+      return focused ? "flame" : "flame-outline";
+    case "summary":
       return focused ? "fitness" : "fitness-outline";
     default:
       return "help"; // Fallback icon
@@ -47,8 +47,8 @@ export const getTabTitle = (routeName: string) => {
       return "Home";
     case "workouts":
       return "Workouts";
-    case "activity":
-      return "Activity";
+    case "summary":
+      return "Summary";
     default:
       return "Tab";
   }
