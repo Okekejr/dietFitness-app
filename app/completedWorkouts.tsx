@@ -125,7 +125,7 @@ export default function CompletedWorkoutsScreen() {
         <View style={styles.topBar}>
           <TouchableOpacity
             style={styles.closeButton}
-            onPress={() => router.replace("/workouts")}
+            onPress={() => router.back()}
           >
             <Ionicons name="close" size={28} color="#000" />
           </TouchableOpacity>
@@ -136,7 +136,7 @@ export default function CompletedWorkoutsScreen() {
           </Text>
           <TouchableOpacity
             style={styles.loginButton}
-            onPress={() => router.replace("/workouts")}
+            onPress={() => router.back()}
           >
             <Text style={styles.loginButtonText}>Explore Workouts</Text>
           </TouchableOpacity>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   View,
   Alert,
@@ -16,7 +16,11 @@ import SuperTokens from "supertokens-react-native";
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const { userData } = useUserData();
+  const { userData, refetchUserData } = useUserData();
+
+  useEffect(() => {
+    refetchUserData();
+  }, []);
 
   const handleSignOut = async () => {
     try {

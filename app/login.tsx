@@ -11,6 +11,7 @@ import {
   Alert,
   TouchableOpacity,
   TouchableWithoutFeedback,
+  ActivityIndicator,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as AuthSession from "expo-auth-session";
@@ -19,6 +20,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { API_URL } from "@/constants/apiUrl";
 import Divider from "@/components/ui/divider";
+import { useUserData } from "@/context/userDataContext";
 
 // Open the browser session correctly (required for standalone apps)
 WebBrowser.maybeCompleteAuthSession();
@@ -56,6 +58,8 @@ export default function LoginScreen() {
   const passwordInputRef = useRef<TextInput>(null);
   const [errors, setErrors] = useState({ email: "", password: "" });
   const [isButtonDisabled, setButtonDisabled] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const { refetchUserData } = useUserData();
 
   const router = useRouter();
 
@@ -103,10 +107,12 @@ export default function LoginScreen() {
     }
   };
 
-  const handleLogin = async (email: string, password: string) => {
+  const handleLogin = async () => {
     if (!validateInputs()) return; // Ensure inputs are valid
 
     try {
+      setLoading(true);
+
       const response = await fetch(`${API_URL}/api/auth/signin`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -144,6 +150,8 @@ export default function LoginScreen() {
       const errorMessage =
         error instanceof Error ? error.message : "Unexpected error.";
       Alert.alert("Login Failed", errorMessage);
+    } finally {
+      setLoading(false); // Ensure loading state is cleared
     }
   };
 
@@ -218,6 +226,9 @@ export default function LoginScreen() {
               value={email}
               onChangeText={(text) => setEmail(text.trim())}
               onSubmitEditing={() => passwordInputRef.current?.focus()}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoCorrect={false}
             />
             {errors.email ? (
               <Text style={styles.errorText}>{errors.email}</Text>
@@ -243,11 +254,11 @@ export default function LoginScreen() {
                 secureTextEntry={!isPasswordVisible}
                 value={password}
                 onChangeText={setPassword}
-                onSubmitEditing={() => handleLogin(email, password)}
+                onSubmitEditing={handleLogin}
               />
               {/* Eye icon inside input */}
               <TouchableOpacity
-                onPress={() => setPasswordVisible(!isPasswordVisible)}
+                onPress={() => setPasswordVisible((prev) => !prev)}
               >
                 <Ionicons
                   name={isPasswordVisible ? "eye" : "eye-off"}
@@ -268,9 +279,14 @@ export default function LoginScreen() {
               styles.loginButton,
               isButtonDisabled && styles.disabledButton,
             ]}
-            onPress={() => handleLogin(email, password)}
+            onPress={handleLogin}
+            disabled={loading}
           >
-            <Text style={styles.loginButtonText}>Log In</Text>
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.loginButtonText}>Log In</Text>
+            )}
           </TouchableOpacity>
 
           <Divider text="OR" />

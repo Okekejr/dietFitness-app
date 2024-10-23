@@ -106,7 +106,7 @@ export default function AllWorkoutsScreen() {
       <View style={styles.topBar}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => router.push("/workouts")}
+          onPress={() => router.back()}
         >
           <Ionicons name="chevron-back-outline" size={28} color="white" />
         </TouchableOpacity>

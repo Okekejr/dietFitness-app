@@ -6,6 +6,7 @@ import {
   StyleSheet,
   ActivityIndicator,
   FlatList,
+  Button,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_URL } from "@/constants/apiUrl";
@@ -17,7 +18,7 @@ const CACHE_KEY = "featuredWorkouts";
 const CACHE_EXPIRY_KEY = "featuredWorkoutsExpiry";
 
 const FeaturedWorkoutsComp = () => {
-  const { userData } = useUserData();
+  const { userData, refetchUserData } = useUserData();
   const [workouts, setWorkouts] = useState<WorkoutsT[]>([]);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string>("");
@@ -67,7 +68,19 @@ const FeaturedWorkoutsComp = () => {
     }
 
     fetchFeaturedWorkouts();
+    refetchUserData();
   }, []);
+
+  const clearCache = async () => {
+    try {
+      await AsyncStorage.removeItem(CACHE_KEY);
+      await AsyncStorage.removeItem(CACHE_EXPIRY_KEY);
+      Alert.alert("Success", "Cached workouts cleared.");
+    } catch (error) {
+      console.error("Error clearing cache:", error);
+      Alert.alert("Error", "Failed to clear cache.");
+    }
+  };
 
   if (loading) {
     return <ActivityIndicator size="large" color="#4F46E5" />;
@@ -75,19 +88,18 @@ const FeaturedWorkoutsComp = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Featured Workouts</Text>
+      <Text style={styles.header}>Featured</Text>
+      {/* <Button title="Clear Cache" onPress={clearCache} /> */}
 
-      {userId && (
-        <FlatList
-          data={workouts}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => (
-            <WorkoutCard workout={item} userId={userId} />
-          )}
-          scrollEnabled={false}
-          contentContainerStyle={styles.flatListContent}
-        />
-      )}
+      <FlatList
+        data={workouts}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => (
+          <WorkoutCard workout={item} userId={userId} />
+        )}
+        scrollEnabled={false}
+        contentContainerStyle={styles.flatListContent}
+      />
     </View>
   );
 };

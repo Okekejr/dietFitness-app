@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { View, StyleSheet, ActivityIndicator } from "react-native";
+import { View, StyleSheet, ActivityIndicator, Text } from "react-native";
 import { Tabs, useRouter } from "expo-router";
 import { useTheme } from "react-native-paper";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import SuperTokens from "supertokens-react-native";
 import "../../config/supertokens";
-import { getIconName } from "@/utils";
+import { getIconName, getTabTitle } from "@/utils";
+import { ParamListBase, RouteProp } from "@react-navigation/native";
 
 export default function Layout() {
   const theme = useTheme();
@@ -49,17 +50,24 @@ export default function Layout() {
   return (
     <Tabs
       initialRouteName="home"
-      screenOptions={({ route }) => ({
+      screenOptions={({
+        route,
+      }: {
+        route: RouteProp<ParamListBase, string>;
+      }) => ({
         headerShown: false,
-        tabBarStyle: { backgroundColor: "#080b18" },
-        headerStyle: { backgroundColor: "#080b18" },
-        headerTintColor: theme.colors.onPrimary,
-        tabBarIcon: ({ focused, color, size }) => (
+        tabBarStyle: { backgroundColor: "#fff" },
+        tabBarLabel: ({ focused }) => (
+          <Text style={[styles.tabLabel, focused && styles.tabLabelFocused]}>
+            {getTabTitle(route.name)}
+          </Text>
+        ),
+        tabBarIcon: ({ focused, size }) => (
           <View style={styles.iconContainer}>
             <Ionicons
               name={getIconName(route.name, focused)}
               size={size}
-              color={color}
+              color={focused ? "#080b18" : ""}
             />
           </View>
         ),
@@ -80,5 +88,12 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+  tabLabel: {
+    fontSize: 10,
+    color: "#A0A0A0",
+  },
+  tabLabelFocused: {
+    color: "#080b18",
   },
 });

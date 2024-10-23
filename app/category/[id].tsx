@@ -17,6 +17,7 @@ import FilterModal from "@/components/modal/filterModal";
 import WorkoutCard from "@/components/workout/workoutCard";
 import { CategoryT, WorkoutsT } from "@/types";
 import { useUserData } from "@/context/userDataContext";
+import BackButton from "@/components/ui/backButton";
 
 const { height } = Dimensions.get("window");
 
@@ -118,12 +119,7 @@ export default function CategoryScreen() {
           source={{ uri: category.image_url, cache: "force-cache" }}
           style={styles.image}
         />
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.push("/workouts")}
-        >
-          <Ionicons name="chevron-back-outline" size={28} color="black" />
-        </TouchableOpacity>
+        <BackButton />
         <View style={styles.overlay}>
           <Text style={styles.categoryName}>{category.category_name}</Text>
           {category.description && (

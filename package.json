@@ -9,14 +9,15 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "test": "jest --watchAll",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "tsc": "tsc --noEmit"
   },
   "jest": {
     "preset": "jest-expo"
   },
   "dependencies": {
     "@expo/vector-icons": "^14.0.4",
-    "@react-native-async-storage/async-storage": "^1.24.0",
+    "@react-native-async-storage/async-storage": "^1.23.1",
     "@react-navigation/native": "^6.1.18",
     "@react-navigation/native-stack": "^6.11.0",
     "@tanstack/react-query": "^5.59.15",
@@ -36,7 +37,7 @@
     "expo-system-ui": "~3.0.7",
     "expo-video": "^1.2.7",
     "expo-web-browser": "~13.0.3",
-    "lottie-react-native": "^7.0.0",
+    "lottie-react-native": "^6.7.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-native": "0.74.5",
@@ -53,7 +54,8 @@
     "react-native-web-webview": "^1.0.2",
     "react-native-webview": "13.8.6",
     "react-native-youtube-iframe": "^2.3.0",
-    "supertokens-react-native": "^5.1.2"
+    "supertokens-react-native": "^5.1.2",
+    "expo-linear-gradient": "~13.0.2"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

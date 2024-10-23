@@ -16,6 +16,7 @@ import { FlatList } from "react-native";
 import { CategoryT, WorkoutsT } from "@/types";
 import FeaturedWorkoutsComp from "@/components/featuredWorkout/featuredWorkout";
 import { useUserData } from "@/context/userDataContext";
+import Header from "@/components/header/header";
 
 // Fetch function
 const fetchCategories = async () => {
@@ -126,6 +127,20 @@ export default function WorkoutsScreen() {
     queryFn: fetchFavoritedWorkouts,
   });
 
+  // useFocusEffect(
+  //   React.useCallback(() => {
+  //     refetch();
+  //     refetchWorkouts();
+  //     refetchCompletedWorkouts();
+  //     refetchFavoritedWorkouts();
+  //   }, [
+  //     refetch,
+  //     refetchWorkouts,
+  //     refetchCompletedWorkouts,
+  //     refetchFavoritedWorkouts,
+  //   ])
+  // );
+
   if (
     isLoading ||
     isWorkoutsLoading ||
@@ -181,6 +196,7 @@ export default function WorkoutsScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <Header headerTitle="Workouts" />
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
         {/* Featured Workouts */}
         <FeaturedWorkoutsComp />

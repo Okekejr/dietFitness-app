@@ -17,4 +17,5 @@ export interface UserDataT {
   profile_picture?: string;
   current_workout_week: number;
   week_start_date: string;
+  streak: number;
 }

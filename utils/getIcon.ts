@@ -1,6 +1,5 @@
 import { WorkoutsT } from "@/types/workout";
 import { Ionicons } from "@expo/vector-icons";
-import { View } from "react-native";
 
 export const getIconName = (
   routeName: string,
@@ -39,5 +38,18 @@ export const getWorkoutPageIcons = (workoutInfo: workoutInfoT) => {
       return "barbell";
     default:
       return "help-circle-outline";
+  }
+};
+
+export const getTabTitle = (routeName: string) => {
+  switch (routeName) {
+    case "index":
+      return "Home";
+    case "workouts":
+      return "Workouts";
+    case "activity":
+      return "Activity";
+    default:
+      return "Tab";
   }
 };

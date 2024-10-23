@@ -19,6 +19,7 @@ import { getWorkoutPageIcons, getYouTubeVideoId, workoutInfoT } from "@/utils";
 import LottieView from "lottie-react-native";
 import { useUserData } from "@/context/userDataContext";
 import { useQueryClient } from "@tanstack/react-query";
+import BackButton from "@/components/ui/backButton";
 
 const { height } = Dimensions.get("window");
 
@@ -66,57 +67,103 @@ const WorkoutDetailsScreen = () => {
 
   const closeModal = () => setModalVisible(false);
 
-  useEffect(() => {
-    const fetchWorkoutDetails = async () => {
-      try {
-        const response = await fetch(`${API_URL}/api/workouts/${id}`);
-        const data = await response.json();
-        setWorkout(data);
-        setIsFavorite(data.isFavorite);
+  const fetchWorkoutDetails = async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/workouts/${id}`);
+      const data = await response.json();
+      setWorkout(data);
 
-        // Check if workout is completed
-        const completedResponse = await fetch(
-          `${API_URL}/api/completedWorkouts?userId=${userId}`
+      // Check if workout is completed
+      const completedResponse = await fetch(
+        `${API_URL}/api/completedWorkouts?userId=${userId}`
+      );
+
+      if (completedResponse.ok) {
+        const completedData = await completedResponse.json();
+
+        // Check if the workout ID is in the completed workouts
+        const isWorkoutCompleted = completedData.some(
+          (workout: WorkoutsT) => workout.id === data.id
         );
-
-        if (completedResponse.ok) {
-          const completedData = await completedResponse.json();
-
-          // Check if the workout ID is in the completed workouts
-          const isWorkoutCompleted = completedData.some(
-            (workout: WorkoutsT) => workout.id === data.id
-          );
-          setIsCompleted(isWorkoutCompleted);
-        }
-
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching workout details:", error);
-        setLoading(false);
+        setIsCompleted(isWorkoutCompleted);
       }
-    };
 
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching workout details:", error);
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     if (id && userData) {
       fetchWorkoutDetails();
       setUserId(userData.user_id);
     }
   }, [id]);
 
+  useEffect(() => {
+    if (userId && workout) {
+      fetchFavoritesStatus();
+    }
+  }, [workout]);
+
+  const fetchFavoritesStatus = async () => {
+    if (userId && workout) {
+      try {
+        const response = await fetch(
+          `${API_URL}/api/favorites?userId=${userId}`
+        );
+
+        if (response.ok) {
+          const favoritedWorkouts = await response.json();
+
+          // Check if the workout ID is in the favorited workouts
+          const isworkoutFavorited = favoritedWorkouts.some(
+            (work: WorkoutsT) => work.id === workout.id
+          );
+          setIsFavorite(isworkoutFavorited);
+        }
+      } catch (error) {
+        console.error("Failed to fetch completed status:", error);
+      }
+    }
+  };
+
   const handleFavorite = async () => {
+    setLoading(true);
+
+    if (!workout) {
+      return;
+    }
+
+    console.log(userId, workout.id, isFavorite);
     try {
       const response = await fetch(`${API_URL}/api/favorites`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, workoutId: workout?.id, isFavorite }),
+        body: JSON.stringify({
+          userId,
+          workoutId: workout.id,
+          isFavorite,
+        }),
       });
 
       if (response.ok) {
-        setIsFavorite((prev) => !prev);
+        setIsFavorite(!isFavorite);
+        // Invalidate relevant queries to refetch and update UI
+        queryClient.invalidateQueries({ queryKey: ["favoritedWorkouts"] });
+        queryClient.invalidateQueries({ queryKey: ["allWorkouts"] });
       } else {
-        console.error("Failed to update favorite status");
+        console.error(
+          "Failed to update favorite status:",
+          await response.text()
+        );
       }
     } catch (error) {
       console.error("Error updating favorite status:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -167,12 +214,7 @@ const WorkoutDetailsScreen = () => {
           source={{ uri: workout.image_url, cache: "force-cache" }}
           style={styles.image}
         />
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.push(`/category/${workout.category_id}`)}
-        >
-          <Ionicons name="chevron-back-outline" size={28} color="black" />
-        </TouchableOpacity>
+        <BackButton />
         <TouchableOpacity
           style={styles.favoriteButton}
           onPress={handleFavorite}

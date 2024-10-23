@@ -1,6 +1,6 @@
 import React, { FC, useEffect, useState } from "react";
 import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
-import { MaterialIcons } from "@expo/vector-icons";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { API_URL } from "@/constants/apiUrl";
 import { WorkoutsT } from "@/types/workout";
 import { useRouter } from "expo-router";
@@ -117,11 +117,12 @@ const WorkoutCard: FC<WorkoutCardProps> = ({ workout, userId }) => {
       />
       <View style={styles.workoutInfo}>
         <Text style={styles.workoutName}>{workout.name}</Text>
-        <Text style={styles.infoText}>Duration: {workout.duration} mins</Text>
-        <Text style={styles.infoText}>
-          Activity Level: {workout.activity_level}
-        </Text>
-        <Text style={styles.infoText}>Intensity: {workout.intensity}</Text>
+        <View style={styles.innerInfo}>
+          <Text style={styles.infoText}>{workout.tag} •</Text>
+          <Text style={styles.infoText}>{workout.duration} mins •</Text>
+          <Text style={styles.infoText}>{workout.activity_level} •</Text>
+          <Text style={styles.infoText}>{workout.intensity}</Text>
+        </View>
 
         {isCompleted && (
           <View style={styles.completedContainer}>
@@ -130,10 +131,10 @@ const WorkoutCard: FC<WorkoutCardProps> = ({ workout, userId }) => {
         )}
       </View>
       <TouchableOpacity onPress={handleFavorite} disabled={loading}>
-        <MaterialIcons
+        <Ionicons
           name={isFavorite ? "bookmark" : "bookmark-outline"}
-          size={24}
-          color={loading ? "gray" : "black"}
+          size={20}
+          color={loading ? "#31363F" : "black"}
         />
       </TouchableOpacity>
     </TouchableOpacity>
@@ -168,6 +169,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginTop: 2,
+  },
+  innerInfo: {
+    display: "flex",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    maxWidth: 220,
+    gap: 4,
   },
 });
 
