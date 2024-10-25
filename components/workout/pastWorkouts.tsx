@@ -19,6 +19,16 @@ interface PastWorkoutsProps {
 const PastWorkouts: FC<PastWorkoutsProps> = ({ completedWorkouts }) => {
   const router = useRouter();
 
+  if (completedWorkouts.length === 0) {
+    return (
+      <View>
+        <Text style={styles.description}>
+          You havent completed any workouts yet.
+        </Text>
+      </View>
+    );
+  }
+
   // Group workouts by month and year
   const groupedWorkouts = completedWorkouts.reduce((acc, workout) => {
     const date = new Date(workout.completed_at);
@@ -145,6 +155,11 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#686D76",
     marginBottom: 3,
+  },
+  description: {
+    fontSize: 14,
+    color: "#555",
+    textAlign: "center",
   },
   divider: {
     height: 1,

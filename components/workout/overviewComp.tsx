@@ -36,6 +36,16 @@ export default function OverviewComp({
     );
   }
 
+  if (stats.totalWorkouts === 0) {
+    return (
+      <View>
+        <Text style={styles.description}>
+          You havent completed any workouts yet.
+        </Text>
+      </View>
+    );
+  }
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.card}>
@@ -141,5 +151,10 @@ const styles = StyleSheet.create({
   errorText: {
     color: "red",
     fontSize: 18,
+  },
+  description: {
+    fontSize: 14,
+    color: "#555",
+    textAlign: "center",
   },
 });

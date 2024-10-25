@@ -43,6 +43,16 @@ const AchievementsTab = () => {
     enabled: !!userId,
   });
 
+  if (stats && stats?.totalWorkouts === 0) {
+    return (
+      <View>
+        <Text style={styles.description}>
+          You havent completed any workouts yet.
+        </Text>
+      </View>
+    );
+  }
+
   // Fetch unlocked achievements
   const { data: unlockedAchievements = [], isLoading: achievementsLoading } =
     useQuery({
@@ -93,6 +103,11 @@ const styles = StyleSheet.create({
   },
   section: {
     marginBottom: 20,
+  },
+  description: {
+    fontSize: 14,
+    color: "#555",
+    textAlign: "center",
   },
 });
 
