@@ -50,15 +50,13 @@ const WorkoutDetailsScreen = () => {
 
         if (request.ok) {
           setIsCompleted(true);
-          queryClient.invalidateQueries({
-            queryKey: [
-              "completedWorkouts",
-              "getCompleted",
-              "allWorkouts",
-              "favoritedWorkouts",
-            ],
-          });
           setModalVisible(true);
+          queryClient.invalidateQueries({
+            queryKey: ["completedWorkouts"],
+          });
+          queryClient.invalidateQueries({ queryKey: ["getCompleted"] });
+          queryClient.invalidateQueries({ queryKey: ["allWorkouts"] });
+          queryClient.invalidateQueries({ queryKey: ["favoritedWorkouts"] });
         }
       } catch (error) {
         console.error("Error marking workout as completed", error);

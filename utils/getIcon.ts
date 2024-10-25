@@ -53,3 +53,20 @@ export const getTabTitle = (routeName: string) => {
       return "Tab";
   }
 };
+
+export const getTagColor = (tag: string) => {
+  switch (tag) {
+    case "Strength":
+      return "#4CAF50";
+    case "Cardio":
+      return "#FF6347";
+    case "HIIT":
+      return "#FFD700";
+    case "Core":
+      return "#00BFFF";
+    case "Endurance":
+      return "#FF69B4";
+    default:
+      return "#808080";
+  }
+};

@@ -19,3 +19,18 @@ export interface UserDataT {
   week_start_date: string;
   streak: number;
 }
+
+export interface WorkoutBreakdownT {
+  name: string;
+  population: string;
+  color: string;
+  legendFontColor: string;
+}
+
+export interface OverviewStatsT {
+  totalWorkouts: number;
+  totalCalories: number;
+  totalMinutes: number;
+  bestDay: string;
+  workoutBreakdown: WorkoutBreakdownT[];
+}

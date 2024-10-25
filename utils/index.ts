@@ -4,3 +4,4 @@ export * from "./workoutsUtil";
 export * from "./truncateUserName";
 export * from "./validate";
 export * from "./authUtil";
+export * from "./achievements";

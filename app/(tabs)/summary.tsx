@@ -1,59 +1,67 @@
+import React, { useEffect, useRef, useState } from "react";
+import {
+  SafeAreaView,
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Animated,
+  ScrollView,
+  Dimensions,
+} from "react-native";
+import AchievementsTab from "@/components/achievements/achievementTab";
 import Header from "@/components/header/header";
+import OverviewComp from "@/components/workout/overviewComp";
 import PastWorkouts from "@/components/workout/pastWorkouts";
 import { API_URL } from "@/constants/apiUrl";
 import { useUserData } from "@/context/userDataContext";
-import { CompletedWorkout } from "@/types";
 import { useQuery } from "@tanstack/react-query";
-import React, { useRef, useState } from "react";
-import {
-  StyleSheet,
-  SafeAreaView,
-  ScrollView,
-  View,
-  TouchableOpacity,
-  Animated,
-  Text,
-  LayoutChangeEvent,
-} from "react-native";
+import { CompletedWorkout, OverviewStatsT } from "@/types";
 
-const Tabs = ["Overview", "History"];
+const { width } = Dimensions.get("window");
+const Tabs = ["Overview", "History", "Achievements"];
+const TAB_WIDTH = width / Tabs.length;
+
+const fetchUserOverview = async (userId: string): Promise<OverviewStatsT> => {
+  const response = await fetch(`${API_URL}/api/overview/${userId}`);
+  if (!response.ok) throw new Error("Failed to fetch user overview.");
+  return response.json();
+};
 
 export default function SummaryScreen() {
   const [activeTab, setActiveTab] = useState(0);
   const indicatorPosition = useRef(new Animated.Value(0)).current;
-  const tabWidths = useRef<number[]>([]);
   const { userData } = useUserData();
+  const [userId, setUserId] = useState<string>("");
 
-  const fetchCompletedWorkouts = async (): Promise<CompletedWorkout[]> => {
+  useEffect(() => {
     if (userData) {
-      const userId = userData.user_id;
-
-      try {
-        const response = await fetch(
-          `${API_URL}/api/completedWorkouts/getCompleted?userId=${userId}`
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch completed workouts");
-        }
-
-        return await response.json();
-      } catch (error) {
-        console.error("Error fetching completed workouts:", error);
-        throw error;
-      }
-    } else {
-      console.warn("No user data available.");
-      return [];
+      setUserId(userData.user_id);
     }
-  };
+  }, []);
 
   const {
-    data: completed = [],
-    isLoading: isCompletedLoading,
-    isError: isCompletedError,
-    refetch: refetchCompletedWorkouts,
+    data: stats,
+    isLoading,
+    isError,
   } = useQuery({
+    queryKey: ["userOverview", userId],
+    queryFn: () => fetchUserOverview(userId),
+    staleTime: 1000 * 60 * 60 * 24, // 24 hours
+    enabled: !!userData,
+    refetchOnWindowFocus: false,
+  });
+
+  const fetchCompletedWorkouts = async (): Promise<CompletedWorkout[]> => {
+    if (!userData) return [];
+    const response = await fetch(
+      `${API_URL}/api/completedWorkouts/getCompleted?userId=${userId}`
+    );
+    if (!response.ok) throw new Error("Failed to fetch completed workouts");
+    return response.json();
+  };
+
+  const { data: completed = [] } = useQuery({
     queryKey: ["getCompleted"],
     queryFn: fetchCompletedWorkouts,
   });
@@ -61,33 +69,25 @@ export default function SummaryScreen() {
   const handleTabPress = (index: number) => {
     setActiveTab(index);
 
-    // Calculate the exact position of the indicator
-    const translateX = tabWidths.current
-      .slice(0, index)
-      .reduce((acc, width) => acc + width + 20, 0);
-
+    // Animate indicator to the clicked tab
     Animated.timing(indicatorPosition, {
-      toValue: translateX,
+      toValue: index * TAB_WIDTH, // Move indicator to the new tab
       duration: 300,
       useNativeDriver: false,
     }).start();
   };
 
-  const onTabLayout = (event: LayoutChangeEvent, index: number) => {
-    const { width } = event.nativeEvent.layout;
-    tabWidths.current[index] = width;
-  };
-
   return (
     <SafeAreaView style={styles.container}>
       <Header headerTitle="Summary" />
+
+      {/* Tabs */}
       <View style={styles.tabsContainer}>
         {Tabs.map((tab, index) => (
           <TouchableOpacity
             key={index}
             onPress={() => handleTabPress(index)}
             style={styles.tab}
-            onLayout={(event) => onTabLayout(event, index)}
           >
             <Text
               style={[
@@ -100,21 +100,24 @@ export default function SummaryScreen() {
           </TouchableOpacity>
         ))}
 
-        {/* Indicator */}
+        {/* Animated Indicator */}
         <Animated.View
           style={[
             styles.indicator,
-            { transform: [{ translateX: indicatorPosition }] },
+            {
+              transform: [{ translateX: indicatorPosition }],
+            },
           ]}
         />
       </View>
 
+      {/* Tab Content */}
       <ScrollView contentContainerStyle={styles.content}>
-        {activeTab === 0 ? (
-          <Text style={styles.tabContent}>Overview Content</Text>
-        ) : (
-          <PastWorkouts completedWorkouts={completed} />
+        {activeTab === 0 && stats && (
+          <OverviewComp stats={stats} isLoading={isLoading} isError={isError} />
         )}
+        {activeTab === 1 && <PastWorkouts completedWorkouts={completed} />}
+        {activeTab === 2 && <AchievementsTab />}
       </ScrollView>
     </SafeAreaView>
   );
@@ -126,16 +129,14 @@ const styles = StyleSheet.create({
   },
   tabsContainer: {
     flexDirection: "row",
-    justifyContent: "flex-start",
-    alignItems: "center",
-    marginLeft: 25,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ddd",
     marginTop: 10,
-    marginBottom: 15,
-    gap: 35,
   },
   tab: {
-    paddingVertical: 10,
+    width: TAB_WIDTH, // Each tab takes equal width
     alignItems: "center",
+    paddingVertical: 10,
   },
   tabText: {
     fontSize: 16,
@@ -149,16 +150,10 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 0,
     height: 3,
-    width: 80,
+    width: TAB_WIDTH, // Indicator width matches tab width
     backgroundColor: "#4F46E5",
-    borderRadius: 1.5,
   },
   content: {
     padding: 20,
-  },
-  tabContent: {
-    fontSize: 18,
-    textAlign: "center",
-    marginTop: 50,
   },
 });
