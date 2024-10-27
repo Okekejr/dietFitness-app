@@ -8,7 +8,6 @@ import {
   ScrollView,
 } from "react-native";
 import { Href, useFocusEffect } from "expo-router";
-import CategoriesComp from "@/components/Categories/CategoriesComp";
 import { useQuery } from "@tanstack/react-query";
 import { API_URL } from "@/constants/apiUrl";
 import WorkoutCompCard from "@/components/workout/workoutCompCard";
@@ -17,6 +16,7 @@ import { CategoryT, WorkoutsT } from "@/types";
 import FeaturedWorkoutsComp from "@/components/featuredWorkout/featuredWorkout";
 import { useUserData } from "@/context/userDataContext";
 import Header from "@/components/header/header";
+import CategoriesComp from "@/components/categories/categoriesComp";
 
 // Fetch function
 const fetchCategories = async () => {

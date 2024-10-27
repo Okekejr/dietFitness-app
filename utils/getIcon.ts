@@ -12,6 +12,8 @@ export const getIconName = (
       return focused ? "flame" : "flame-outline";
     case "summary":
       return focused ? "fitness" : "fitness-outline";
+    case "runClub":
+      return focused ? "people-circle" : "people-circle-outline";
     default:
       return "help"; // Fallback icon
   }
@@ -49,6 +51,8 @@ export const getTabTitle = (routeName: string) => {
       return "Workouts";
     case "summary":
       return "Summary";
+    case "runClub":
+      return "Run Club";
     default:
       return "Tab";
   }

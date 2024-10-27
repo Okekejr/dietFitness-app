@@ -1,12 +1,27 @@
 import { Ionicons } from "@expo/vector-icons";
-import { TouchableOpacity, StyleSheet } from "react-native";
+import {
+  TouchableOpacity,
+  StyleSheet,
+  GestureResponderEvent,
+} from "react-native";
 import { useRouter } from "expo-router";
 
-const BackButton = () => {
+interface BackButtonProps {
+  func?: (event: GestureResponderEvent) => void;
+}
+
+const BackButton = ({ func }: BackButtonProps) => {
   const router = useRouter();
 
+  const handlePress = (event: GestureResponderEvent) => {
+    if (func) {
+      func(event);
+    } else {
+      router.back();
+    }
+  };
   return (
-    <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+    <TouchableOpacity onPress={handlePress} style={styles.backButton}>
       <Ionicons name="chevron-back-outline" size={28} color="black" />
     </TouchableOpacity>
   );

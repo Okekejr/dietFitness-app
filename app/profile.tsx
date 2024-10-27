@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Alert,
@@ -6,6 +6,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Image,
+  ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -13,14 +14,40 @@ import { Ionicons } from "@expo/vector-icons";
 import { getInitials } from "@/utils";
 import { useUserData } from "@/context/userDataContext";
 import SuperTokens from "supertokens-react-native";
+import { ClubData } from "@/types";
+import { API_URL } from "@/constants/apiUrl";
+import * as FileSystem from "expo-file-system";
+import * as Sharing from "expo-sharing";
 
 export default function ProfileScreen() {
   const router = useRouter();
   const { userData, refetchUserData } = useUserData();
+  const [clubData, setClubData] = useState<ClubData | null>(null);
+  const [isSharing, setIsSharing] = useState(false);
+  const [loadingClubData, setLoadingClubData] = useState(true);
 
   useEffect(() => {
     refetchUserData();
+    fetchClubData();
   }, []);
+
+  const fetchClubData = async () => {
+    try {
+      const response = await fetch(
+        `${API_URL}/api/clubs/userClub/${userData?.user_id}`
+      );
+
+      if (!response.ok) throw new Error("Failed to fetch club data");
+
+      const data: ClubData = await response.json();
+      setClubData(data);
+    } catch (error) {
+      console.error("Error fetching club data:", error);
+      Alert.alert("Error", "Failed to load club data.");
+    } finally {
+      setLoadingClubData(false);
+    }
+  };
 
   const handleSignOut = async () => {
     try {
@@ -31,6 +58,44 @@ export default function ProfileScreen() {
       router.replace("/login");
     } catch (error) {
       Alert.alert("Sign Out Failed", (error as Error).message);
+    }
+  };
+
+  // Share QR code logic
+  const handleShare = async () => {
+    try {
+      if (!clubData?.qr_code) {
+        Alert.alert("Error", "No QR code available to share.");
+        return;
+      }
+
+      setIsSharing(true);
+
+      const base64Data = clubData.qr_code.replace(
+        /^data:image\/png;base64,/,
+        ""
+      );
+      const fileUri = `${FileSystem.cacheDirectory}club-qr-code.png`;
+
+      await FileSystem.writeAsStringAsync(fileUri, base64Data, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      if (!(await Sharing.isAvailableAsync())) {
+        Alert.alert("Error", "Sharing is not available on this device.");
+        return;
+      }
+
+      await Sharing.shareAsync(fileUri, {
+        mimeType: "image/png",
+        dialogTitle: "Share your Club QR Code",
+        UTI: "image/png",
+      });
+    } catch (error) {
+      console.error("Error sharing QR code:", error);
+      Alert.alert("Error", "Failed to share QR code.");
+    } finally {
+      setIsSharing(false);
     }
   };
 
@@ -79,6 +144,31 @@ export default function ProfileScreen() {
         <Text style={styles.boxText}>Sign out</Text>
         <Ionicons name="log-out-outline" size={24} color="#000" />
       </TouchableOpacity>
+
+      {loadingClubData ? (
+        <ActivityIndicator size="large" color="#4F46E5" />
+      ) : (
+        clubData && (
+          <View style={styles.qrCodeContainer}>
+            <Text
+              style={{ fontWeight: "bold", fontSize: 20, marginBottom: 10 }}
+            >
+              Run Club
+            </Text>
+            <Text style={styles.inviteCode}>
+              Invite Code: {clubData.invite_code}
+            </Text>
+            <Image source={{ uri: clubData.qr_code }} style={styles.qrCode} />
+            <TouchableOpacity onPress={handleShare} style={styles.shareButton}>
+              {isSharing ? (
+                <ActivityIndicator size="small" color="#000" />
+              ) : (
+                <Ionicons name="share-outline" size={24} color="#000" />
+              )}
+            </TouchableOpacity>
+          </View>
+        )
+      )}
     </SafeAreaView>
   );
 }
@@ -117,4 +207,16 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   boxText: { flex: 1, marginLeft: 10, fontSize: 16 },
+  qrCodeContainer: {
+    alignItems: "center",
+    marginTop: 40,
+  },
+  inviteCode: { fontSize: 18, marginBottom: 10 },
+  qrCode: { width: 200, height: 200, marginBottom: 20 },
+  shareButton: {
+    padding: 10,
+    backgroundColor: "#f0f0f0",
+    borderRadius: 50,
+    marginBottom: 30,
+  },
 });
