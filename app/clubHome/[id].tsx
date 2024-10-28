@@ -1,4 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   View,
   Text,
@@ -7,32 +13,31 @@ import {
   Alert,
   TouchableOpacity,
   SafeAreaView,
+  TextInput,
 } from "react-native";
-import MapView from "react-native-maps";
+import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import Header from "@/components/header/header";
 import { Ionicons } from "@expo/vector-icons";
-import { useUserData } from "@/context/userDataContext";
 import { useQuery } from "@tanstack/react-query";
 import { API_URL } from "@/constants/apiUrl";
-
-interface ClubData {
-  id: string;
-  name: string;
-  description: string;
-  location?: string;
-  membersCount: number;
-}
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
+import { ClubData } from "@/types";
 
 const ClubHomeScreen = () => {
   const { id } = useLocalSearchParams();
-  const { userData } = useUserData();
   const [location, setLocation] = useState<Location.LocationObject | null>(
     null
   );
   const [loadingLocation, setLoadingLocation] = useState(true);
   const router = useRouter();
+
+  const bottomSheetRef = useRef<BottomSheet>(null);
+
+  // Define snap points for the bottom sheet
+  const snapPoints = useMemo(() => ["10%", "50%", "90%"], []);
 
   // Fetch Club Data
   const { data: club, isLoading: clubLoading } = useQuery({
@@ -47,7 +52,7 @@ const ClubHomeScreen = () => {
 
   // Get User Location with Permission Handling
   useEffect(() => {
-    const getLocation = async () => {
+    const getLocationUpdates = async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
         Alert.alert("Permission Denied", "Location access is required.");
@@ -55,12 +60,25 @@ const ClubHomeScreen = () => {
         return;
       }
 
-      const userLocation = await Location.getCurrentPositionAsync({});
-      setLocation(userLocation);
-      setLoadingLocation(false);
+      // Start watching location changes
+      await Location.watchPositionAsync(
+        {
+          accuracy: Location.Accuracy.High,
+          timeInterval: 5000, // Update every 5 seconds
+          distanceInterval: 10, // Or every 10 meters
+        },
+        (newLocation) => {
+          setLocation(newLocation);
+          setLoadingLocation(false);
+        }
+      );
     };
 
-    getLocation();
+    getLocationUpdates();
+  }, []);
+
+  const handleSheetChanges = useCallback((index: number) => {
+    console.log("Bottom sheet index changed to:", index);
   }, []);
 
   if (loadingLocation || clubLoading) {
@@ -76,30 +94,68 @@ const ClubHomeScreen = () => {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Header with Home Button */}
-      <Header headerTitle={club?.name}>
-        <TouchableOpacity
-          style={styles.homeButton}
-          onPress={() => router.push("/")}
-        >
-          <Ionicons name="home-outline" size={20} color="#000" />
-        </TouchableOpacity>
-      </Header>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaView style={styles.container}>
+        {/* Header with Home Button */}
+        <Header>
+          <TouchableOpacity
+            style={styles.homeButton}
+            onPress={() => router.push("/")}
+          >
+            <Ionicons name="home-outline" size={20} color="#000" />
+          </TouchableOpacity>
+        </Header>
 
-      {/* Map Background */}
-      <View style={styles.mapContainer}>
-        <MapView
-          style={StyleSheet.absoluteFillObject}
-          region={{
-            latitude: location.coords.latitude,
-            longitude: location.coords.longitude,
-            latitudeDelta: 0.05,
-            longitudeDelta: 0.05,
-          }}
-        />
-      </View>
-    </SafeAreaView>
+        {/* Search Bar and Bookmark Icon */}
+        <View style={styles.searchContainer}>
+          <TextInput placeholder="Search..." style={styles.searchInput} />
+          <TouchableOpacity style={styles.bookmarkButton}>
+            <Ionicons name="bookmark-outline" size={24} color="#FFF" />
+          </TouchableOpacity>
+        </View>
+
+        {/* Map Background */}
+        <View style={styles.mapContainer}>
+          <MapView
+            style={StyleSheet.absoluteFillObject}
+            region={{
+              latitude: location.coords.latitude,
+              longitude: location.coords.longitude,
+              latitudeDelta: 0.05,
+              longitudeDelta: 0.05,
+            }}
+            showsUserLocation={true} // Display user's location on the map
+            followsUserLocation={true} // Keep the map centered on the user
+          >
+            {/* Pointer at the User's Current Location */}
+            {/* <Marker
+              coordinate={{
+                latitude: location.coords.latitude,
+                longitude: location.coords.longitude,
+              }}
+            >
+              <View style={styles.marker}>
+                <View style={styles.markerInner} />
+              </View>
+            </Marker> */}
+          </MapView>
+        </View>
+
+        {/* Bottom Sheet */}
+        <BottomSheet
+          ref={bottomSheetRef}
+          index={0}
+          snapPoints={snapPoints}
+          onChange={handleSheetChanges}
+          backgroundStyle={styles.bottomSheetBackground}
+          handleIndicatorStyle={styles.handleIndicator}
+        >
+          <BottomSheetView style={styles.contentContainer}>
+            <Text> Members: {club && club.members_count}</Text>
+          </BottomSheetView>
+        </BottomSheet>
+      </SafeAreaView>
+    </GestureHandlerRootView>
   );
 };
 
@@ -110,6 +166,58 @@ const styles = StyleSheet.create({
   },
   mapContainer: {
     flex: 1,
+  },
+  contentContainer: {
+    flex: 1,
+    padding: 36,
+    alignItems: "center",
+  },
+  searchContainer: {
+    position: "absolute",
+    top: 130,
+    left: 20,
+    right: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFF",
+    borderRadius: 25,
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    zIndex: 10,
+  },
+  searchInput: {
+    flex: 1,
+    height: 40,
+    borderRadius: 25,
+    paddingHorizontal: 10,
+    fontSize: 16,
+    backgroundColor: "#F0F0F0",
+    marginRight: 10,
+  },
+  bookmarkButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 25,
+    backgroundColor: "#4F46E5",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  bottomSheetBackground: {
+    backgroundColor: "#f0f0f0",
+    borderRadius: 20,
+  },
+  handleIndicator: {
+    width: 50,
+    height: 5,
+    backgroundColor: "#ccc",
+    borderRadius: 10,
+    alignSelf: "center",
+    marginVertical: 10,
   },
   homeButton: {
     backgroundColor: "#FFF",
@@ -123,6 +231,20 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
+  },
+  marker: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: "rgba(0, 122, 255, 0.2)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  markerInner: {
+    width: 15,
+    height: 15,
+    borderRadius: 7.5,
+    backgroundColor: "#007AFF",
   },
   center: {
     flex: 1,

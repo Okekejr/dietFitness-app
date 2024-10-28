@@ -7,4 +7,8 @@ export interface ClubData {
   location?: string;
   maxMembers?: number;
   logo?: string;
+  created_at: string;
+  created_by: string;
+  max_members: number;
+  members_count: string;
 }
