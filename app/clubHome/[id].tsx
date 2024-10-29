@@ -25,6 +25,7 @@ import { API_URL } from "@/constants/apiUrl";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { ClubData } from "@/types";
+import BottomSheetContent from "@/components/BottomSheetContent";
 
 const ClubHomeScreen = () => {
   const { id } = useLocalSearchParams();
@@ -33,11 +34,17 @@ const ClubHomeScreen = () => {
   );
   const [loadingLocation, setLoadingLocation] = useState(true);
   const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchedLocation, setSearchedLocation] = useState({
+    latitude: 0,
+    longitude: 0,
+  });
+  const [selectedCard, setSelectedCard] = useState<string | null>(null);
 
   const bottomSheetRef = useRef<BottomSheet>(null);
 
   // Define snap points for the bottom sheet
-  const snapPoints = useMemo(() => ["10%", "50%", "90%"], []);
+  const snapPoints = useMemo(() => ["10%", "50%"], []);
 
   // Fetch Club Data
   const { data: club, isLoading: clubLoading } = useQuery({
@@ -77,9 +84,34 @@ const ClubHomeScreen = () => {
     getLocationUpdates();
   }, []);
 
-  const handleSheetChanges = useCallback((index: number) => {
-    console.log("Bottom sheet index changed to:", index);
-  }, []);
+  // const handleSearchLocation = async () => {
+  //   try {
+  //     const response = await fetch(
+  //       `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(
+  //         searchQuery
+  //       )}&key=YOUR_OPENCAGE_API_KEY`
+  //     );
+  //     const data = await response.json();
+
+  //     if (data.results.length > 0) {
+  //       const { lat, lng } = data.results[0].geometry;
+  //       setSearchedLocation({ latitude: lat, longitude: lng });
+  //     } else {
+  //       Alert.alert("Location not found", "Please try a different search.");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching location:", error);
+  //     Alert.alert("Error", "Failed to search for location.");
+  //   }
+  // };
+
+  // const handleSheetChanges = useCallback((index: number) => {
+  //   console.log("Bottom sheet index changed to:", index);
+  // }, []);
+
+  const handleCardPress = (route: string) => {
+    router.push(route);
+  };
 
   if (loadingLocation || clubLoading) {
     return <ActivityIndicator size="large" color="#4F46E5" />;
@@ -108,7 +140,12 @@ const ClubHomeScreen = () => {
 
         {/* Search Bar and Bookmark Icon */}
         <View style={styles.searchContainer}>
-          <TextInput placeholder="Search..." style={styles.searchInput} />
+          <TextInput
+            placeholder="Search location"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            style={styles.searchInput}
+          />
           <TouchableOpacity style={styles.bookmarkButton}>
             <Ionicons name="bookmark-outline" size={24} color="#FFF" />
           </TouchableOpacity>
@@ -128,16 +165,9 @@ const ClubHomeScreen = () => {
             followsUserLocation={true} // Keep the map centered on the user
           >
             {/* Pointer at the User's Current Location */}
-            {/* <Marker
-              coordinate={{
-                latitude: location.coords.latitude,
-                longitude: location.coords.longitude,
-              }}
-            >
-              <View style={styles.marker}>
-                <View style={styles.markerInner} />
-              </View>
-            </Marker> */}
+            {searchedLocation.latitude !== 0 && (
+              <Marker coordinate={searchedLocation} title="Searched Location" />
+            )}
           </MapView>
         </View>
 
@@ -146,12 +176,19 @@ const ClubHomeScreen = () => {
           ref={bottomSheetRef}
           index={0}
           snapPoints={snapPoints}
-          onChange={handleSheetChanges}
           backgroundStyle={styles.bottomSheetBackground}
           handleIndicatorStyle={styles.handleIndicator}
         >
           <BottomSheetView style={styles.contentContainer}>
-            <Text> Members: {club && club.members_count}</Text>
+            {club ? (
+              <BottomSheetContent
+                selectedCard={selectedCard}
+                setSelectedCard={setSelectedCard}
+                club={club}
+              />
+            ) : (
+              "...loading"
+            )}
           </BottomSheetView>
         </BottomSheet>
       </SafeAreaView>
@@ -169,8 +206,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     flex: 1,
-    padding: 36,
-    alignItems: "center",
+    paddingHorizontal: 20,
   },
   searchContainer: {
     position: "absolute",
@@ -192,12 +228,11 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     flex: 1,
-    height: 40,
+    padding: 10,
+    backgroundColor: "#fff",
     borderRadius: 25,
-    paddingHorizontal: 10,
-    fontSize: 16,
-    backgroundColor: "#F0F0F0",
     marginRight: 10,
+    elevation: 3,
   },
   bookmarkButton: {
     width: 40,

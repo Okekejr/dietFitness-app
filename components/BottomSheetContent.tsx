@@ -1,0 +1,66 @@
+import React from "react";
+import { ScrollView, StyleSheet } from "react-native";
+import ClubDetailsCard from "./clubs/clubDetailsCard";
+import LeaderBoardCard from "./clubs/leaderboardCard";
+import ActivityFeedCard from "./clubs/activityFeedCard";
+import ClubCards from "./clubs/clubCards";
+import { ClubData } from "@/types";
+
+interface BottomSheetContentProps {
+  selectedCard: string | null;
+  setSelectedCard: (card: string | null) => void;
+  club: ClubData;
+}
+
+const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
+  selectedCard,
+  setSelectedCard,
+  club,
+}) => {
+  if (selectedCard === "Club Details") {
+    return (
+      <ClubDetailsCard
+        onBack={() => setSelectedCard(null)}
+        clubName={club.name}
+        clubDescription={club.description}
+      />
+    );
+  }
+
+  if (selectedCard === "Leaderboard") {
+    return <LeaderBoardCard onBack={() => setSelectedCard(null)} />;
+  }
+
+  if (selectedCard === "Activity Feed") {
+    return <ActivityFeedCard onBack={() => setSelectedCard(null)} />;
+  }
+
+  return (
+    <ScrollView>
+      <ClubCards
+        title={`${club?.name} Details` || "Club Details"}
+        description="View club information"
+        icon="information-circle-outline"
+        onPress={() => setSelectedCard("Club Details")}
+      />
+      <ClubCards
+        title="Leaderboard"
+        description="See top performers"
+        icon="trophy-outline"
+        onPress={() => setSelectedCard("Leaderboard")}
+      />
+      <ClubCards
+        title="Activity Feed"
+        description="Recent activities"
+        icon="list-outline"
+        onPress={() => setSelectedCard("Activity Feed")}
+      />
+    </ScrollView>
+  );
+};
+
+const styles = StyleSheet.create({
+  cardContainer: { padding: 20 },
+});
+
+export default BottomSheetContent;
