@@ -5,10 +5,21 @@ export interface ClubData {
   invite_code: string;
   qr_code: string;
   location?: string;
-  maxMembers?: number;
   logo?: string;
   created_at: string;
   created_by: string;
   max_members: number;
-  members_count: string;
+}
+
+export interface isLeader {
+  isLeader: boolean;
+}
+export interface Coordinate {
+  latitude: number;
+  longitude: number;
+}
+
+export interface RouteState {
+  pointA: Coordinate | null;
+  pointB: Coordinate | null;
 }

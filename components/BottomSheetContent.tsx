@@ -1,5 +1,5 @@
 import React from "react";
-import { ScrollView, StyleSheet } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 import ClubDetailsCard from "./clubs/clubDetailsCard";
 import LeaderBoardCard from "./clubs/leaderboardCard";
 import ActivityFeedCard from "./clubs/activityFeedCard";
@@ -42,6 +42,12 @@ const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
         description="View club information"
         icon="information-circle-outline"
         onPress={() => setSelectedCard("Club Details")}
+      />
+      <ClubCards
+        title="Routes"
+        description="Recent routes"
+        icon="infinite-outline"
+        onPress={() => setSelectedCard("Routes")}
       />
       <ClubCards
         title="Leaderboard"

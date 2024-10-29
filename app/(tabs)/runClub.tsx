@@ -6,6 +6,7 @@ import {
   ImageBackground,
   TouchableOpacity,
   Alert,
+  Modal,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { API_URL } from "@/constants/apiUrl";
@@ -18,6 +19,7 @@ import { useUserData } from "@/context/userDataContext";
 import { CreateClub } from "@/components/clubs/createClub";
 import { ClubData } from "@/types";
 import { useRouter } from "expo-router";
+import JoinClub from "@/components/clubs/joinClub";
 
 const ClubScreen = () => {
   const [name, setName] = useState<string>("");
@@ -26,6 +28,7 @@ const ClubScreen = () => {
   const [logoFile, setLogoFile] = useState<any>(null);
   const [maxMembers, setMaxMembers] = useState<number | null>(null);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
+  const [joinModalVisible, setJoinModalVisible] = useState(false);
   const [createdClub, setCreatedClub] = useState<ClubData | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const { userData } = useUserData();
@@ -149,6 +152,10 @@ const ClubScreen = () => {
     createClubMutation.mutate();
   };
 
+  const handleJoinClub = () => {
+    setJoinModalVisible(true);
+  };
+
   return (
     <ImageBackground
       source={require("../../assets/img/runClubBackgroud.jpeg")}
@@ -166,7 +173,7 @@ const ClubScreen = () => {
           <Text style={styles.buttonText}>Create a Club</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.buttonJoin}>
+        <TouchableOpacity onPress={handleJoinClub} style={styles.buttonJoin}>
           <Text style={styles.buttonText}>Join a Club</Text>
         </TouchableOpacity>
       </View>
@@ -190,6 +197,11 @@ const ClubScreen = () => {
         setModalVisible={setModalVisible}
         createdClub={createdClub}
       />
+
+      <Modal visible={joinModalVisible} animationType="slide">
+        <JoinClub onClose={() => setJoinModalVisible(false)} />
+      </Modal>
+      
     </ImageBackground>
   );
 };

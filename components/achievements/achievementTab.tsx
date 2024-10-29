@@ -43,16 +43,6 @@ const AchievementsTab = () => {
     enabled: !!userId,
   });
 
-  if (stats && stats?.totalWorkouts === 0) {
-    return (
-      <View>
-        <Text style={styles.description}>
-          You havent completed any workouts yet.
-        </Text>
-      </View>
-    );
-  }
-
   // Fetch unlocked achievements
   const { data: unlockedAchievements = [], isLoading: achievementsLoading } =
     useQuery({
@@ -82,10 +72,21 @@ const AchievementsTab = () => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.header}>Achievements</Text>
-      <View style={styles.section}>{renderAchievements(ACHIEVEMENTS)}</View>
-      <Text style={styles.header}>Milestones</Text>
-      <View style={styles.section}>{renderAchievements(MILESTONES)}</View>
+      {stats?.totalWorkouts === 0 ? (
+        <View style={styles.center}>
+          <Text style={styles.description}>
+            You haven't completed any workouts yet.
+          </Text>
+        </View>
+      ) : (
+        <>
+          <Text style={styles.header}>Achievements</Text>
+          <View style={styles.section}>{renderAchievements(ACHIEVEMENTS)}</View>
+          <Text style={styles.header}>Milestones</Text>
+          <View style={styles.section}>{renderAchievements(MILESTONES)}</View>
+        </>
+      )}
+
       {/* <Text style={styles.header}>Streaks</Text>
       <View style={styles.section}>{renderAchievements(STREAKs)}</View> */}
     </ScrollView>
@@ -100,6 +101,11 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     marginBottom: 10,
+  },
+  center: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
   section: {
     marginBottom: 20,
