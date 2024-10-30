@@ -1,28 +1,31 @@
 import React from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet } from "react-native";
 import ClubDetailsCard from "./clubs/clubDetailsCard";
 import LeaderBoardCard from "./clubs/leaderboardCard";
 import ActivityFeedCard from "./clubs/activityFeedCard";
 import ClubCards from "./clubs/clubCards";
 import { ClubData } from "@/types";
+import RouteUpdatesCard from "./clubs/routesUpdatesCard";
 
 interface BottomSheetContentProps {
   selectedCard: string | null;
   setSelectedCard: (card: string | null) => void;
   club: ClubData;
+  isLeader: boolean;
 }
 
 const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
   selectedCard,
   setSelectedCard,
   club,
+  isLeader,
 }) => {
   if (selectedCard === "Club Details") {
     return (
       <ClubDetailsCard
         onBack={() => setSelectedCard(null)}
-        clubName={club.name}
-        clubDescription={club.description}
+        club={club}
+        isLeader={isLeader}
       />
     );
   }
@@ -33,6 +36,10 @@ const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
 
   if (selectedCard === "Activity Feed") {
     return <ActivityFeedCard onBack={() => setSelectedCard(null)} />;
+  }
+
+  if (selectedCard === "Routes Feed") {
+    return <RouteUpdatesCard onBack={() => setSelectedCard(null)} />;
   }
 
   return (
@@ -47,7 +54,7 @@ const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
         title="Routes"
         description="Recent routes"
         icon="infinite-outline"
-        onPress={() => setSelectedCard("Routes")}
+        onPress={() => setSelectedCard("Routes Feed")}
       />
       <ClubCards
         title="Leaderboard"

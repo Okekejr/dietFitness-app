@@ -114,7 +114,10 @@ export default function HomeScreen() {
       }
 
       // If a week has passed, increment the workout week and generate a new schedule
-      if (daysSinceWeekStart >= 7) {
+      if (
+        daysSinceWeekStart >= 7 &&
+        currentWorkoutWeek > userData.current_workout_week
+      ) {
         currentWorkoutWeek += 1;
         userData.week_start_date = today.toISOString();
 
@@ -132,6 +135,8 @@ export default function HomeScreen() {
           today
         );
         workoutSchedule = newWorkoutSchedule;
+      } else {
+        console.log("Already workout for the week:");
       }
 
       setWorkoutSchedule(workoutSchedule);
@@ -150,30 +155,35 @@ export default function HomeScreen() {
   ) => {
     try {
       // Save the new workout schedule
-      await fetch(`${API_URL}/api/user/saveWorkoutSchedule`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId,
-          currentWorkoutWeek: weekNumber,
-          weekStartDate: startDate.toISOString(),
-          workoutSchedule: schedule,
-        }),
-      });
+      const saveWorkout = await fetch(
+        `${API_URL}/api/user/saveWorkoutSchedule`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userId,
+            currentWorkoutWeek: weekNumber,
+            weekStartDate: startDate.toISOString(),
+            workoutSchedule: schedule,
+          }),
+        }
+      );
 
-      // Save the used workouts
-      await fetch(`${API_URL}/api/user/saveUsedWorkouts`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId,
-          usedWorkouts: schedule.map((workout) => ({
-            workoutId: workout.workout.id,
-            weekNumber,
-            dateAssigned: startDate.toISOString(),
-          })),
-        }),
-      });
+      if (saveWorkout.ok) {
+        // Save the used workouts
+        await fetch(`${API_URL}/api/user/saveUsedWorkouts`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userId,
+            usedWorkouts: schedule.map((workout) => ({
+              workoutId: workout.workout.id,
+              weekNumber,
+              dateAssigned: startDate.toISOString(),
+            })),
+          }),
+        });
+      }
     } catch (error) {
       console.error("Error saving workout schedule:", error);
     }

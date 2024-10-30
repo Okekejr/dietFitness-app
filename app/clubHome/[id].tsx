@@ -349,11 +349,12 @@ const ClubHomeScreen = () => {
               </TouchableOpacity>
             )}
 
-            {club ? (
+            {club && isLeader ? (
               <BottomSheetContent
                 selectedCard={selectedCard}
                 setSelectedCard={setSelectedCard}
                 club={club}
+                isLeader={isLeader?.isLeader}
               />
             ) : (
               "...loading"
