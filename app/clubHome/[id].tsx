@@ -294,6 +294,20 @@ const ClubHomeScreen = () => {
         </BlurView>
       )}
 
+      {route.pointA && isLeader && (
+        <BlurView tint="dark" style={styles.routeContainer}>
+          {route.pointA && <Text>Start Point: {locationNames.pointA}</Text>}
+          {route.pointB && <Text>End Point: {locationNames.pointB}</Text>}
+          {distance && <Text>Distance: {distance}</Text>}
+          {estimatedTime && <Text>Estimated Time: {estimatedTime}</Text>}
+          {estimatedTime && (
+            <TouchableOpacity style={styles.saveButton} onPress={saveRoute}>
+              <Text style={styles.saveButtonText}>Save Route</Text>
+            </TouchableOpacity>
+          )}
+        </BlurView>
+      )}
+
       {/* Map Background */}
       <View style={styles.mapContainer}>
         <MapView
@@ -338,17 +352,6 @@ const ClubHomeScreen = () => {
           </View>
 
           <ScrollView style={styles.routeInfo}>
-            {route.pointA && <Text>Point A: {locationNames.pointA}</Text>}
-            {route.pointB && <Text>Point B: {locationNames.pointB}</Text>}
-            {distance && <Text>Distance: {distance}</Text>}
-            {estimatedTime && <Text>Estimated Time: {estimatedTime}</Text>}
-
-            {route.pointB && (
-              <TouchableOpacity style={styles.saveButton} onPress={saveRoute}>
-                <Text style={styles.saveButtonText}>Save Route</Text>
-              </TouchableOpacity>
-            )}
-
             {club && isLeader ? (
               <BottomSheetContent
                 selectedCard={selectedCard}
@@ -409,6 +412,18 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     top: 300,
     right: 20,
+    zIndex: 10,
+  },
+  routeContainer: {
+    position: "absolute",
+    borderRadius: 25,
+    gap: 5,
+    padding: 10,
+    maxWidth: 300,
+    maxHeight: 300,
+    top: 200,
+    left: 20,
+    overflow: "hidden",
     zIndex: 10,
   },
   navContainer: {
@@ -518,8 +533,7 @@ const styles = StyleSheet.create({
   },
   saveButton: {
     marginTop: 10,
-    marginBottom: 20,
-    backgroundColor: "#34D399",
+    backgroundColor: "#4F46E5",
     padding: 15,
     borderRadius: 10,
   },
