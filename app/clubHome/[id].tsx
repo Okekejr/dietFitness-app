@@ -49,6 +49,7 @@ const ClubHomeScreen = () => {
     latitudeDelta: 0.05,
     longitudeDelta: 0.05,
   });
+  const [savedRoute, setSavedRoutes] = useState(false);
 
   const bottomSheetRef = useRef<BottomSheet>(null);
 
@@ -182,16 +183,22 @@ const ClubHomeScreen = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          club_id: id,
-          point_a: route.pointA,
-          point_b: route.pointB,
+          clubId: id,
+          pointA: route.pointA,
+          pointB: route.pointB,
           distance,
-          estimated_time: estimatedTime,
+          estimatedTime,
         }),
       });
 
       if (response.ok) {
-        Alert.alert("Success", "Route saved successfully!");
+        const responseData = await response.json();
+        setSavedRoutes(true);
+        resetHandler();
+        Alert.alert(
+          "Success",
+          responseData.message || "Route saved successfully."
+        );
       } else {
         throw new Error("Failed to save route.");
       }
@@ -224,6 +231,7 @@ const ClubHomeScreen = () => {
     setPolylineCoords([]);
     setDistance(null);
     setEstimatedTime("");
+    setSavedRoutes(false);
   };
 
   const toggleFollow = () => {
@@ -296,10 +304,24 @@ const ClubHomeScreen = () => {
 
       {route.pointA && isLeader && (
         <BlurView tint="dark" style={styles.routeContainer}>
-          {route.pointA && <Text>Start Point: {locationNames.pointA}</Text>}
-          {route.pointB && <Text>End Point: {locationNames.pointB}</Text>}
-          {distance && <Text>Distance: {distance}</Text>}
-          {estimatedTime && <Text>Estimated Time: {estimatedTime}</Text>}
+          {!savedRoute ? (
+            <>
+              {route.pointA && <Text>Start Point: {locationNames.pointA}</Text>}
+              {route.pointB && <Text>End Point: {locationNames.pointB}</Text>}
+              {distance && <Text>Distance: {distance}</Text>}
+              {estimatedTime && <Text>Estimated Time: {estimatedTime}</Text>}
+            </>
+          ) : (
+            <View style={styles.savedCard}>
+              <Ionicons
+                name="checkmark-done-circle-outline"
+                size={50}
+                color="#4F46E5"
+                style={styles.icon}
+              />
+            </View>
+          )}
+
           {estimatedTime && (
             <TouchableOpacity style={styles.saveButton} onPress={saveRoute}>
               <Text style={styles.saveButtonText}>Save Route</Text>
@@ -467,6 +489,15 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     marginRight: 10,
     elevation: 3,
+  },
+  savedCard: {
+    padding: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    minWidth: 100,
+  },
+  icon: {
+    marginBottom: 10,
   },
   bookmarkButton: {
     width: 40,

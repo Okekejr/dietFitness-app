@@ -1,11 +1,39 @@
+import { API_URL } from "@/constants/apiUrl";
 import { Ionicons } from "@expo/vector-icons";
-import { Text, TouchableOpacity, View, StyleSheet } from "react-native";
+import { useQuery } from "@tanstack/react-query";
+import {
+  Text,
+  TouchableOpacity,
+  View,
+  StyleSheet,
+  ScrollView,
+} from "react-native";
+import RouteCard from "./routesCard";
+import { RouteData } from "@/types";
 
 interface RouteUpdatesCardT {
   onBack: () => void;
+  clubId: string;
 }
 
-const RouteUpdatesCard = ({ onBack }: RouteUpdatesCardT) => {
+const RouteUpdatesCard = ({ onBack, clubId }: RouteUpdatesCardT) => {
+  const {
+    data: routesData,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["routesData", clubId],
+    queryFn: async () => {
+      const response = await fetch(`${API_URL}/api/clubs/getRoutes/${clubId}`);
+      if (!response.ok) throw new Error("Failed to fetch route data");
+      const data = await response.json();
+      return data.routes as RouteData[];
+    },
+  });
+
+  if (isLoading) return <Text>Loading routes...</Text>;
+  if (error) return <Text>Error fetching routes</Text>;
+
   return (
     <View style={styles.container}>
       <View style={styles.topBar}>
@@ -14,6 +42,19 @@ const RouteUpdatesCard = ({ onBack }: RouteUpdatesCardT) => {
         </TouchableOpacity>
         <Text style={styles.title}>Latest Routes</Text>
       </View>
+
+      <ScrollView contentContainerStyle={styles.scrollViewContainer}>
+        {routesData?.map((route, index) => (
+          <RouteCard
+            key={index}
+            startPoint={route.startPoint}
+            endPoint={route.endPoint}
+            estimatedTime={route.estimatedTime}
+            estimatedDistance={route.estimatedDistance}
+            dateCreated={route.dateCreated}
+          />
+        ))}
+      </ScrollView>
     </View>
   );
 };
@@ -21,7 +62,7 @@ const RouteUpdatesCard = ({ onBack }: RouteUpdatesCardT) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    padding: 5,
   },
   backButton: {
     backgroundColor: "#fff",
@@ -40,7 +81,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 30,
   },
+  subContainer: {
+    alignItems: "center",
+  },
   title: { fontSize: 18, fontWeight: "bold", marginLeft: 90 },
+  scrollViewContainer: {
+    alignItems: "flex-start",
+    paddingLeft: 5,
+  },
 });
 
 export default RouteUpdatesCard;

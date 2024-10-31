@@ -39,7 +39,9 @@ const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
   }
 
   if (selectedCard === "Routes Feed") {
-    return <RouteUpdatesCard onBack={() => setSelectedCard(null)} />;
+    return (
+      <RouteUpdatesCard clubId={club.id} onBack={() => setSelectedCard(null)} />
+    );
   }
 
   return (

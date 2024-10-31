@@ -23,3 +23,16 @@ export interface RouteState {
   pointA: Coordinate | null;
   pointB: Coordinate | null;
 }
+
+export interface RouteData {
+  startPoint: StartPointOrEndPoint;
+  endPoint: StartPointOrEndPoint;
+  estimatedTime: string;
+  estimatedDistance: string;
+  dateCreated: string;
+}
+
+export interface StartPointOrEndPoint {
+  latitude: number;
+  longitude: number;
+}
