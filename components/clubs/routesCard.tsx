@@ -6,7 +6,7 @@ import {
   Linking,
   StyleSheet,
 } from "react-native";
-import { format, formatDistanceToNow } from "date-fns";
+import { parseISO, format, formatDistanceToNow } from "date-fns";
 import { RouteData } from "@/types";
 
 // Function to get human-readable address from latitude and longitude
@@ -48,9 +48,9 @@ const RouteCard: React.FC<RouteData> = ({
     fetchAddresses();
 
     const updateRelativeTime = () => {
-      setRelativeTime(
-        formatDistanceToNow(new Date(dateCreated), { addSuffix: true })
-      );
+      // Use parseISO to handle date strings correctly
+      const parsedDate = parseISO(dateCreated);
+      setRelativeTime(formatDistanceToNow(parsedDate, { addSuffix: true }));
     };
 
     updateRelativeTime();

@@ -34,6 +34,13 @@ const RouteUpdatesCard = ({ onBack, clubId }: RouteUpdatesCardT) => {
   if (isLoading) return <Text>Loading routes...</Text>;
   if (error) return <Text>Error fetching routes</Text>;
 
+  // Sort the routes by dateCreated in ascending order (oldest to latest)
+  const sortedRoutes = routesData?.sort((a, b) => {
+    return (
+      new Date(a.dateCreated).getTime() - new Date(b.dateCreated).getTime()
+    );
+  });
+
   return (
     <View style={styles.container}>
       <View style={styles.topBar}>
@@ -44,7 +51,7 @@ const RouteUpdatesCard = ({ onBack, clubId }: RouteUpdatesCardT) => {
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollViewContainer}>
-        {routesData?.map((route, index) => (
+        {sortedRoutes?.map((route, index) => (
           <RouteCard
             key={index}
             startPoint={route.startPoint}

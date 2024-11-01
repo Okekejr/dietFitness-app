@@ -1,10 +1,9 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef } from "react";
 import {
   View,
   Text,
   StyleSheet,
   ActivityIndicator,
-  Alert,
   TouchableOpacity,
   TextInput,
   ScrollView,
@@ -12,231 +11,49 @@ import {
 } from "react-native";
 import { BlurView } from "expo-blur";
 import MapView, { Marker, Polyline } from "react-native-maps";
-import * as Location from "expo-location";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { useQuery } from "@tanstack/react-query";
-import { API_URL } from "@/constants/apiUrl";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import BottomSheetContent from "@/components/BottomSheetContent";
-import { ClubData, Coordinate, RouteState, isLeader } from "@/types";
-import { decodePolyline, getInitials } from "@/utils";
+import { getInitials } from "@/utils";
 import { useUserData } from "@/context/userDataContext";
+import { useClubQueries } from "@/hooks/useClubQueries";
 
 const ClubHomeScreen = () => {
   const { id } = useLocalSearchParams();
   const { userData } = useUserData();
-  const [loadingLocation, setLoadingLocation] = useState(true);
-  const [locationNames, setLocationNames] = useState({
-    pointA: "",
-    pointB: "",
-  });
   const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCard, setSelectedCard] = useState<string | null>(null);
-  const [route, setRoute] = useState<RouteState>({
-    pointA: null,
-    pointB: null,
-  });
-  const [follow, setFollow] = useState(false);
-  const [polylineCoords, setPolylineCoords] = useState<Coordinate[]>([]);
-  const [distance, setDistance] = useState<number | null>(null);
-  const [estimatedTime, setEstimatedTime] = useState("");
-  const [region, setRegion] = useState({
-    latitude: 25.686613,
-    longitude: -100.316116,
-    latitudeDelta: 0.05,
-    longitudeDelta: 0.05,
-  });
-  const [savedRoute, setSavedRoutes] = useState(false);
-
   const bottomSheetRef = useRef<BottomSheet>(null);
-
-  // Define snap points for the bottom sheet
   const snapPoints = useMemo(() => ["10%", "50%"], []);
-
-  // Fetch Club Data
-  const { data: club, isLoading: clubLoading } = useQuery({
-    queryKey: ["club", id],
-    queryFn: async () => {
-      const response = await fetch(`${API_URL}/api/clubs/${id}`);
-      if (!response.ok) throw new Error("Failed to fetch club data");
-      return response.json() as Promise<ClubData>;
-    },
-    enabled: !!id,
+  const {
+    loadingLocation,
+    clubLoading,
+    isLeader,
+    searchQuery,
+    setSearchQuery,
+    handleSearchLocation,
+    club,
+    follow,
+    toggleFollow,
+    route,
+    resetHandler,
+    savedRoute,
+    distance,
+    region,
+    estimatedTime,
+    setRegion,
+    locationNames,
+    saveRoute,
+    handleMapPress,
+    polylineCoords,
+    selectedCard,
+    setSelectedCard,
+    setSavedRoutes,
+  } = useClubQueries({
+    id,
+    userData,
   });
-
-  const { data: isLeader, isLoading: leaderLoading } = useQuery({
-    queryKey: ["isLeader", userData?.user_id],
-    queryFn: async () => {
-      const response = await fetch(
-        `${API_URL}/api/clubs/isLeader/${id}/${userData?.user_id}`
-      );
-      if (!response.ok) throw new Error("Failed to fetch leader");
-      return response.json() as Promise<isLeader>;
-    },
-  });
-
-  // Get User Location with Permission Handling
-  useEffect(() => {
-    const getLocationUpdates = async () => {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        Alert.alert("Permission Denied", "Location access is required.");
-        setLoadingLocation(false);
-        return;
-      }
-      await Location.watchPositionAsync(
-        {
-          accuracy: Location.Accuracy.High,
-          timeInterval: 5000,
-          distanceInterval: 10,
-        },
-        (newLocation) =>
-          setRegion({
-            latitude: newLocation.coords.latitude,
-            longitude: newLocation.coords.longitude,
-            latitudeDelta: 0.05,
-            longitudeDelta: 0.05,
-          })
-      );
-      setLoadingLocation(false);
-    };
-    getLocationUpdates();
-  }, []);
-
-  const handleSearchLocation = async () => {
-    try {
-      const response = await fetch(
-        `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(
-          searchQuery
-        )}&key=${process.env.GEOCODING_API_KEY}`
-      );
-      const data = await response.json();
-
-      if (data.results.length > 0) {
-        const { lat, lng } = data.results[0].geometry;
-        setRegion({
-          latitude: lat,
-          longitude: lng,
-          latitudeDelta: 0.05,
-          longitudeDelta: 0.05,
-        });
-      } else {
-        Alert.alert("Location not found", "Please try a different search.");
-      }
-    } catch (error) {
-      console.error("Error fetching location:", error);
-      Alert.alert("Error", "Failed to search for location.");
-    }
-  };
-
-  // Function to Fetch Directions from Google Maps API
-  const fetchDirections = async (pointA: Coordinate, pointB: Coordinate) => {
-    try {
-      const response = await fetch(
-        `https://maps.googleapis.com/maps/api/directions/json?origin=${pointA.latitude},${pointA.longitude}&destination=${pointB.latitude},${pointB.longitude}&mode=walking&key=${process.env.GOOGLE_DIRECTIONS_API_KEY}`
-      );
-      const data = await response.json();
-
-      if (data.routes.length > 0) {
-        const route = data.routes[0];
-        const points = decodePolyline(route.overview_polyline.points);
-        setPolylineCoords(points);
-        setDistance(route.legs[0].distance.text); // e.g., "2.5 km"
-        setEstimatedTime(route.legs[0].duration.text); // e.g., "30 mins"
-      } else {
-        Alert.alert("No route found", "Unable to get a route.");
-      }
-    } catch (error) {
-      console.error("Error fetching directions:", error);
-      Alert.alert("Error", "Failed to fetch directions.");
-    }
-  };
-
-  const reverseGeocode = async (coordinate: Coordinate, point: "A" | "B") => {
-    try {
-      const response = await fetch(
-        `https://api.opencagedata.com/geocode/v1/json?q=${coordinate.latitude}+${coordinate.longitude}&key=${process.env.GEOCODING_API_KEY}`
-      );
-      const data = await response.json();
-      const locationName = data.results[0]?.formatted || "Unknown Location";
-
-      setLocationNames((prev) => ({
-        ...prev,
-        [point === "A" ? "pointA" : "pointB"]: locationName,
-      }));
-    } catch (error) {
-      console.error("Reverse Geocoding Error:", error);
-    }
-  };
-
-  const saveRoute = async () => {
-    if (!route.pointA || !route.pointB || !distance) {
-      Alert.alert("Incomplete Data", "Please set both points A and B.");
-      return;
-    }
-
-    try {
-      const response = await fetch(`${API_URL}/api/clubs/saveRoute`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          clubId: id,
-          pointA: route.pointA,
-          pointB: route.pointB,
-          distance,
-          estimatedTime,
-        }),
-      });
-
-      if (response.ok) {
-        const responseData = await response.json();
-        setSavedRoutes(true);
-        resetHandler();
-        Alert.alert(
-          "Success",
-          responseData.message || "Route saved successfully."
-        );
-      } else {
-        throw new Error("Failed to save route.");
-      }
-    } catch (error) {
-      console.error("Error saving route:", error);
-      Alert.alert("Error", "Could not save the route.");
-    }
-  };
-
-  const handleMapPress = (event: {
-    nativeEvent: { coordinate: Coordinate };
-  }) => {
-    const { latitude, longitude } = event.nativeEvent.coordinate;
-    setRoute((prev) => {
-      if (!prev.pointA) {
-        reverseGeocode({ latitude, longitude }, "A");
-        return { ...prev, pointA: { latitude, longitude } };
-      } else if (!prev.pointB) {
-        const pointB = { latitude, longitude };
-        reverseGeocode(pointB, "B");
-        fetchDirections(prev.pointA!, pointB);
-        return { ...prev, pointB };
-      }
-      return prev;
-    });
-  };
-
-  const resetHandler = () => {
-    setRoute({ pointA: null, pointB: null });
-    setPolylineCoords([]);
-    setDistance(null);
-    setEstimatedTime("");
-    setSavedRoutes(false);
-  };
-
-  const toggleFollow = () => {
-    setFollow((prev) => !prev);
-  };
 
   if (loadingLocation || clubLoading) {
     return <ActivityIndicator size="large" color="#4F46E5" />;
@@ -304,28 +121,23 @@ const ClubHomeScreen = () => {
 
       {route.pointA && isLeader && (
         <BlurView tint="dark" style={styles.routeContainer}>
-          {!savedRoute ? (
+          {!savedRoute && (
             <>
-              {route.pointA && <Text>Start Point: {locationNames.pointA}</Text>}
-              {route.pointB && <Text>End Point: {locationNames.pointB}</Text>}
+              {route.pointA && locationNames.pointA && (
+                <Text>Start Point: {locationNames.pointA}</Text>
+              )}
+              {route.pointB && locationNames.pointB && (
+                <Text>End Point: {locationNames.pointB}</Text>
+              )}
               {distance && <Text>Distance: {distance}</Text>}
               {estimatedTime && <Text>Estimated Time: {estimatedTime}</Text>}
-            </>
-          ) : (
-            <View style={styles.savedCard}>
-              <Ionicons
-                name="checkmark-done-circle-outline"
-                size={50}
-                color="#4F46E5"
-                style={styles.icon}
-              />
-            </View>
-          )}
 
-          {estimatedTime && (
-            <TouchableOpacity style={styles.saveButton} onPress={saveRoute}>
-              <Text style={styles.saveButtonText}>Save Route</Text>
-            </TouchableOpacity>
+              {estimatedTime && (
+                <TouchableOpacity style={styles.saveButton} onPress={saveRoute}>
+                  <Text style={styles.saveButtonText}>Save Route</Text>
+                </TouchableOpacity>
+              )}
+            </>
           )}
         </BlurView>
       )}
@@ -490,15 +302,6 @@ const styles = StyleSheet.create({
     marginRight: 10,
     elevation: 3,
   },
-  savedCard: {
-    padding: 20,
-    alignItems: "center",
-    justifyContent: "center",
-    minWidth: 100,
-  },
-  icon: {
-    marginBottom: 10,
-  },
   bookmarkButton: {
     width: 40,
     height: 40,
@@ -567,6 +370,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#4F46E5",
     padding: 15,
     borderRadius: 10,
+    width: "100%",
   },
   saveButtonText: { color: "#FFF", textAlign: "center", fontWeight: "bold" },
 });

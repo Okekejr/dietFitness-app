@@ -10,7 +10,7 @@ import {
   Dimensions,
   ScrollView,
 } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { API_URL } from "@/constants/apiUrl";
 import FilterModal from "@/components/modal/filterModal";
@@ -24,7 +24,6 @@ const { height } = Dimensions.get("window");
 export default function CategoryScreen() {
   const { id } = useLocalSearchParams();
   const { userData } = useUserData();
-  const router = useRouter();
   const [category, setCategory] = useState<CategoryT | null>(null);
   const [workouts, setWorkouts] = useState<WorkoutsT[]>([]);
   const [userId, setUserId] = useState<string>("");
