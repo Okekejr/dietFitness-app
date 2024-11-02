@@ -1,6 +1,13 @@
 import { API_URL } from "@/constants/apiUrl";
-import { ClubData, Coordinate, RouteState, UserDataT, isLeader } from "@/types";
-import { useQuery } from "@tanstack/react-query";
+import {
+  ClubData,
+  Coordinate,
+  RouteData,
+  RouteState,
+  UserDataT,
+  isLeader,
+} from "@/types";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import * as Location from "expo-location";
 import { decodePolyline } from "@/utils";
@@ -12,6 +19,7 @@ interface QueryType {
 }
 
 export const useClubQueries = ({ id, userData }: QueryType) => {
+  const queryClient = useQueryClient();
   const [loadingLocation, setLoadingLocation] = useState(true);
   const [locationNames, setLocationNames] = useState({
     pointA: "",
@@ -174,6 +182,7 @@ export const useClubQueries = ({ id, userData }: QueryType) => {
         const responseData = await response.json();
         setSavedRoutes(true);
         resetHandler();
+        queryClient.invalidateQueries({ queryKey: ["routesData", id] });
         Alert.alert(
           "Success",
           responseData.message || "Route saved successfully."
@@ -216,6 +225,22 @@ export const useClubQueries = ({ id, userData }: QueryType) => {
     setFollow((prev) => !prev);
   };
 
+  const {
+    data: routesData,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["routesData", id],
+    queryFn: async () => {
+      const response = await fetch(`${API_URL}/api/clubs/getRoutes/${id}`);
+      if (!response.ok) throw new Error("Failed to fetch route data");
+      const data = await response.json();
+      return data.routes as RouteData[];
+    },
+  });
+
+  const latestRoute = routesData && routesData[routesData?.length - 1];
+
   return {
     loadingLocation,
     locationNames,
@@ -240,5 +265,6 @@ export const useClubQueries = ({ id, userData }: QueryType) => {
     selectedCard,
     setSelectedCard,
     setSavedRoutes,
+    latestRoute,
   };
 };

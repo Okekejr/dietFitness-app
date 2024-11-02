@@ -49,7 +49,6 @@ const ClubHomeScreen = () => {
     polylineCoords,
     selectedCard,
     setSelectedCard,
-    setSavedRoutes,
   } = useClubQueries({
     id,
     userData,
@@ -108,7 +107,7 @@ const ClubHomeScreen = () => {
         </TouchableOpacity>
       </BlurView>
 
-      {route.pointA && (
+      {route.pointA && isLeader?.isLeader && (
         <BlurView tint="dark" style={styles.clearContainer}>
           <TouchableOpacity
             onPress={resetHandler}
@@ -119,7 +118,7 @@ const ClubHomeScreen = () => {
         </BlurView>
       )}
 
-      {route.pointA && isLeader && (
+      {route.pointA && isLeader?.isLeader && (
         <BlurView tint="dark" style={styles.routeContainer}>
           {!savedRoute && (
             <>
