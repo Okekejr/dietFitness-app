@@ -49,6 +49,7 @@ const ClubHomeScreen = () => {
     polylineCoords,
     selectedCard,
     setSelectedCard,
+    latestRoute,
   } = useClubQueries({
     id,
     userData,
