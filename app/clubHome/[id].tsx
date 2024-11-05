@@ -25,7 +25,7 @@ const ClubHomeScreen = () => {
   const { userData } = useUserData();
   const router = useRouter();
   const bottomSheetRef = useRef<BottomSheet>(null);
-  const snapPoints = useMemo(() => ["10%", "50%"], []);
+  const snapPoints = useMemo(() => ["10%", "55%"], []);
   const {
     loadingLocation,
     clubLoading,
