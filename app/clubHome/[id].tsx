@@ -6,7 +6,6 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   TextInput,
-  ScrollView,
   Image,
 } from "react-native";
 import { BlurView } from "expo-blur";
@@ -185,18 +184,16 @@ const ClubHomeScreen = () => {
             </Text>
           </View>
 
-          <ScrollView style={styles.routeInfo}>
-            {club && isLeader ? (
-              <BottomSheetContent
-                selectedCard={selectedCard}
-                setSelectedCard={setSelectedCard}
-                club={club}
-                isLeader={isLeader?.isLeader}
-              />
-            ) : (
-              "...loading"
-            )}
-          </ScrollView>
+          {club && isLeader ? (
+            <BottomSheetContent
+              selectedCard={selectedCard}
+              setSelectedCard={setSelectedCard}
+              club={club}
+              isLeader={isLeader?.isLeader}
+            />
+          ) : (
+            "...loading"
+          )}
         </BottomSheetView>
       </BottomSheet>
     </GestureHandlerRootView>
