@@ -6,6 +6,7 @@ import {
   SafeAreaView,
   ActivityIndicator,
   ScrollView,
+  TextInput,
 } from "react-native";
 import { Href, useFocusEffect } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
@@ -198,6 +199,7 @@ export default function WorkoutsScreen() {
     <SafeAreaView style={styles.safeArea}>
       <Header headerTitle="Workouts" />
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
+        <TextInput placeholder="Search" placeholderTextColor="#000" />
         {/* Featured Workouts */}
         <FeaturedWorkoutsComp />
 
