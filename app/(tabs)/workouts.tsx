@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   ScrollView,
   TextInput,
+  TouchableOpacity,
 } from "react-native";
 import { Href, useFocusEffect } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
@@ -18,6 +19,7 @@ import FeaturedWorkoutsComp from "@/components/featuredWorkout/featuredWorkout";
 import { useUserData } from "@/context/userDataContext";
 import Header from "@/components/header/header";
 import CategoriesComp from "@/components/categories/categoriesComp";
+import { Ionicons } from "@expo/vector-icons";
 
 // Fetch function
 const fetchCategories = async () => {
@@ -163,14 +165,6 @@ export default function WorkoutsScreen() {
     );
   }
 
-  if (isError) {
-    return (
-      <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>Error fetching categories</Text>
-      </View>
-    );
-  }
-
   const workoutCardsConfig = [
     {
       key: "favoriteWorkouts",
@@ -199,7 +193,22 @@ export default function WorkoutsScreen() {
     <SafeAreaView style={styles.safeArea}>
       <Header headerTitle="Workouts" />
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
-        <TextInput placeholder="Search" placeholderTextColor="#000" />
+        <View style={styles.searchInputContainer}>
+          <TouchableOpacity>
+            <Ionicons
+              name="search-outline"
+              size={17}
+              color="#000"
+              style={styles.eyeIcon}
+            />
+          </TouchableOpacity>
+
+          <TextInput
+            placeholder="Search"
+            placeholderTextColor="#777"
+            style={styles.searchInput}
+          />
+        </View>
         {/* Featured Workouts */}
         <FeaturedWorkoutsComp />
 
@@ -246,6 +255,26 @@ const styles = StyleSheet.create({
   scrollViewContent: {
     paddingHorizontal: 25,
     paddingBottom: 20,
+  },
+  searchInput: {
+    flex: 1,
+    color: "#000",
+  },
+  searchInputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderColor: "gray",
+    borderWidth: 1,
+    height: 40,
+    paddingHorizontal: 10,
+    padding: 10,
+    backgroundColor: "#F0EEED",
+    borderRadius: 25,
+    marginTop: 20,
+    elevation: 3,
+  },
+  eyeIcon: {
+    marginHorizontal: 10,
   },
   heading: {
     fontSize: 22,
