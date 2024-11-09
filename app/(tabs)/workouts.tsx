@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -8,8 +8,9 @@ import {
   ScrollView,
   TextInput,
   TouchableOpacity,
+  Modal,
 } from "react-native";
-import { Href, useFocusEffect } from "expo-router";
+import { Href, useFocusEffect, useRouter } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import { API_URL } from "@/constants/apiUrl";
 import WorkoutCompCard from "@/components/workout/workoutCompCard";
@@ -37,6 +38,14 @@ const fetchWorkouts = async (): Promise<WorkoutsT[]> => {
 
 export default function WorkoutsScreen() {
   const { userData } = useUserData();
+  const router = useRouter();
+
+  // State for Search Modal
+  const [isSearchModalVisible, setSearchModalVisible] = useState(false);
+  const [searchText, setSearchText] = useState("");
+  const [searchResults, setSearchResults] = useState<WorkoutsT[]>([]);
+  const searchInputRef = useRef<TextInput>(null);
+  const normalInputRef = useRef<TextInput>(null);
 
   const fetchCompletedWorkouts = async (): Promise<WorkoutsT[]> => {
     if (!userData) return [];
@@ -144,6 +153,59 @@ export default function WorkoutsScreen() {
   //   ])
   // );
 
+  // Open Search Modal
+  const openSearchModal = () => {
+    setSearchModalVisible(true);
+    setSearchText("");
+    setSearchResults([]);
+  };
+
+  const handleBackPress = () => {
+    setSearchModalVisible(false);
+    setSearchText("");
+    setSearchResults([]);
+
+    setTimeout(() => {
+      if (normalInputRef.current) {
+        normalInputRef.current.blur(); // This removes focus from the input
+      }
+    }, 100);
+  };
+
+  useEffect(() => {
+    if (searchText === "") {
+      setSearchResults([]); // No results when input is empty
+      return;
+    }
+  }, [searchText]);
+
+  // Handle search text change and filter workouts
+  const handleSearch = (text: string) => {
+    setSearchText(text);
+
+    if (text.trim() === "") {
+      setSearchResults([]); // No results when input is empty
+      return;
+    }
+
+    // Filter workouts based on input
+    const filteredResults = workouts.filter((workout) =>
+      workout.name.toLowerCase().includes(text.toLowerCase())
+    );
+
+    setSearchResults(filteredResults);
+  };
+
+  // Navigate to workout details screen
+  const handleNavigate = (id: number) => {
+    router.push({
+      pathname: `/workout/[id]`,
+      params: { id },
+    });
+
+    handleBackPress();
+  };
+
   if (
     isLoading ||
     isWorkoutsLoading ||
@@ -192,9 +254,64 @@ export default function WorkoutsScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <Header headerTitle="Workouts" />
+
+      {/* Search Modal */}
+      <Modal visible={isSearchModalVisible} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            {/* Header Row */}
+            <View style={styles.searchHeader}>
+              <TextInput
+                ref={searchInputRef}
+                style={styles.modalSearchInput}
+                placeholder="Search Workouts"
+                value={searchText}
+                onChangeText={handleSearch}
+                autoFocus
+              />
+              {searchText && (
+                <TouchableOpacity onPress={() => setSearchText("")}>
+                  <Ionicons name="close-circle" size={24} color="black" />
+                </TouchableOpacity>
+              )}
+              <TouchableOpacity
+                style={{ marginLeft: 10 }}
+                onPress={() => {
+                  handleBackPress();
+                  normalInputRef.current?.blur();
+                }}
+              >
+                <Text>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Search Results */}
+            {searchResults.length > 0 ? (
+              <FlatList
+                data={searchResults}
+                keyExtractor={(item) => item.id.toString()}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    onPress={() => handleNavigate(item.id)}
+                    style={styles.resultItem}
+                  >
+                    <Text style={styles.resultText}>{item.name}</Text>
+                    <Text style={styles.resultTime}>{item.duration} mins</Text>
+                  </TouchableOpacity>
+                )}
+              />
+            ) : (
+              <View style={styles.noResults}>
+                <Text>No results</Text>
+              </View>
+            )}
+          </View>
+        </View>
+      </Modal>
+
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
         <View style={styles.searchInputContainer}>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={openSearchModal}>
             <Ionicons
               name="search-outline"
               size={17}
@@ -204,9 +321,11 @@ export default function WorkoutsScreen() {
           </TouchableOpacity>
 
           <TextInput
+            ref={normalInputRef}
             placeholder="Search"
             placeholderTextColor="#777"
             style={styles.searchInput}
+            onPress={openSearchModal}
           />
         </View>
         {/* Featured Workouts */}
@@ -256,6 +375,41 @@ const styles = StyleSheet.create({
     paddingHorizontal: 25,
     paddingBottom: 20,
   },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+  },
+  modalContent: {
+    backgroundColor: "#fff",
+    margin: 20,
+    borderRadius: 10,
+    padding: 15,
+    maxHeight: "40%",
+  },
+  searchHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderBottomWidth: 1,
+    borderColor: "#ddd",
+    paddingBottom: 10,
+    marginBottom: 10,
+  },
+  modalSearchInput: {
+    flex: 1,
+    marginHorizontal: 10,
+    paddingVertical: 8,
+    fontSize: 16,
+  },
+  resultItem: {
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
+  resultText: { fontSize: 16 },
+  resultTime: { fontSize: 13, color: "#c7c7c7", marginTop: 2 },
+  noResults: { padding: 20, alignItems: "center" },
   searchInput: {
     flex: 1,
     color: "#000",
