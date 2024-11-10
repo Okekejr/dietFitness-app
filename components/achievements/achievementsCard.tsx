@@ -1,7 +1,8 @@
 import { AchievementCardProps } from "@/types";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
-import { Text, StyleSheet, Animated } from "react-native";
+import { StyleSheet, Animated } from "react-native";
+import CustomText from "../ui/customText";
 
 const AchievementCard = ({ goal, unlocked }: AchievementCardProps) => {
   return (
@@ -15,8 +16,8 @@ const AchievementCard = ({ goal, unlocked }: AchievementCardProps) => {
         style={styles.icon}
       />
 
-      <Text style={styles.name}>{goal.name}</Text>
-      <Text style={styles.description}>{goal.description}</Text>
+      <CustomText style={styles.name}>{goal.name}</CustomText>
+      <CustomText style={styles.description}>{goal.description}</CustomText>
     </Animated.View>
   );
 };
@@ -42,7 +43,7 @@ const styles = StyleSheet.create({
   },
   name: {
     fontSize: 18,
-    fontWeight: "bold",
+    fontFamily: "HostGrotesk-Medium",
     textAlign: "center",
     marginBottom: 5,
   },

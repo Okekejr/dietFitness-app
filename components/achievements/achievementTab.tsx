@@ -1,17 +1,12 @@
 import React, { useEffect } from "react";
-import {
-  ScrollView,
-  View,
-  Text,
-  StyleSheet,
-  ActivityIndicator,
-} from "react-native";
+import { ScrollView, View, StyleSheet, ActivityIndicator } from "react-native";
 import { useQuery } from "@tanstack/react-query";
 import { API_URL } from "@/constants/apiUrl";
 import { useUserData } from "@/context/userDataContext";
 import AchievementCard from "./achievementsCard";
 import { Goal, OverviewStatsT } from "@/types";
 import { ACHIEVEMENTS, MILESTONES, trackAchievements } from "@/utils";
+import CustomText from "../ui/customText";
 
 const fetchUserOverview = async (userId: string): Promise<OverviewStatsT> => {
   const response = await fetch(`${API_URL}/api/overview/${userId}`);
@@ -74,15 +69,15 @@ const AchievementsTab = () => {
     <ScrollView contentContainerStyle={styles.container}>
       {stats?.totalWorkouts === 0 ? (
         <View style={styles.center}>
-          <Text style={styles.description}>
+          <CustomText style={styles.description}>
             You haven't completed any workouts yet.
-          </Text>
+          </CustomText>
         </View>
       ) : (
         <>
-          <Text style={styles.header}>Achievements</Text>
+          <CustomText style={styles.header}>Achievements</CustomText>
           <View style={styles.section}>{renderAchievements(ACHIEVEMENTS)}</View>
-          <Text style={styles.header}>Milestones</Text>
+          <CustomText style={styles.header}>Milestones</CustomText>
           <View style={styles.section}>{renderAchievements(MILESTONES)}</View>
         </>
       )}
@@ -99,7 +94,7 @@ const styles = StyleSheet.create({
   },
   header: {
     fontSize: 24,
-    fontWeight: "bold",
+    fontFamily: "HostGrotesk-Medium",
     marginBottom: 10,
   },
   center: {

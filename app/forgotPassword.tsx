@@ -3,7 +3,6 @@ import {
   View,
   TextInput,
   TouchableOpacity,
-  Text,
   StyleSheet,
   Alert,
 } from "react-native";
@@ -11,6 +10,7 @@ import { API_URL } from "@/constants/apiUrl";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { validateEmail } from "@/utils";
+import CustomText from "@/components/ui/customText";
 
 export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState("");
@@ -109,11 +109,11 @@ export default function ForgotPasswordScreen() {
         <Ionicons name="close" size={24} color="#000" />
       </TouchableOpacity>
 
-      <Text style={styles.title}>Forgot your password?</Text>
-      <Text style={styles.subTitle}>
+      <CustomText style={styles.title}>Forgot your password?</CustomText>
+      <CustomText style={styles.subTitle}>
         Enter your email, and we'll send you the instructions to reset your
         password.
-      </Text>
+      </CustomText>
 
       <TextInput
         style={styles.input}
@@ -125,10 +125,14 @@ export default function ForgotPasswordScreen() {
       />
 
       {!isEmailValid && email.length > 0 && (
-        <Text style={styles.errorText}>Please enter a valid email.</Text>
+        <CustomText style={styles.errorText}>
+          Please enter a valid email.
+        </CustomText>
       )}
       {isEmailValid && !emailExists && (
-        <Text style={styles.errorText}>This email is not registered.</Text>
+        <CustomText style={styles.errorText}>
+          This email is not registered.
+        </CustomText>
       )}
 
       <TouchableOpacity
@@ -139,9 +143,9 @@ export default function ForgotPasswordScreen() {
         onPress={handlePasswordReset}
         disabled={!emailExists || checkingEmail || isLoading}
       >
-        <Text style={styles.buttonText}>
+        <CustomText style={styles.buttonText}>
           {isLoading ? "Sending..." : "Send Reset Email"}
-        </Text>
+        </CustomText>
       </TouchableOpacity>
     </View>
   );
@@ -157,6 +161,9 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 90,
     left: 20,
+    backgroundColor: "#c7c7c7",
+    borderRadius: 25,
+    padding: 5,
   },
   title: {
     fontSize: 24,

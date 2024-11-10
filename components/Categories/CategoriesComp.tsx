@@ -1,7 +1,8 @@
 import React, { FC, memo } from "react";
-import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
+import { View, TouchableOpacity, Image, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import { CategoryT } from "@/types";
+import CustomText from "../ui/customText";
 interface CategoriesCompProps {
   category: CategoryT;
 }
@@ -23,7 +24,9 @@ const CategoriesComp: FC<CategoriesCompProps> = ({ category }) => {
       />
 
       <View style={styles.textContainer}>
-        <Text style={styles.categoryName}>{category.category_name}</Text>
+        <CustomText style={styles.categoryName}>
+          {category.category_name}
+        </CustomText>
       </View>
     </TouchableOpacity>
   );
@@ -54,7 +57,7 @@ const styles = StyleSheet.create({
   categoryName: {
     color: "#fff",
     fontSize: 18,
-    fontWeight: "bold",
+    fontFamily: "HostGrotesk-Medium",
   },
 });
 

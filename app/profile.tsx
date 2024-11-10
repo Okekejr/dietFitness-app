@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import {
   View,
   Alert,
-  Text,
   StyleSheet,
   TouchableOpacity,
   Image,
@@ -18,6 +17,7 @@ import { ClubData } from "@/types";
 import { API_URL } from "@/constants/apiUrl";
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
+import CustomText from "@/components/ui/customText";
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -37,13 +37,14 @@ export default function ProfileScreen() {
         `${API_URL}/api/clubs/userClub/${userData?.user_id}`
       );
 
-      if (!response.ok) throw new Error("Failed to fetch club data");
-
-      const data: ClubData = await response.json();
-      setClubData(data);
+      if (response.ok) {
+        const data: ClubData = await response.json();
+        setClubData(data);
+      } else {
+        console.log("No club found");
+      }
     } catch (error) {
       console.error("Error fetching club data:", error);
-      Alert.alert("Error", "Failed to load club data.");
     } finally {
       setLoadingClubData(false);
     }
@@ -116,32 +117,36 @@ export default function ProfileScreen() {
           />
         ) : (
           <View style={styles.avatarFallback}>
-            <Text style={styles.avatarText}>
+            <CustomText style={styles.avatarText}>
               {userData && getInitials(userData.name)}
-            </Text>
+            </CustomText>
           </View>
         )}
         <View style={styles.profileInfo}>
-          <Text style={styles.name}>{userData && userData.name}</Text>
-          <Text style={styles.email}>{userData && userData.email}</Text>
+          <CustomText style={styles.name}>
+            {userData && userData.name}
+          </CustomText>
+          <CustomText style={styles.email}>
+            {userData && userData.email}
+          </CustomText>
         </View>
         <Ionicons name="chevron-forward" size={24} color="#000" />
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.box}>
         <Ionicons name="settings-outline" size={24} color="#000" />
-        <Text style={styles.boxText}>Settings</Text>
+        <CustomText style={styles.boxText}>Settings</CustomText>
         <Ionicons name="chevron-forward" size={24} color="#000" />
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.box}>
         <Ionicons name="help-circle-outline" size={24} color="#000" />
-        <Text style={styles.boxText}>Help and Info</Text>
+        <CustomText style={styles.boxText}>Help and Info</CustomText>
         <Ionicons name="chevron-forward" size={24} color="#000" />
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.box} onPress={handleSignOut}>
-        <Text style={styles.boxText}>Sign out</Text>
+        <CustomText style={styles.boxText}>Sign out</CustomText>
         <Ionicons name="log-out-outline" size={24} color="#000" />
       </TouchableOpacity>
 
@@ -150,14 +155,18 @@ export default function ProfileScreen() {
       ) : (
         clubData && (
           <View style={styles.qrCodeContainer}>
-            <Text
-              style={{ fontWeight: "bold", fontSize: 20, marginBottom: 10 }}
+            <CustomText
+              style={{
+                fontFamily: "HostGrotesk-Medium",
+                fontSize: 20,
+                marginBottom: 10,
+              }}
             >
               Run Club
-            </Text>
-            <Text style={styles.inviteCode}>
+            </CustomText>
+            <CustomText style={styles.inviteCode}>
               Invite Code: {clubData.invite_code}
-            </Text>
+            </CustomText>
             <Image source={{ uri: clubData.qr_code }} style={styles.qrCode} />
             <TouchableOpacity onPress={handleShare} style={styles.shareButton}>
               {isSharing ? (
@@ -175,7 +184,14 @@ export default function ProfileScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff", padding: 20 },
-  backButton: { position: "absolute", top: 60, left: 20 },
+  backButton: {
+    position: "absolute",
+    top: 60,
+    left: 20,
+    backgroundColor: "#c7c7c7",
+    borderRadius: 25,
+    padding: 5,
+  },
   profileBox: {
     flexDirection: "row",
     alignItems: "center",
@@ -194,9 +210,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  avatarText: { fontSize: 20, fontWeight: "bold", color: "#fff" },
+  avatarText: { fontSize: 20, fontFamily: "HostGrotesk-Medium", color: "#fff" },
   profileInfo: { flex: 1, marginLeft: 15 },
-  name: { fontSize: 18, fontWeight: "bold" },
+  name: { fontSize: 18, fontFamily: "HostGrotesk-Medium" },
   email: { fontSize: 14, color: "#777" },
   box: {
     flexDirection: "row",

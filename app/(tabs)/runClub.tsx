@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
   View,
-  Text,
   StyleSheet,
   ImageBackground,
   TouchableOpacity,
@@ -20,6 +19,7 @@ import { CreateClub } from "@/components/clubs/createClub";
 import { ClubData } from "@/types";
 import { useRouter } from "expo-router";
 import JoinClub from "@/components/clubs/joinClub";
+import CustomText from "@/components/ui/customText";
 
 const ClubScreen = () => {
   const [name, setName] = useState<string>("");
@@ -170,11 +170,11 @@ const ClubScreen = () => {
           style={styles.button}
           onPress={() => setCreateModalVisible(true)}
         >
-          <Text style={styles.buttonText}>Create a Club</Text>
+          <CustomText style={styles.buttonText}>Create a Club</CustomText>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={handleJoinClub} style={styles.buttonJoin}>
-          <Text style={styles.buttonText}>Join a Club</Text>
+          <CustomText style={styles.buttonText}>Join a Club</CustomText>
         </TouchableOpacity>
       </View>
 
@@ -201,7 +201,6 @@ const ClubScreen = () => {
       <Modal visible={joinModalVisible} animationType="slide">
         <JoinClub onClose={() => setJoinModalVisible(false)} />
       </Modal>
-      
     </ImageBackground>
   );
 };

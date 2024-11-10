@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import { parseISO, format, formatDistanceToNow } from "date-fns";
 import { RouteData } from "@/types";
+import CustomText from "../ui/customText";
 
 // Function to get human-readable address from latitude and longitude
 const reverseGeocode = async (lat: number, lon: number): Promise<string> => {
@@ -69,32 +70,36 @@ const RouteCard: React.FC<RouteData> = ({
 
   return (
     <View style={styles.card}>
-      <Text style={styles.title}>Route Information</Text>
+      <CustomText style={styles.title}>Route Information</CustomText>
       <View style={styles.routeInfo}>
         <TouchableOpacity
           onPress={() =>
             openInGoogleMaps(startPoint.latitude, startPoint.longitude)
           }
         >
-          <Text style={styles.routePoint}>
+          <CustomText style={styles.routePoint}>
             Start Point: {startAddress || "Loading..."}
-          </Text>
+          </CustomText>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() =>
             openInGoogleMaps(endPoint.latitude, endPoint.longitude)
           }
         >
-          <Text style={styles.routePoint}>
+          <CustomText style={styles.routePoint}>
             End Point: {endAddress || "Loading..."}
-          </Text>
+          </CustomText>
         </TouchableOpacity>
-        <Text style={styles.details}>Estimated Time: {estimatedTime}</Text>
-        <Text style={styles.details}>
+        <CustomText style={styles.details}>
+          Estimated Time: {estimatedTime}
+        </CustomText>
+        <CustomText style={styles.details}>
           Estimated Distance: {estimatedDistance}
-        </Text>
-        <Text style={styles.details}>Date Created: {formattedDate}</Text>
-        <Text style={styles.timer}>{relativeTime}</Text>
+        </CustomText>
+        <CustomText style={styles.details}>
+          Date Created: {formattedDate}
+        </CustomText>
+        <CustomText style={styles.timer}>{relativeTime}</CustomText>
       </View>
     </View>
   );
@@ -112,7 +117,7 @@ const styles = StyleSheet.create({
     width: "auto",
   },
   title: {
-    fontWeight: "bold",
+    fontFamily: "HostGrotesk-Medium",
     fontSize: 18,
     marginBottom: 8,
   },

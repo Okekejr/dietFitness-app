@@ -22,8 +22,12 @@ const queryClient = new QueryClient();
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
+  const [loaded, error] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
+    "HostGrotesk-Light": require("../assets/fonts/HostGrotesk-Light.ttf"),
+    "HostGrotesk-LightItalic": require("../assets/fonts/HostGrotesk-LightItalic.ttf"),
+    "HostGrotesk-Medium": require("../assets/fonts/HostGrotesk-Medium.ttf"),
+    "HostGrotesk-Regular": require("../assets/fonts/HostGrotesk-Regular.ttf"),
   });
 
   const router = useRouter();
@@ -56,12 +60,12 @@ export default function RootLayout() {
   }, []);
 
   useEffect(() => {
-    if (loaded) {
+    if (loaded || error) {
       SplashScreen.hideAsync();
     }
-  }, [loaded]);
+  }, [loaded, error]);
 
-  if (!loaded) {
+  if (!loaded && !error) {
     return null;
   }
 
@@ -73,7 +77,6 @@ export default function RootLayout() {
             <Stack screenOptions={{ headerShown: false }}>
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
               <Stack.Screen name="+not-found" />
-              <Stack.Screen name="clubHome/[id]" />
             </Stack>
           </UserDataProvider>
         </UserProvider>

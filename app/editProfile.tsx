@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
   View,
-  Text,
   TextInput,
   Button,
   StyleSheet,
@@ -21,6 +20,7 @@ import { API_URL } from "@/constants/apiUrl";
 import { useUserData } from "@/context/userDataContext";
 import { Ionicons } from "@expo/vector-icons";
 import * as FileSystem from "expo-file-system";
+import CustomText from "@/components/ui/customText";
 
 export default function EditProfileScreen() {
   const { userData, refetchUserData } = useUserData();
@@ -182,21 +182,21 @@ export default function EditProfileScreen() {
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.header}>
             <TouchableOpacity onPress={() => router.back()}>
-              <Ionicons name="arrow-back" size={24} color="black" />
+              <Ionicons name="chevron-back" size={24} color="black" />
             </TouchableOpacity>
 
             <TouchableOpacity
               onPress={handleSave}
               disabled={!isFormChanged || loading}
             >
-              <Text
+              <CustomText
                 style={[
                   styles.saveText,
                   { color: isFormChanged ? "black" : "gray" },
                 ]}
               >
                 Save
-              </Text>
+              </CustomText>
             </TouchableOpacity>
           </View>
           <TouchableOpacity onPress={pickImage} style={styles.avatarContainer}>
@@ -213,14 +213,16 @@ export default function EditProfileScreen() {
           <Button title="Upload Picture" onPress={pickImage} />
 
           <View style={styles.formGroup}>
-            <Text style={styles.heading}>Preferences</Text>
+            <CustomText style={styles.heading}>Preferences</CustomText>
 
-            <Text style={styles.subHeading}>Dietary Preferences</Text>
+            <CustomText style={styles.subHeading}>
+              Dietary Preferences
+            </CustomText>
             {["vegan", "vegetarian", "low-carb"].map((diet) => (
               <View key={diet} style={styles.switchRow}>
-                <Text style={styles.label}>
+                <CustomText style={styles.label}>
                   {diet.charAt(0).toUpperCase() + diet.slice(1)}
-                </Text>
+                </CustomText>
                 <Switch
                   value={preferences.diet.includes(diet)}
                   onValueChange={() => togglePreference("diet", diet)}
@@ -228,15 +230,15 @@ export default function EditProfileScreen() {
               </View>
             ))}
 
-            <Text style={styles.subHeading}>Workout Goals</Text>
+            <CustomText style={styles.subHeading}>Workout Goals</CustomText>
             {["weight-loss", "muscle-gain", "endurance"].map((goal) => (
               <View key={goal} style={styles.switchRow}>
-                <Text style={styles.label}>
+                <CustomText style={styles.label}>
                   {goal
                     .split("-")
                     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
                     .join(" ")}
-                </Text>
+                </CustomText>
                 <Switch
                   value={preferences.workout.includes(goal)}
                   onValueChange={() => togglePreference("workout", goal)}
@@ -246,7 +248,7 @@ export default function EditProfileScreen() {
           </View>
 
           <View style={styles.formGroup}>
-            <Text style={styles.label}>Activity Level</Text>
+            <CustomText style={styles.label}>Activity Level</CustomText>
             <Picker
               selectedValue={activityLevel}
               onValueChange={(value) => setActivityLevel(value)}
@@ -262,10 +264,12 @@ export default function EditProfileScreen() {
           </View>
 
           <View style={styles.formGroup}>
-            <Text style={styles.label}>Allergies (comma-separated)</Text>
+            <CustomText style={styles.label}>
+              Allergies (comma-separated)
+            </CustomText>
             <TextInput
               placeholder="e.g., peanuts, shellfish"
-              placeholderTextColor= "#686D76"
+              placeholderTextColor="#686D76"
               value={allergies.join(", ")}
               onChangeText={handleAllergiesChange}
               style={styles.input}
@@ -312,7 +316,7 @@ const styles = StyleSheet.create({
   },
   heading: {
     fontSize: 22,
-    fontWeight: "bold",
+    fontFamily: "HostGrotesk-Medium",
     marginBottom: 10,
   },
   subHeading: {

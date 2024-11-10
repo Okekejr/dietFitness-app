@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   SafeAreaView,
   View,
-  Text,
   StyleSheet,
   TouchableOpacity,
   Animated,
@@ -17,6 +16,7 @@ import { API_URL } from "@/constants/apiUrl";
 import { useUserData } from "@/context/userDataContext";
 import { useQuery } from "@tanstack/react-query";
 import { CompletedWorkout, OverviewStatsT } from "@/types";
+import CustomText from "@/components/ui/customText";
 
 const { width } = Dimensions.get("window");
 const Tabs = ["Overview", "History", "Achievements"];
@@ -89,14 +89,14 @@ export default function SummaryScreen() {
             onPress={() => handleTabPress(index)}
             style={styles.tab}
           >
-            <Text
+            <CustomText
               style={[
                 styles.tabText,
                 activeTab === index && styles.activeTabText,
               ]}
             >
               {tab}
-            </Text>
+            </CustomText>
           </TouchableOpacity>
         ))}
 
@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
     color: "#aaa",
   },
   activeTabText: {
-    fontWeight: "bold",
+    fontFamily: "HostGrotesk-Medium",
     color: "#4F46E5",
   },
   indicator: {
@@ -153,6 +153,8 @@ const styles = StyleSheet.create({
     height: 3,
     width: TAB_WIDTH, // Indicator width matches tab width
     backgroundColor: "#4F46E5",
+    borderTopLeftRadius: 5,
+    borderTopRightRadius: 5,
   },
   content: {
     padding: 20,

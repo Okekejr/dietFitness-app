@@ -13,6 +13,7 @@ import {
 import { useRouter } from "expo-router";
 import { Picker } from "@react-native-picker/picker";
 import { useUserData } from "@/context/userContext";
+import CustomText from "@/components/ui/customText";
 
 export default function PersonalInfoScreen() {
   const { formData, updateFormData } = useUserData();
@@ -25,11 +26,11 @@ export default function PersonalInfoScreen() {
         style={{ flex: 1 }}
       >
         <ScrollView contentContainerStyle={styles.container}>
-          <Text style={styles.heading}>Personal Information</Text>
+          <CustomText style={styles.heading}>Personal Information</CustomText>
 
           {/* Name Input */}
           <View style={styles.formGroup}>
-            <Text style={styles.label}>Name</Text>
+            <CustomText style={styles.label}>Name</CustomText>
             <TextInput
               placeholder="Enter your full name"
               value={formData.name}
@@ -40,7 +41,7 @@ export default function PersonalInfoScreen() {
 
           {/* Weight Input */}
           <View style={styles.formGroup}>
-            <Text style={styles.label}>Weight (kg)</Text>
+            <CustomText style={styles.label}>Weight (kg)</CustomText>
             <TextInput
               placeholder="e.g., 70"
               keyboardType="numeric"
@@ -54,7 +55,7 @@ export default function PersonalInfoScreen() {
 
           {/* Height Input */}
           <View style={styles.formGroup}>
-            <Text style={styles.label}>Height (cm)</Text>
+            <CustomText style={styles.label}>Height (cm)</CustomText>
             <TextInput
               placeholder="e.g., 175"
               keyboardType="numeric"
@@ -68,7 +69,7 @@ export default function PersonalInfoScreen() {
 
           {/* Age Input */}
           <View style={styles.formGroup}>
-            <Text style={styles.label}>Age</Text>
+            <CustomText style={styles.label}>Age</CustomText>
             <TextInput
               placeholder="e.g., 25"
               keyboardType="numeric"
@@ -82,7 +83,7 @@ export default function PersonalInfoScreen() {
 
           {/* Activity Level Picker */}
           <View style={styles.formGroup}>
-            <Text style={styles.label}>Activity Level</Text>
+            <CustomText style={styles.label}>Activity Level</CustomText>
             <Picker
               selectedValue={formData.activityLevel}
               onValueChange={(value) => updateFormData("activityLevel", value)}
@@ -114,7 +115,9 @@ export default function PersonalInfoScreen() {
 
           {/* Allergies Input */}
           <View style={styles.formGroup}>
-            <Text style={styles.label}>Allergies (comma-separated)</Text>
+            <CustomText style={styles.label}>
+              Allergies (comma-separated)
+            </CustomText>
             <TextInput
               placeholder="e.g., peanuts, shellfish"
               value={formData.allergies.join(", ")}
@@ -133,7 +136,7 @@ export default function PersonalInfoScreen() {
             style={styles.nextButton}
             onPress={() => router.push("/preferences")}
           >
-            <Text style={styles.buttonText}>Next</Text>
+            <CustomText style={styles.buttonText}>Next</CustomText>
           </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -154,7 +157,7 @@ const styles = StyleSheet.create({
   },
   heading: {
     fontSize: 24,
-    fontWeight: "bold",
+    fontFamily: "HostGrotesk-Medium",
     textAlign: "center",
     marginBottom: 30,
   },
@@ -163,7 +166,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    fontWeight: "bold",
+    fontFamily: "HostGrotesk-Medium",
     marginBottom: 5,
     color: "#000",
   },

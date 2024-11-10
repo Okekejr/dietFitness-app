@@ -1,6 +1,7 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import CustomText from "../ui/customText";
 
 interface ActivityFeedCardProps {
   onBack: () => void;
@@ -12,7 +13,7 @@ const ActivityFeedCard: React.FC<ActivityFeedCardProps> = ({ onBack }) => (
       <TouchableOpacity onPress={onBack}>
         <Ionicons name="chevron-back" size={24} color="#4F46E5" />
       </TouchableOpacity>
-      <Text style={styles.title}>Activity Feed</Text>
+      <CustomText style={styles.title}>Activity Feed</CustomText>
     </View>
   </View>
 );
@@ -29,7 +30,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 30,
   },
-  title: { fontSize: 18, fontWeight: "bold", marginLeft: 100 },
+  title: { fontSize: 18, fontFamily: "HostGrotesk-Medium", marginLeft: 100 },
 });
 
 export default ActivityFeedCard;

@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
   View,
-  Text,
   StyleSheet,
   Alert,
   TouchableOpacity,
@@ -16,6 +15,7 @@ import { useRouter } from "expo-router";
 import { API_URL } from "@/constants/apiUrl";
 import { useUserData } from "@/context/userDataContext";
 import BackButton from "../ui/backButton";
+import CustomText from "../ui/customText";
 
 interface JoinClubProps {
   onClose: () => void;
@@ -121,7 +121,7 @@ const JoinClub = ({ onClose }: JoinClubProps) => {
   if (hasPermission === false) {
     return (
       <View style={styles.center}>
-        <Text style={styles.errorText}>No access to camera</Text>
+        <CustomText style={styles.errorText}>No access to camera</CustomText>
       </View>
     );
   }
@@ -144,7 +144,7 @@ const JoinClub = ({ onClose }: JoinClubProps) => {
               onPress={() => setScanned(false)}
               style={styles.scanButton}
             >
-              <Text style={styles.scanButtonText}>Scan Again</Text>
+              <CustomText style={styles.scanButtonText}>Scan Again</CustomText>
             </TouchableOpacity>
           )}
         </View>
@@ -161,7 +161,7 @@ const JoinClub = ({ onClose }: JoinClubProps) => {
             style={styles.submitButton}
             onPress={() => handleJoinClub(code)}
           >
-            <Text style={styles.submitButtonText}>Join Club</Text>
+            <CustomText style={styles.submitButtonText}>Join Club</CustomText>
           </TouchableOpacity>
         </View>
 
@@ -188,7 +188,11 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: "center",
   },
-  submitButtonText: { color: "#FFF", fontSize: 16, fontWeight: "bold" },
+  submitButtonText: {
+    color: "#FFF",
+    fontSize: 16,
+    fontFamily: "HostGrotesk-Medium",
+  },
   cameraContainer: {
     justifyContent: "center",
     alignItems: "center",
@@ -203,7 +207,11 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 10,
   },
-  scanButtonText: { color: "#FFF", fontSize: 16, fontWeight: "bold" },
+  scanButtonText: {
+    color: "#FFF",
+    fontSize: 16,
+    fontFamily: "HostGrotesk-Medium",
+  },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
   errorText: { fontSize: 18, color: "red" },
 });

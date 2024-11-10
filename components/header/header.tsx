@@ -3,6 +3,7 @@ import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import { useUserData } from "@/context/userDataContext";
 import { getInitials } from "@/utils";
+import CustomText from "../ui/customText";
 
 interface HeaderProps {
   children?: React.ReactNode;
@@ -43,15 +44,17 @@ const Header: React.FC<HeaderProps> = ({ children, headerTitle }) => {
             />
           ) : (
             <View style={styles.profileFallback}>
-              <Text style={styles.initials}>
+              <CustomText style={styles.initials}>
                 {userData?.name ? getInitials(userData.name) : "?"}
-              </Text>
+              </CustomText>
             </View>
           )}
         </TouchableOpacity>
         <View style={styles.childrenContainer}>{children}</View>
       </View>
-      {headerTitle && <Text style={styles.headerTitle}>{headerTitle}</Text>}
+      {headerTitle && (
+        <CustomText style={styles.headerTitle}>{headerTitle}</CustomText>
+      )}
     </View>
   );
 };
@@ -96,7 +99,7 @@ const styles = StyleSheet.create({
   initials: {
     color: "#fff",
     fontSize: 22,
-    fontWeight: "bold",
+    fontFamily: "HostGrotesk-Medium",
   },
   childrenContainer: {
     flex: 1,
@@ -104,6 +107,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 24,
+    fontFamily: "HostGrotesk-Medium",
     color: "#000",
   },
 });

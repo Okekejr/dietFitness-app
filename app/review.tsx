@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import {
   View,
-  Text,
   TouchableOpacity,
   ActivityIndicator,
   StyleSheet,
@@ -13,6 +12,7 @@ import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useUserData } from "@/context/userContext";
 import { API_URL } from "@/constants/apiUrl";
+import CustomText from "@/components/ui/customText";
 
 export default function ReviewScreen() {
   const { formData } = useUserData();
@@ -85,9 +85,9 @@ export default function ReviewScreen() {
     return (
       <View style={styles.centeredContainer}>
         <ActivityIndicator size="large" color="#0000ff" />
-        <Text style={styles.processingText}>
+        <CustomText style={styles.processingText}>
           Saving your information and creating workout...
-        </Text>
+        </CustomText>
       </View>
     );
   }
@@ -103,31 +103,35 @@ export default function ReviewScreen() {
           <Ionicons name="chevron-back-outline" size={28} color="black" />
         </TouchableOpacity>
 
-        <Text style={styles.heading}>Review Your Information</Text>
+        <CustomText style={styles.heading}>Review Your Information</CustomText>
 
         {/* Display User Data */}
         <View style={styles.infoContainer}>
-          <Text style={styles.infoText}>Name: {formData.name}</Text>
-          <Text style={styles.infoText}>Weight: {formData.weight} kg</Text>
-          <Text style={styles.infoText}>Height: {formData.height} cm</Text>
-          <Text style={styles.infoText}>Age: {formData.age}</Text>
-          <Text style={styles.infoText}>
+          <CustomText style={styles.infoText}>Name: {formData.name}</CustomText>
+          <CustomText style={styles.infoText}>
+            Weight: {formData.weight} kg
+          </CustomText>
+          <CustomText style={styles.infoText}>
+            Height: {formData.height} cm
+          </CustomText>
+          <CustomText style={styles.infoText}>Age: {formData.age}</CustomText>
+          <CustomText style={styles.infoText}>
             Allergies: {formData.allergies.join(", ") || "None"}
-          </Text>
-          <Text style={styles.infoText}>
+          </CustomText>
+          <CustomText style={styles.infoText}>
             Diet Preferences: {formData.preferences.diet.join(", ") || "None"}
-          </Text>
-          <Text style={styles.infoText}>
+          </CustomText>
+          <CustomText style={styles.infoText}>
             Workout Goals: {formData.preferences.workout.join(", ") || "None"}
-          </Text>
-          <Text style={styles.infoText}>
+          </CustomText>
+          <CustomText style={styles.infoText}>
             Activity Level: {formData.activityLevel}
-          </Text>
+          </CustomText>
         </View>
 
         {/* Submit Button */}
         <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-          <Text style={styles.buttonText}>Submit</Text>
+          <CustomText style={styles.buttonText}>Submit</CustomText>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
@@ -146,10 +150,13 @@ const styles = StyleSheet.create({
   backButton: {
     alignSelf: "flex-start",
     marginBottom: 20,
+    backgroundColor: "#c7c7c7",
+    borderRadius: 25,
+    padding: 5,
   },
   heading: {
     fontSize: 24,
-    fontWeight: "bold",
+    fontFamily: "HostGrotesk-Medium",
     textAlign: "center",
     marginBottom: 30,
   },

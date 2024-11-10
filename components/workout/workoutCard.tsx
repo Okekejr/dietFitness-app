@@ -1,10 +1,11 @@
 import React, { FC, useEffect, useState } from "react";
-import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Image, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { API_URL } from "@/constants/apiUrl";
 import { WorkoutsT } from "@/types/workout";
 import { useRouter } from "expo-router";
 import { useQueryClient } from "@tanstack/react-query";
+import CustomText from "../ui/customText";
 
 interface WorkoutCardProps {
   workout: WorkoutsT;
@@ -116,12 +117,16 @@ const WorkoutCard: FC<WorkoutCardProps> = ({ workout, userId }) => {
         style={styles.workoutImage}
       />
       <View style={styles.workoutInfo}>
-        <Text style={styles.workoutName}>{workout.name}</Text>
+        <CustomText style={styles.workoutName}>{workout.name}</CustomText>
         <View style={styles.innerInfo}>
-          <Text style={styles.infoText}>{workout.tag} •</Text>
-          <Text style={styles.infoText}>{workout.duration} mins •</Text>
-          <Text style={styles.infoText}>{workout.activity_level} •</Text>
-          <Text style={styles.infoText}>{workout.intensity}</Text>
+          <CustomText style={styles.infoText}>{workout.tag} •</CustomText>
+          <CustomText style={styles.infoText}>
+            {workout.duration} mins •
+          </CustomText>
+          <CustomText style={styles.infoText}>
+            {workout.activity_level} •
+          </CustomText>
+          <CustomText style={styles.infoText}>{workout.intensity}</CustomText>
         </View>
 
         {isCompleted && (
@@ -159,7 +164,7 @@ const styles = StyleSheet.create({
   },
   workoutName: {
     fontSize: 15,
-    fontWeight: "bold",
+    fontFamily: "HostGrotesk-Medium",
     marginBottom: 4,
   },
   infoText: {

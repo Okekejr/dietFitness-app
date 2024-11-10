@@ -1,5 +1,6 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
+import CustomText from "./customText";
 
 interface Props {
   text?: string;
@@ -9,7 +10,7 @@ const Divider = ({ text }: Props) => {
   return (
     <View style={styles.dividerContainer}>
       <View style={styles.line} />
-      {text && <Text style={styles.text}>{text}</Text>}
+      {text && <CustomText style={styles.text}>{text}</CustomText>}
       <View style={styles.line} />
     </View>
   );
@@ -30,7 +31,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
     fontSize: 14,
     color: "#7A7A7A",
-    fontFamily: "Poppins-Regular",
   },
 });
 

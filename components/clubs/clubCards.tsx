@@ -1,12 +1,12 @@
 import React from "react";
 import {
   View,
-  Text,
   TouchableOpacity,
   StyleSheet,
   GestureResponderEvent,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import CustomText from "../ui/customText";
 
 interface ClubCardsProps {
   title: string;
@@ -26,8 +26,8 @@ const ClubCards: React.FC<ClubCardsProps> = ({
       <View style={styles.cardContent}>
         <Ionicons name={icon} size={24} color="#4F46E5" />
         <View style={styles.textContainer}>
-          <Text style={styles.title}>{title}</Text>
-          <Text style={styles.description}>{description}</Text>
+          <CustomText style={styles.title}>{title}</CustomText>
+          <CustomText style={styles.description}>{description}</CustomText>
         </View>
         <Ionicons name="chevron-forward" size={20} color="#4F46E5" />
       </View>
@@ -57,7 +57,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 18,
-    fontWeight: "bold",
+    fontFamily: "HostGrotesk-Medium",
     color: "#000",
   },
   description: {

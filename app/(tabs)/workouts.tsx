@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   View,
-  Text,
   StyleSheet,
   SafeAreaView,
   ActivityIndicator,
@@ -21,6 +20,7 @@ import { useUserData } from "@/context/userDataContext";
 import Header from "@/components/header/header";
 import CategoriesComp from "@/components/categories/categoriesComp";
 import { Ionicons } from "@expo/vector-icons";
+import CustomText from "@/components/ui/customText";
 
 // Fetch function
 const fetchCategories = async () => {
@@ -222,7 +222,7 @@ export default function WorkoutsScreen() {
   if (isError || isWorkoutsError || isCompletedError || isFavoritedError) {
     return (
       <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>Error fetching data</Text>
+        <CustomText style={styles.errorText}>Error fetching data</CustomText>
       </View>
     );
   }
@@ -281,7 +281,7 @@ export default function WorkoutsScreen() {
                   normalInputRef.current?.blur();
                 }}
               >
-                <Text>Cancel</Text>
+                <CustomText>Cancel</CustomText>
               </TouchableOpacity>
             </View>
 
@@ -295,14 +295,18 @@ export default function WorkoutsScreen() {
                     onPress={() => handleNavigate(item.id)}
                     style={styles.resultItem}
                   >
-                    <Text style={styles.resultText}>{item.name}</Text>
-                    <Text style={styles.resultTime}>{item.duration} mins</Text>
+                    <CustomText style={styles.resultText}>
+                      {item.name}
+                    </CustomText>
+                    <CustomText style={styles.resultTime}>
+                      {item.duration} mins
+                    </CustomText>
                   </TouchableOpacity>
                 )}
               />
             ) : (
               <View style={styles.noResults}>
-                <Text>No results</Text>
+                <CustomText>No results</CustomText>
               </View>
             )}
           </View>
@@ -333,14 +337,14 @@ export default function WorkoutsScreen() {
 
         {/* Categories Section */}
         <View style={styles.header}>
-          <Text style={styles.heading}>Browse by Category</Text>
+          <CustomText style={styles.heading}>Browse by Category</CustomText>
         </View>
         {categories.map((category: CategoryT) => (
           <CategoriesComp key={category.id} category={category} />
         ))}
 
         <View style={styles.header}>
-          <Text style={styles.heading}>Your Workouts</Text>
+          <CustomText style={styles.heading}>Your Workouts</CustomText>
         </View>
 
         <FlatList
@@ -432,7 +436,6 @@ const styles = StyleSheet.create({
   },
   heading: {
     fontSize: 22,
-    fontWeight: "bold",
     color: "#000",
   },
   listContent: {
@@ -458,11 +461,6 @@ const styles = StyleSheet.create({
   yourWorkoutsSection: {
     marginTop: 20,
     paddingHorizontal: 16,
-  },
-  subHeading: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 10,
   },
   cardsRow: {
     flexDirection: "row",

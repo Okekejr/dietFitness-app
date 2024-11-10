@@ -7,7 +7,6 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-  Text,
   Alert,
   TouchableOpacity,
   TouchableWithoutFeedback,
@@ -21,6 +20,7 @@ import { useRouter } from "expo-router";
 import { API_URL } from "@/constants/apiUrl";
 import Divider from "@/components/ui/divider";
 import { useUserData } from "@/context/userDataContext";
+import CustomText from "@/components/ui/customText";
 
 // Open the browser session correctly (required for standalone apps)
 WebBrowser.maybeCompleteAuthSession();
@@ -185,7 +185,7 @@ export default function LoginScreen() {
           contentContainerStyle={styles.container}
           keyboardShouldPersistTaps="handled"
         >
-          <Text style={styles.headerText}>Log in to our app</Text>
+          <CustomText style={styles.headerText}>Log in to our app</CustomText>
           {/* OAuth Buttons */}
           <View style={styles.oauthContainer}>
             <TouchableOpacity
@@ -198,7 +198,9 @@ export default function LoginScreen() {
                 color="#fff"
                 style={styles.oauthIcon}
               />
-              <Text style={styles.oauthButtonText}>Login with Google</Text>
+              <CustomText style={styles.oauthButtonText}>
+                Login with Google
+              </CustomText>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -211,13 +213,15 @@ export default function LoginScreen() {
                 color="#fff"
                 style={styles.oauthIcon}
               />
-              <Text style={styles.oauthButtonText}>Login with GitHub</Text>
+              <CustomText style={styles.oauthButtonText}>
+                Login with GitHub
+              </CustomText>
             </TouchableOpacity>
           </View>
 
           {/* Inputs with Labels */}
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Email</Text>
+            <CustomText style={styles.label}>Email</CustomText>
             <TextInput
               ref={emailInputRef}
               style={[styles.input, errors.email ? styles.errorInput : null]}
@@ -231,15 +235,17 @@ export default function LoginScreen() {
               autoCorrect={false}
             />
             {errors.email ? (
-              <Text style={styles.errorText}>{errors.email}</Text>
+              <CustomText style={styles.errorText}>{errors.email}</CustomText>
             ) : null}
           </View>
 
           <View style={styles.inputContainer}>
             <View style={styles.passwordstyle}>
-              <Text style={styles.passwordLabel}>Password</Text>
+              <CustomText style={styles.passwordLabel}>Password</CustomText>
               <TouchableOpacity onPress={() => router.push("/forgotPassword")}>
-                <Text style={styles.signupLink}>Forgot password?</Text>
+                <CustomText style={styles.signupLink}>
+                  Forgot password?
+                </CustomText>
               </TouchableOpacity>
             </View>
             <View style={styles.passwordInputContainer}>
@@ -269,7 +275,9 @@ export default function LoginScreen() {
               </TouchableOpacity>
             </View>
             {errors.password ? (
-              <Text style={styles.errorText}>{errors.password}</Text>
+              <CustomText style={styles.errorText}>
+                {errors.password}
+              </CustomText>
             ) : null}
           </View>
 
@@ -285,7 +293,7 @@ export default function LoginScreen() {
             {loading ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={styles.loginButtonText}>Log In</Text>
+              <CustomText style={styles.loginButtonText}>Log In</CustomText>
             )}
           </TouchableOpacity>
 
@@ -295,7 +303,9 @@ export default function LoginScreen() {
             style={styles.signUpButton}
             onPress={() => router.push("/signup")}
           >
-            <Text style={styles.loginButtonText}>New to our app? Sign up</Text>
+            <CustomText style={styles.loginButtonText}>
+              New to our app? Sign up
+            </CustomText>
           </TouchableOpacity>
         </ScrollView>
       </TouchableWithoutFeedback>
@@ -320,7 +330,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   headerText: {
-    fontWeight: "bold",
     marginBottom: 30,
     fontSize: 20,
     color: "#000",

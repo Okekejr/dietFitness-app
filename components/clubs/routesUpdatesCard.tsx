@@ -1,15 +1,10 @@
 import { API_URL } from "@/constants/apiUrl";
 import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
-import {
-  Text,
-  TouchableOpacity,
-  View,
-  StyleSheet,
-  ScrollView,
-} from "react-native";
+import { TouchableOpacity, View, StyleSheet, ScrollView } from "react-native";
 import RouteCard from "./routesCard";
 import { RouteData } from "@/types";
+import CustomText from "../ui/customText";
 
 interface RouteUpdatesCardT {
   onBack: () => void;
@@ -31,8 +26,8 @@ const RouteUpdatesCard = ({ onBack, clubId }: RouteUpdatesCardT) => {
     },
   });
 
-  if (isLoading) return <Text>Loading routes...</Text>;
-  if (error) return <Text>Error fetching routes</Text>;
+  if (isLoading) return <CustomText>Loading routes...</CustomText>;
+  if (error) return <CustomText>Error fetching routes</CustomText>;
 
   // Sort the routes by dateCreated in ascending order (oldest to latest)
   const sortedRoutes = routesData?.sort((a, b) => {
@@ -47,7 +42,7 @@ const RouteUpdatesCard = ({ onBack, clubId }: RouteUpdatesCardT) => {
         <TouchableOpacity onPress={onBack} style={styles.backButton}>
           <Ionicons name="chevron-back" size={24} color="#4F46E5" />
         </TouchableOpacity>
-        <Text style={styles.title}>Latest Routes</Text>
+        <CustomText style={styles.title}>Latest Routes</CustomText>
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollViewContainer}>
@@ -91,7 +86,7 @@ const styles = StyleSheet.create({
   subContainer: {
     alignItems: "center",
   },
-  title: { fontSize: 18, fontWeight: "bold", marginLeft: 90 },
+  title: { fontSize: 18, fontFamily: "HostGrotesk-Medium", marginLeft: 90 },
   scrollViewContainer: {
     alignItems: "flex-start",
     paddingLeft: 5,

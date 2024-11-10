@@ -7,7 +7,6 @@ import { API_URL } from "@/constants/apiUrl";
 import {
   ActivityIndicator,
   Button,
-  Text,
   View,
   StyleSheet,
   SafeAreaView,
@@ -17,6 +16,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import WorkoutCard from "@/components/workout/workoutCard";
 import FilterModal from "@/components/modal/filterModal";
+import CustomText from "@/components/ui/customText";
 
 export default function CompletedWorkoutsScreen() {
   const router = useRouter();
@@ -113,7 +113,9 @@ export default function CompletedWorkoutsScreen() {
   if (isCompletedError) {
     return (
       <View style={styles.centeredContainer}>
-        <Text style={styles.errorText}>Error fetching workouts</Text>
+        <CustomText style={styles.errorText}>
+          Error fetching workouts
+        </CustomText>
         <Button title="Retry" onPress={() => refetchCompletedWorkouts()} />
       </View>
     );
@@ -131,14 +133,16 @@ export default function CompletedWorkoutsScreen() {
           </TouchableOpacity>
         </View>
         <View style={styles.centeredContainer}>
-          <Text style={styles.emptyText}>
+          <CustomText style={styles.emptyText}>
             You havent completed any workouts yet
-          </Text>
+          </CustomText>
           <TouchableOpacity
             style={styles.loginButton}
             onPress={() => router.back()}
           >
-            <Text style={styles.loginButtonText}>Explore Workouts</Text>
+            <CustomText style={styles.loginButtonText}>
+              Explore Workouts
+            </CustomText>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -152,20 +156,20 @@ export default function CompletedWorkoutsScreen() {
           style={styles.backButton}
           onPress={() => router.push("/workouts")}
         >
-          <Ionicons name="chevron-back-outline" size={28} color="white" />
+          <Ionicons name="chevron-back-outline" size={28} color="#000" />
         </TouchableOpacity>
       </View>
 
       {/* Number of Workouts and Filter Button */}
       <View style={styles.headerRow}>
-        <Text style={styles.workoutCount}>
+        <CustomText style={styles.workoutCount}>
           {filteredWorkouts.length} workouts
-        </Text>
+        </CustomText>
         <TouchableOpacity
           style={styles.filterButton}
           onPress={() => setFilterModalVisible(true)}
         >
-          <Text style={styles.filterButtonText}>Filters</Text>
+          <CustomText style={styles.filterButtonText}>Filters</CustomText>
           <Ionicons name="filter-outline" size={18} color="#fff" />
         </TouchableOpacity>
       </View>
@@ -178,7 +182,7 @@ export default function CompletedWorkoutsScreen() {
             <WorkoutCard workout={item} userId={userId} />
           )}
           contentContainerStyle={styles.listContent}
-          ListEmptyComponent={<Text>No workouts available</Text>}
+          ListEmptyComponent={<CustomText>No workouts available</CustomText>}
         />
       </View>
 
@@ -203,7 +207,7 @@ const styles = StyleSheet.create({
   },
   workoutCount: {
     fontSize: 18,
-    fontWeight: "bold",
+    fontFamily: "HostGrotesk-Medium",
   },
   centeredContainer: {
     flex: 1,
@@ -239,7 +243,7 @@ const styles = StyleSheet.create({
     padding: 5,
   },
   backButton: {
-    backgroundColor: "#000",
+    backgroundColor: "#c7c7c7",
     borderRadius: 25,
     padding: 5,
   },

@@ -1,7 +1,6 @@
 import React from "react";
 import {
   View,
-  Text,
   StyleSheet,
   TouchableOpacity,
   Switch,
@@ -11,6 +10,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useUserData } from "@/context/userContext";
+import CustomText from "@/components/ui/customText";
 
 export default function PreferencesScreen() {
   const { formData, updateFormData } = useUserData();
@@ -39,15 +39,15 @@ export default function PreferencesScreen() {
           <Ionicons name="chevron-back-outline" size={28} color="black" />
         </TouchableOpacity>
 
-        <Text style={styles.heading}>Preferences</Text>
+        <CustomText style={styles.heading}>Preferences</CustomText>
 
         {/* Dietary Preferences */}
-        <Text style={styles.subHeading}>Dietary Preferences</Text>
-        {["vegan", "vegetarian", "low-carb"].map((diet) => (
+        <CustomText style={styles.subHeading}>Dietary Preferences</CustomText>
+        {["balanced", "high-protein", "low-carb"].map((diet) => (
           <View key={diet} style={styles.switchRow}>
-            <Text style={styles.label}>
+            <CustomText style={styles.label}>
               {diet.charAt(0).toUpperCase() + diet.slice(1)}
-            </Text>
+            </CustomText>
             <Switch
               value={formData.preferences.diet.includes(diet)}
               onValueChange={() => togglePreference("diet", diet)}
@@ -56,15 +56,15 @@ export default function PreferencesScreen() {
         ))}
 
         {/* Workout Goals */}
-        <Text style={styles.subHeading}>Workout Goals</Text>
+        <CustomText style={styles.subHeading}>Workout Goals</CustomText>
         {["weight-loss", "muscle-gain", "endurance"].map((goal) => (
           <View key={goal} style={styles.switchRow}>
-            <Text style={styles.label}>
+            <CustomText style={styles.label}>
               {goal
                 .split("-")
                 .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
                 .join(" ")}
-            </Text>
+            </CustomText>
             <Switch
               value={formData.preferences.workout.includes(goal)}
               onValueChange={() => togglePreference("workout", goal)}
@@ -77,7 +77,7 @@ export default function PreferencesScreen() {
           style={styles.nextButton}
           onPress={() => router.push("/review")}
         >
-          <Text style={styles.buttonText}>Next</Text>
+          <CustomText style={styles.buttonText}>Next</CustomText>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
@@ -96,16 +96,19 @@ const styles = StyleSheet.create({
   backButton: {
     alignSelf: "flex-start",
     marginBottom: 20,
+    backgroundColor: "#c7c7c7",
+    borderRadius: 25,
+    padding: 5,
   },
   heading: {
     fontSize: 24,
-    fontWeight: "bold",
+    fontFamily: "HostGrotesk-Medium",
     textAlign: "center",
     marginBottom: 30,
   },
   subHeading: {
     fontSize: 20,
-    fontWeight: "600",
+    fontFamily: "HostGrotesk-Medium",
     marginVertical: 15,
   },
   switchRow: {

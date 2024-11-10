@@ -1,7 +1,6 @@
 import React, { useMemo, useRef } from "react";
 import {
   View,
-  Text,
   StyleSheet,
   ActivityIndicator,
   TouchableOpacity,
@@ -18,6 +17,7 @@ import BottomSheetContent from "@/components/BottomSheetContent";
 import { getInitials } from "@/utils";
 import { useUserData } from "@/context/userDataContext";
 import { useClubQueries } from "@/hooks/useClubQueries";
+import CustomText from "@/components/ui/customText";
 
 const ClubHomeScreen = () => {
   const { id } = useLocalSearchParams();
@@ -79,9 +79,9 @@ const ClubHomeScreen = () => {
               />
             ) : (
               <View style={styles.profileFallback}>
-                <Text style={styles.initials}>
+                <CustomText style={styles.initials}>
                   {club?.name ? getInitials(club.name) : "?"}
-                </Text>
+                </CustomText>
               </View>
             )}
           </View>
@@ -123,17 +123,21 @@ const ClubHomeScreen = () => {
           {!savedRoute && (
             <>
               {route.pointA && locationNames.pointA && (
-                <Text>Start Point: {locationNames.pointA}</Text>
+                <CustomText>Start Point: {locationNames.pointA}</CustomText>
               )}
               {route.pointB && locationNames.pointB && (
-                <Text>End Point: {locationNames.pointB}</Text>
+                <CustomText>End Point: {locationNames.pointB}</CustomText>
               )}
-              {distance && <Text>Distance: {distance}</Text>}
-              {estimatedTime && <Text>Estimated Time: {estimatedTime}</Text>}
+              {distance && <CustomText>Distance: {distance}</CustomText>}
+              {estimatedTime && (
+                <CustomText>Estimated Time: {estimatedTime}</CustomText>
+              )}
 
               {estimatedTime && (
                 <TouchableOpacity style={styles.saveButton} onPress={saveRoute}>
-                  <Text style={styles.saveButtonText}>Save Route</Text>
+                  <CustomText style={styles.saveButtonText}>
+                    Save Route
+                  </CustomText>
                 </TouchableOpacity>
               )}
             </>
@@ -177,11 +181,13 @@ const ClubHomeScreen = () => {
       >
         <BottomSheetView style={styles.contentContainer}>
           <View style={styles.header}>
-            <Text style={styles.sectionTitle}>Explore Your Club</Text>
-            <Text style={styles.sectionSubtitle}>
+            <CustomText style={styles.sectionTitle}>
+              Explore Your Club
+            </CustomText>
+            <CustomText style={styles.sectionSubtitle}>
               Get insights, activities, and updates about "{club && club.name}
               ".
-            </Text>
+            </CustomText>
           </View>
 
           {club && isLeader ? (
@@ -228,7 +234,7 @@ const styles = StyleSheet.create({
   initials: {
     color: "#fff",
     fontSize: 22,
-    fontWeight: "bold",
+    fontFamily: "HostGrotesk-Medium",
   },
   profileFallback: {
     width: "100%",
@@ -355,7 +361,11 @@ const styles = StyleSheet.create({
     color: "red",
   },
   header: { marginBottom: 10 },
-  sectionTitle: { fontSize: 22, fontWeight: "bold", marginBottom: 5 },
+  sectionTitle: {
+    fontSize: 22,
+    fontFamily: "HostGrotesk-Medium",
+    marginBottom: 5,
+  },
   sectionSubtitle: { fontSize: 16, color: "#777" },
   routeInfo: {
     marginTop: 10,
@@ -369,7 +379,11 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     width: "100%",
   },
-  saveButtonText: { color: "#FFF", textAlign: "center", fontWeight: "bold" },
+  saveButtonText: {
+    color: "#FFF",
+    textAlign: "center",
+    fontFamily: "HostGrotesk-Medium",
+  },
 });
 
 export default ClubHomeScreen;

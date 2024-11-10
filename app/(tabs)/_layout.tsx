@@ -7,6 +7,7 @@ import SuperTokens from "supertokens-react-native";
 import "../../config/supertokens";
 import { getIconName, getTabTitle } from "@/utils";
 import { ParamListBase, RouteProp } from "@react-navigation/native";
+import CustomText from "@/components/ui/customText";
 
 export default function Layout() {
   const theme = useTheme();
@@ -58,9 +59,9 @@ export default function Layout() {
         headerShown: false,
         tabBarStyle: { backgroundColor: "#fff" },
         tabBarLabel: ({ focused }) => (
-          <Text style={[styles.tabLabel, focused && styles.tabLabelFocused]}>
+          <CustomText style={[styles.tabLabel, focused && styles.tabLabelFocused]}>
             {getTabTitle(route.name)}
-          </Text>
+          </CustomText>
         ),
         tabBarIcon: ({ focused, size }) => (
           <View style={styles.iconContainer}>

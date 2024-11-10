@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
   View,
-  Text,
   StyleSheet,
   SafeAreaView,
   TouchableOpacity,
@@ -22,6 +21,8 @@ import { ProgressBar } from "react-native-paper";
 import { AssignedWorkoutT, WorkoutsT } from "@/types";
 import useStreak from "@/hooks/useStreak";
 import Header from "@/components/header/header";
+import CustomText from "@/components/ui/customText";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -218,7 +219,7 @@ export default function HomeScreen() {
             { backgroundColor: day === selectedDay ? "green" : "#E0E0E0" },
           ]}
         />
-        <Text style={styles.dayText}>Day {day}</Text>
+        <CustomText style={styles.dayText}>Day {day}</CustomText>
       </View>
 
       {/* Filter workouts for this specific day */}
@@ -227,14 +228,16 @@ export default function HomeScreen() {
           .filter((work) => work.day === day)
           .map((work) => (
             <View key={work.workout.id} style={styles.workoutDetails}>
-              <Text style={styles.workoutName}>{work.workout.name}</Text>
-              <Text style={styles.workoutDuration}>
+              <CustomText style={styles.workoutName}>
+                {work.workout.name}
+              </CustomText>
+              <CustomText style={styles.workoutDuration}>
                 {work.workout.duration} mins
-              </Text>
+              </CustomText>
             </View>
           ))
       ) : (
-        <Text style={styles.restDayText}>Rest day</Text>
+        <CustomText style={styles.restDayText}>Rest day</CustomText>
       )}
     </TouchableOpacity>
   );
@@ -244,8 +247,8 @@ export default function HomeScreen() {
       style={styles.workoutCard}
       onPress={() => handleWorkoutClick(item.workout.id)}
     >
-      <Text style={styles.workoutName}>{item.workout.name}</Text>
-      <Text>{item.workout.duration} mins</Text>
+      <CustomText style={styles.workoutName}>{item.workout.name}</CustomText>
+      <CustomText>{item.workout.duration} mins</CustomText>
     </TouchableOpacity>
   );
 
@@ -266,7 +269,7 @@ export default function HomeScreen() {
             start={{ x: 0.9, y: 0.2 }}
             style={styles.upgradeBtn}
           >
-            <Text style={styles.upgradeText}>Go Premium 🚀</Text>
+            <CustomText style={styles.upgradeText}>Go Premium 🚀</CustomText>
           </LinearGradient>
         </TouchableOpacity>
       </Header>
@@ -274,15 +277,9 @@ export default function HomeScreen() {
         {/* Streak Progress Bar */}
         <View style={styles.streakContainer}>
           {streakNumber && (
-            <Text style={styles.streakText}>🔥 {streakNumber}-day streak</Text>
-          )}
-
-          {streakNumber && (
-            <ProgressBar
-              progress={streak / 7}
-              color="#4CAF50"
-              style={styles.progressBar}
-            />
+            <CustomText style={styles.streakText}>
+              🔥 {streakNumber} day streak
+            </CustomText>
           )}
         </View>
 
@@ -293,7 +290,9 @@ export default function HomeScreen() {
 
         {/* Workouts for Selected Day */}
         <View style={styles.workoutListContainer}>
-          <Text style={styles.heading}>Workouts for Day {selectedDay}</Text>
+          <CustomText style={styles.heading}>
+            Workouts for Day {selectedDay}
+          </CustomText>
           {workoutsForDay.length > 0 ? (
             <FlatList
               data={workoutsForDay}
@@ -302,9 +301,9 @@ export default function HomeScreen() {
               renderItem={renderWorkout}
             />
           ) : (
-            <Text style={styles.emptyText}>
+            <CustomText style={styles.emptyText}>
               No workouts assigned for this day.
-            </Text>
+            </CustomText>
           )}
         </View>
       </ScrollView>
@@ -329,7 +328,7 @@ const styles = StyleSheet.create({
   },
   upgradeText: {
     color: "#000",
-    fontWeight: "bold",
+    fontFamily: "HostGrotesk-Medium",
   },
   dayInfoContainer: {
     flexDirection: "row",
@@ -396,14 +395,14 @@ const styles = StyleSheet.create({
   restDayText: {
     fontSize: 14,
     color: "#A0A0A0",
-    fontStyle: "italic",
+    fontFamily: "HostGrotesk-LightItalic",
   },
   workoutListContainer: {
     marginVertical: 20,
   },
   heading: {
     fontSize: 22,
-    fontWeight: "bold",
+    fontFamily: "HostGrotesk-Medium",
   },
   dayText: {
     fontSize: 16,
@@ -411,7 +410,7 @@ const styles = StyleSheet.create({
   },
   workoutName: {
     fontSize: 18,
-    fontWeight: "600",
+    fontFamily: "HostGrotesk-Medium",
     marginBottom: 4,
     color: "#000",
   },
@@ -436,6 +435,6 @@ const styles = StyleSheet.create({
   },
   streakText: {
     fontSize: 18,
-    fontWeight: "bold",
+    fontFamily: "HostGrotesk-Medium",
   },
 });

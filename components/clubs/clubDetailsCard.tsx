@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import {
   View,
-  Text,
   StyleSheet,
   TouchableOpacity,
   Image,
@@ -15,6 +14,7 @@ import { format } from "date-fns";
 import { API_URL } from "@/constants/apiUrl";
 import * as ImagePicker from "expo-image-picker";
 import { useQueryClient } from "@tanstack/react-query";
+import CustomText from "../ui/customText";
 
 interface ClubDetailsCardProps {
   onBack: () => void;
@@ -66,11 +66,18 @@ const ClubDetailsCard: React.FC<ClubDetailsCardProps> = ({
       );
 
       const data = await response.json();
-      if (response.ok) {
+
+      if (response.status === 413) {
+        Alert.alert(
+          "Error",
+          "The file is too large. Please select a file under 5 MB."
+        );
+      } else if (!response.ok) {
+        const data = await response.json();
+        Alert.alert("Error", data.error || "Failed to update club logo.");
+      } else {
         Alert.alert("Success", "Club logo updated successfully!");
         queryClient.invalidateQueries({ queryKey: ["club", clubId] });
-      } else {
-        Alert.alert("Error", data.error || "Failed to update club logo.");
       }
     } catch (error) {
       console.error("Error uploading logo:", error);
@@ -86,7 +93,7 @@ const ClubDetailsCard: React.FC<ClubDetailsCardProps> = ({
         <TouchableOpacity onPress={onBack} style={styles.backButton}>
           <Ionicons name="chevron-back" size={24} color="#4F46E5" />
         </TouchableOpacity>
-        <Text style={styles.title}>Club Details</Text>
+        <CustomText style={styles.title}>Club Details</CustomText>
       </View>
       <View style={styles.subContainer}>
         <View style={styles.profileContainer}>
@@ -97,35 +104,45 @@ const ClubDetailsCard: React.FC<ClubDetailsCardProps> = ({
             />
           ) : (
             <View style={styles.profileFallback}>
-              <Text style={styles.initials}>
+              <CustomText style={styles.initials}>
                 {club?.name ? getInitials(name) : "?"}
-              </Text>
+              </CustomText>
             </View>
           )}
 
           {isLeader && (
             <TouchableOpacity onPress={pickImage} style={styles.editButton}>
-              <Ionicons name="pencil-outline" size={24} color="#000" />
+              <Ionicons name="pencil-outline" size={24} color="#fff" />
             </TouchableOpacity>
           )}
 
           {loading && <ActivityIndicator size="large" color="#4F46E5" />}
         </View>
         <View style={styles.nameContainer}>
-          <Text style={{ fontWeight: "bold", fontSize: 19 }}>Name:</Text>
-          <Text style={{ fontSize: 18 }}>{club.name}</Text>
+          <CustomText
+            style={{ fontFamily: "HostGrotesk-Medium", fontSize: 19 }}
+          >
+            Name:
+          </CustomText>
+          <CustomText style={{ fontSize: 18 }}>{club.name}</CustomText>
         </View>
         <View style={styles.descriptionContainer}>
-          <Text style={{ fontWeight: "bold", fontSize: 19 }}>Description:</Text>
-          <Text style={{ fontSize: 18, maxWidth: 200 }}>
+          <CustomText
+            style={{ fontFamily: "HostGrotesk-Medium", fontSize: 19 }}
+          >
+            Description:
+          </CustomText>
+          <CustomText style={{ fontSize: 18, maxWidth: 200 }}>
             {club.description}
-          </Text>
+          </CustomText>
         </View>
         <View style={styles.createdContainer}>
-          <Text style={{ fontWeight: "bold", fontSize: 19 }}>
+          <CustomText
+            style={{ fontFamily: "HostGrotesk-Medium", fontSize: 19 }}
+          >
             Date created:
-          </Text>
-          <Text style={{ fontSize: 18 }}>{formatDate(club)}</Text>
+          </CustomText>
+          <CustomText style={{ fontSize: 18 }}>{formatDate(club)}</CustomText>
         </View>
       </View>
     </View>
@@ -184,7 +201,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 30,
   },
-  title: { fontSize: 18, fontWeight: "bold", marginLeft: 90 },
+  title: { fontSize: 18, fontFamily: "HostGrotesk-Medium", marginLeft: 90 },
   profileContainer: {
     width: 60,
     height: 60,
@@ -205,7 +222,7 @@ const styles = StyleSheet.create({
   initials: {
     color: "#fff",
     fontSize: 22,
-    fontWeight: "bold",
+    fontFamily: "HostGrotesk-Medium",
   },
   profileFallback: {
     width: "100%",

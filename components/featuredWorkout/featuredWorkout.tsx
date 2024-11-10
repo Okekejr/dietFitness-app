@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
   View,
-  Text,
   Alert,
   StyleSheet,
   ActivityIndicator,
@@ -13,6 +12,7 @@ import { API_URL } from "@/constants/apiUrl";
 import { WorkoutsT } from "@/types";
 import WorkoutCard from "../workout/workoutCard";
 import { useUserData } from "@/context/userDataContext";
+import CustomText from "../ui/customText";
 
 const CACHE_KEY = "featuredWorkouts";
 const CACHE_EXPIRY_KEY = "featuredWorkoutsExpiry";
@@ -88,7 +88,7 @@ const FeaturedWorkoutsComp = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Featured</Text>
+      <CustomText style={styles.header}>Featured</CustomText>
       {/* <Button title="Clear Cache" onPress={clearCache} /> */}
 
       <FlatList
@@ -110,7 +110,6 @@ const styles = StyleSheet.create({
   },
   header: {
     fontSize: 22,
-    fontWeight: "bold",
     marginBottom: 20,
   },
   flatListContent: {

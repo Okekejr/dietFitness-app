@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import {
   View,
   FlatList,
-  Text,
   StyleSheet,
   Button,
   ActivityIndicator,
@@ -17,6 +16,7 @@ import { WorkoutsT } from "@/types/workout";
 import { Ionicons } from "@expo/vector-icons";
 import FilterModal from "@/components/modal/filterModal";
 import { useUserData } from "@/context/userDataContext";
+import CustomText from "@/components/ui/customText";
 
 async function fetchWorkouts(): Promise<WorkoutsT[]> {
   const response = await fetch(`${API_URL}/api/workouts`);
@@ -95,7 +95,9 @@ export default function AllWorkoutsScreen() {
   if (isError) {
     return (
       <View style={styles.centeredContainer}>
-        <Text style={styles.errorText}>Error fetching workouts</Text>
+        <CustomText style={styles.errorText}>
+          Error fetching workouts
+        </CustomText>
         <Button title="Retry" onPress={() => refetch()} />
       </View>
     );
@@ -108,20 +110,20 @@ export default function AllWorkoutsScreen() {
           style={styles.backButton}
           onPress={() => router.back()}
         >
-          <Ionicons name="chevron-back-outline" size={28} color="white" />
+          <Ionicons name="chevron-back-outline" size={28} color="#000" />
         </TouchableOpacity>
       </View>
 
       {/* Number of Workouts and Filter Button */}
       <View style={styles.headerRow}>
-        <Text style={styles.workoutCount}>
+        <CustomText style={styles.workoutCount}>
           {filteredWorkouts.length} workouts
-        </Text>
+        </CustomText>
         <TouchableOpacity
           style={styles.filterButton}
           onPress={() => setFilterModalVisible(true)}
         >
-          <Text style={styles.filterButtonText}>Filters</Text>
+          <CustomText style={styles.filterButtonText}>Filters</CustomText>
           <Ionicons name="filter-outline" size={18} color="#fff" />
         </TouchableOpacity>
       </View>
@@ -134,7 +136,7 @@ export default function AllWorkoutsScreen() {
             <WorkoutCard workout={item} userId={userId} />
           )}
           contentContainerStyle={styles.listContent}
-          ListEmptyComponent={<Text>No workouts available</Text>}
+          ListEmptyComponent={<CustomText>No workouts available</CustomText>}
         />
       </View>
 
@@ -159,7 +161,7 @@ const styles = StyleSheet.create({
   },
   workoutCount: {
     fontSize: 18,
-    fontWeight: "bold",
+    fontFamily: "HostGrotesk-Medium",
   },
   centeredContainer: {
     flex: 1,
@@ -190,7 +192,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   backButton: {
-    backgroundColor: "#000",
+    backgroundColor: "#c7c7c7",
     borderRadius: 25,
     padding: 5,
   },

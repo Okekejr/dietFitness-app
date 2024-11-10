@@ -1,3 +1,4 @@
+import CustomText from "@/components/ui/customText";
 import Divider from "@/components/ui/divider";
 import { handleLogin, validateEmail, validatePassword } from "@/utils";
 import { Ionicons } from "@expo/vector-icons";
@@ -10,7 +11,6 @@ import {
   Keyboard,
   ScrollView,
   StyleSheet,
-  Text,
   TextInput,
   TouchableOpacity,
   TouchableWithoutFeedback,
@@ -132,7 +132,7 @@ export default function SignupScreen() {
           contentContainerStyle={styles.container}
           keyboardShouldPersistTaps="handled"
         >
-          <Text style={styles.headerText}>Create an account</Text>
+          <CustomText style={styles.headerText}>Create an account</CustomText>
           {/* OAuth Buttons */}
           <View style={styles.oauthContainer}>
             <TouchableOpacity style={styles.oauthButton}>
@@ -142,7 +142,9 @@ export default function SignupScreen() {
                 color="#fff"
                 style={styles.oauthIcon}
               />
-              <Text style={styles.oauthButtonText}>Sign up with Google</Text>
+              <CustomText style={styles.oauthButtonText}>
+                Sign up with Google
+              </CustomText>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.oauthButton}>
@@ -152,13 +154,15 @@ export default function SignupScreen() {
                 color="#fff"
                 style={styles.oauthIcon}
               />
-              <Text style={styles.oauthButtonText}>Sign up with GitHub</Text>
+              <CustomText style={styles.oauthButtonText}>
+                Sign up with GitHub
+              </CustomText>
             </TouchableOpacity>
           </View>
 
           {/* Inputs with Labels */}
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Email</Text>
+            <CustomText style={styles.label}>Email</CustomText>
             <TextInput
               ref={emailInputRef}
               style={styles.input}
@@ -172,12 +176,12 @@ export default function SignupScreen() {
               onSubmitEditing={() => passwordInputRef.current?.focus()}
             />
             {errors.email ? (
-              <Text style={styles.errorText}>{errors.email}</Text>
+              <CustomText style={styles.errorText}>{errors.email}</CustomText>
             ) : null}
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Password</Text>
+            <CustomText style={styles.label}>Password</CustomText>
             <View style={styles.passwordInputContainer}>
               <TextInput
                 ref={passwordInputRef}
@@ -202,13 +206,15 @@ export default function SignupScreen() {
               </TouchableOpacity>
             </View>
             {errors.password ? (
-              <Text style={styles.errorText}>{errors.password}</Text>
+              <CustomText style={styles.errorText}>
+                {errors.password}
+              </CustomText>
             ) : null}
           </View>
 
           {/* Confirm Password Input */}
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Confirm Password</Text>
+            <CustomText style={styles.label}>Confirm Password</CustomText>
             <View style={styles.passwordInputContainer}>
               <TextInput
                 ref={confirmPasswordRef}
@@ -232,7 +238,9 @@ export default function SignupScreen() {
               </TouchableOpacity>
             </View>
             {errors.confirmPassword ? (
-              <Text style={styles.errorText}>{errors.confirmPassword}</Text>
+              <CustomText style={styles.errorText}>
+                {errors.confirmPassword}
+              </CustomText>
             ) : null}
           </View>
 
@@ -244,7 +252,7 @@ export default function SignupScreen() {
             ]}
             onPress={handleSignup}
           >
-            <Text style={styles.loginButtonText}>Sign Up</Text>
+            <CustomText style={styles.loginButtonText}>Sign Up</CustomText>
           </TouchableOpacity>
 
           <Divider text="OR" />
@@ -253,7 +261,9 @@ export default function SignupScreen() {
             style={styles.signUpButton}
             onPress={() => router.push("/login")}
           >
-            <Text style={styles.loginButtonText}>Have an account? Log in</Text>
+            <CustomText style={styles.loginButtonText}>
+              Have an account? Log in
+            </CustomText>
           </TouchableOpacity>
         </ScrollView>
       </TouchableWithoutFeedback>

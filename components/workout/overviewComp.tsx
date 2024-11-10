@@ -1,7 +1,6 @@
 import { OverviewStatsT } from "@/types";
 import {
   ActivityIndicator,
-  Text,
   View,
   StyleSheet,
   ScrollView,
@@ -10,6 +9,7 @@ import {
 import CircularProgress from "react-native-circular-progress-indicator";
 import { PieChart } from "react-native-chart-kit";
 import { getTagColor } from "@/utils";
+import CustomText from "../ui/customText";
 
 interface OverviewCompT {
   stats: OverviewStatsT;
@@ -31,7 +31,7 @@ export default function OverviewComp({
   if (isError) {
     return (
       <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>Failed to load overview data.</Text>
+        <CustomText style={styles.errorText}>Failed to load overview data.</CustomText>
       </View>
     );
   }
@@ -39,9 +39,9 @@ export default function OverviewComp({
   if (stats.totalWorkouts === 0) {
     return (
       <View>
-        <Text style={styles.description}>
+        <CustomText style={styles.description}>
           You havent completed any workouts yet.
-        </Text>
+        </CustomText>
       </View>
     );
   }
@@ -49,12 +49,12 @@ export default function OverviewComp({
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>Total Workouts</Text>
-        <Text style={styles.cardValue}>{stats.totalWorkouts}</Text>
+        <CustomText style={styles.cardTitle}>Total Workouts</CustomText>
+        <CustomText style={styles.cardValue}>{stats.totalWorkouts}</CustomText>
       </View>
 
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>Total Calories Burned</Text>
+        <CustomText style={styles.cardTitle}>Total Calories Burned</CustomText>
         <CircularProgress
           value={stats.totalCalories}
           radius={60}
@@ -68,7 +68,7 @@ export default function OverviewComp({
       </View>
 
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>Total Workout Minutes</Text>
+        <CustomText style={styles.cardTitle}>Total Workout Minutes</CustomText>
         <CircularProgress
           value={stats.totalMinutes}
           radius={60}
@@ -82,12 +82,12 @@ export default function OverviewComp({
       </View>
 
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>Most Active Day</Text>
-        <Text style={styles.cardValue}>{stats.bestDay}</Text>
+        <CustomText style={styles.cardTitle}>Most Active Day</CustomText>
+        <CustomText style={styles.cardValue}>{stats.bestDay}</CustomText>
       </View>
 
       <View style={styles.chartContainer}>
-        <Text style={styles.chartTitle}>Workouts Breakdown</Text>
+        <CustomText style={styles.chartTitle}>Workouts Breakdown</CustomText>
         <PieChart
           data={stats.workoutBreakdown.map((item) => ({
             name: item.name,
@@ -126,12 +126,12 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     fontSize: 18,
-    fontWeight: "bold",
+    fontFamily: "HostGrotesk-Medium",
     marginBottom: 10,
   },
   cardValue: {
     fontSize: 24,
-    fontWeight: "bold",
+    fontFamily: "HostGrotesk-Medium",
     color: "#4F46E5",
   },
   chartContainer: {
@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
   },
   chartTitle: {
     fontSize: 18,
-    fontWeight: "bold",
+    fontFamily: "HostGrotesk-Medium",
     marginBottom: 10,
     textAlign: "center",
   },

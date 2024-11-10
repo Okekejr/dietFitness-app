@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
   View,
-  Text,
   Image,
   StyleSheet,
   TouchableOpacity,
@@ -20,6 +19,7 @@ import LottieView from "lottie-react-native";
 import { useUserData } from "@/context/userDataContext";
 import { useQueryClient } from "@tanstack/react-query";
 import BackButton from "@/components/ui/backButton";
+import CustomText from "@/components/ui/customText";
 
 const { height } = Dimensions.get("window");
 
@@ -183,7 +183,7 @@ const WorkoutDetailsScreen = () => {
   if (!workout) {
     return (
       <View style={styles.container}>
-        <Text style={styles.errorText}>Workout not found</Text>
+        <CustomText style={styles.errorText}>Workout not found</CustomText>
       </View>
     );
   }
@@ -199,14 +199,14 @@ const WorkoutDetailsScreen = () => {
           size={24}
           color="black"
         />
-        <Text style={styles.infoText}>
+        <CustomText style={styles.infoText}>
           {text === workoutInfo.duration &&
             `${workout.duration + " mins, " + workout.activity_level}`}
           {text === workoutInfo.tag && `${workout.tag + " workout"}`}
           {text === workout.intensity && `${workout.intensity + " intensity"}`}
           {text === workout.calories_burned &&
             `${workout.calories_burned + " calories burned"}`}
-        </Text>
+        </CustomText>
       </View>
     );
   };
@@ -233,7 +233,7 @@ const WorkoutDetailsScreen = () => {
       </View>
 
       <View style={styles.detailsContainer}>
-        <Text style={styles.workoutName}>{workout.name}</Text>
+        <CustomText style={styles.workoutName}>{workout.name}</CustomText>
         {workoutIconsTexts({ duration: workout.duration }, workout.duration)}
         {workoutIconsTexts({ tag: workout.tag }, workout.tag)}
         {workoutIconsTexts({ intensity: workout.intensity }, workout.intensity)}
@@ -245,11 +245,13 @@ const WorkoutDetailsScreen = () => {
         {isCompleted && (
           <View style={styles.completedContainer}>
             <Ionicons name="checkmark-circle" size={24} color="green" />
-            <Text style={styles.completedText}>Completed</Text>
+            <CustomText style={styles.completedText}>Completed</CustomText>
           </View>
         )}
 
-        <Text style={styles.description}>{workout.description}</Text>
+        <CustomText style={styles.description}>
+          {workout.description}
+        </CustomText>
 
         {videoId != "" && (
           <YoutubePlayer
@@ -281,7 +283,7 @@ const WorkoutDetailsScreen = () => {
               style={styles.animation}
             />
 
-            <Text style={styles.modalText}>Workout Complete!</Text>
+            <CustomText style={styles.modalText}>Workout Complete!</CustomText>
           </View>
         </Modal>
       </View>
@@ -341,7 +343,7 @@ const styles = StyleSheet.create({
   },
   workoutName: {
     fontSize: 24,
-    fontWeight: "bold",
+    fontFamily: "HostGrotesk-Medium",
     marginBottom: 20,
   },
   infoText: {
@@ -368,7 +370,7 @@ const styles = StyleSheet.create({
   completedText: {
     marginLeft: 8,
     color: "green",
-    fontWeight: "bold",
+    fontFamily: "HostGrotesk-Medium",
   },
   errorText: {
     textAlign: "center",
@@ -406,7 +408,7 @@ const styles = StyleSheet.create({
   closeButtonText: {
     fontSize: 18,
     color: "#fff",
-    fontWeight: "bold",
+    fontFamily: "HostGrotesk-Medium",
   },
   animation: {
     width: 200,
@@ -414,7 +416,7 @@ const styles = StyleSheet.create({
   },
   modalText: {
     fontSize: 20,
-    fontWeight: "bold",
+    fontFamily: "HostGrotesk-Medium",
     marginTop: 10,
     color: "#fff",
   },

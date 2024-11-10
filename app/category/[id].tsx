@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
   View,
-  Text,
   StyleSheet,
   Image,
   FlatList,
@@ -18,6 +17,7 @@ import WorkoutCard from "@/components/workout/workoutCard";
 import { CategoryT, WorkoutsT } from "@/types";
 import { useUserData } from "@/context/userDataContext";
 import BackButton from "@/components/ui/backButton";
+import CustomText from "@/components/ui/customText";
 
 const { height } = Dimensions.get("window");
 
@@ -105,7 +105,7 @@ export default function CategoryScreen() {
   if (!category) {
     return (
       <View style={styles.container}>
-        <Text style={styles.errorText}>Category not found</Text>
+        <CustomText style={styles.errorText}>Category not found</CustomText>
       </View>
     );
   }
@@ -120,23 +120,27 @@ export default function CategoryScreen() {
         />
         <BackButton />
         <View style={styles.overlay}>
-          <Text style={styles.categoryName}>{category.category_name}</Text>
+          <CustomText style={styles.categoryName}>
+            {category.category_name}
+          </CustomText>
           {category.description && (
-            <Text style={styles.description}>{category.description}</Text>
+            <CustomText style={styles.description}>
+              {category.description}
+            </CustomText>
           )}
         </View>
       </View>
 
       {/* Number of Workouts and Filter Button */}
       <View style={styles.headerRow}>
-        <Text style={styles.workoutCount}>
+        <CustomText style={styles.workoutCount}>
           {filteredWorkouts.length} workouts
-        </Text>
+        </CustomText>
         <TouchableOpacity
           style={styles.filterButton}
           onPress={() => setFilterModalVisible(true)}
         >
-          <Text style={styles.filterButtonText}>Filters</Text>
+          <CustomText style={styles.filterButtonText}>Filters</CustomText>
           <Ionicons name="filter-outline" size={18} color="#fff" />
         </TouchableOpacity>
       </View>
@@ -203,7 +207,7 @@ const styles = StyleSheet.create({
   categoryName: {
     color: "#fff",
     fontSize: 28,
-    fontWeight: "bold",
+    fontFamily: "HostGrotesk-Medium",
     marginBottom: 10,
   },
   description: {
@@ -220,7 +224,7 @@ const styles = StyleSheet.create({
   },
   workoutCount: {
     fontSize: 18,
-    fontWeight: "bold",
+    fontFamily: "HostGrotesk-Medium",
   },
   filterButton: {
     flexDirection: "row",

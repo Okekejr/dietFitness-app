@@ -2,7 +2,6 @@ import {
   ActivityIndicator,
   Image,
   Modal,
-  Text,
   TextInput,
   TouchableOpacity,
   StyleSheet,
@@ -17,6 +16,7 @@ import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import { useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
+import CustomText from "../ui/customText";
 
 interface CreateClubProps {
   pickImage: () => Promise<void>;
@@ -119,7 +119,7 @@ export const CreateClub = ({
         onRequestClose={() => setCreateModalVisible(false)}
       >
         <View style={styles.modalContainer}>
-          <Text style={styles.modalTitle}>Create a Club</Text>
+          <CustomText style={styles.modalTitle}>Create a Club</CustomText>
           <BackButton func={() => setCreateModalVisible(false)} />
 
           <TouchableOpacity onPress={pickImage} style={styles.avatarContainer}>
@@ -131,7 +131,7 @@ export const CreateClub = ({
               }
               style={styles.logoPreview}
             />
-            <Text style={styles.avatarText}>Select Logo</Text>
+            <CustomText style={styles.avatarText}>Select Logo</CustomText>
           </TouchableOpacity>
           <TextInput
             style={styles.input}
@@ -175,7 +175,7 @@ export const CreateClub = ({
             {loading ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={styles.buttonText}>Create Club</Text>
+              <CustomText style={styles.buttonText}>Create Club</CustomText>
             )}
           </TouchableOpacity>
         </View>
@@ -189,11 +189,13 @@ export const CreateClub = ({
       >
         <View style={styles.modalContainer}>
           {/* Header with Share Button */}
-          <Text style={styles.modalTitle}>Club Created Successfully!</Text>
+          <CustomText style={styles.modalTitle}>
+            Club Created Successfully!
+          </CustomText>
           <View style={styles.header}></View>
-          <Text style={styles.inviteCode}>
+          <CustomText style={styles.inviteCode}>
             Invite Code: {createdClub?.invite_code}
-          </Text>
+          </CustomText>
 
           {createdClub?.qr_code && (
             <Image
@@ -214,7 +216,7 @@ export const CreateClub = ({
             onPress={() => handleBegin(createdClub?.id)}
             style={styles.button}
           >
-            <Text style={styles.buttonText}>Begin</Text>
+            <CustomText style={styles.buttonText}>Begin</CustomText>
           </TouchableOpacity>
         </View>
       </Modal>
@@ -229,7 +231,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 20,
   },
-  modalTitle: { fontSize: 24, fontWeight: "bold", marginBottom: 20 },
+  modalTitle: {
+    fontSize: 24,
+    fontFamily: "HostGrotesk-Medium",
+    marginBottom: 20,
+  },
   avatarContainer: { alignItems: "center", marginBottom: 10 },
   avatarText: { color: "#4F46E5", marginBottom: 15 },
   logoPreview: {
@@ -271,7 +277,7 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   pickerContainer: { marginBottom: 20, width: "100%" },
-  buttonText: { color: "#fff", fontSize: 18, fontWeight: "bold" },
+  buttonText: { color: "#fff", fontSize: 18, fontFamily: "HostGrotesk-Medium" },
   inviteCode: { fontSize: 18, marginBottom: 10 },
   qrCode: { width: 200, height: 200, marginBottom: 5 },
 });

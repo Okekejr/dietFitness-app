@@ -1,7 +1,6 @@
 import React, { FC } from "react";
 import {
   View,
-  Text,
   StyleSheet,
   TouchableOpacity,
   Image,
@@ -9,6 +8,7 @@ import {
 } from "react-native";
 import { Href, useRouter } from "expo-router";
 import { WorkoutsT } from "@/types/workout";
+import CustomText from "../ui/customText";
 
 interface WorkoutCompCardProps {
   data: WorkoutsT[] | undefined;
@@ -33,10 +33,10 @@ const WorkoutCompCard: FC<WorkoutCompCardProps> = ({
     >
       <Image source={bgImgLink} style={styles.imageStyle} />
       <View style={styles.textContainer}>
-        <Text style={styles.cardName}>{cardName}</Text>
-        <Text style={styles.workoutCount}>
+        <CustomText style={styles.cardName}>{cardName}</CustomText>
+        <CustomText style={styles.workoutCount}>
           {numWorkouts} {numWorkouts === 1 ? "workout" : "workouts"}
-        </Text>
+        </CustomText>
       </View>
     </TouchableOpacity>
   );
@@ -61,7 +61,6 @@ const styles = StyleSheet.create({
   },
   cardName: {
     fontSize: 16,
-    fontWeight: "bold",
   },
   workoutCount: {
     fontSize: 12,

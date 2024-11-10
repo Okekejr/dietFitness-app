@@ -4,3 +4,4 @@ export * from "./userData";
 export * from "./workout";
 export * from "./achievements";
 export * from "./club";
+export * from "./diet";

@@ -2,7 +2,6 @@ import { Filters } from "@/types/filter";
 import React, { FC, useState, useEffect } from "react";
 import {
   View,
-  Text,
   Modal,
   TouchableOpacity,
   StyleSheet,
@@ -10,6 +9,7 @@ import {
   SafeAreaView,
   Dimensions,
 } from "react-native";
+import CustomText from "../ui/customText";
 
 interface FilterModalProps {
   visible: boolean;
@@ -54,14 +54,14 @@ const FilterModal: FC<FilterModalProps> = ({
       <Modal visible={visible} animationType="slide" transparent>
         <View style={styles.overlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Filter Workouts</Text>
+            <CustomText style={styles.modalTitle}>Filter Workouts</CustomText>
 
             <ScrollView contentContainerStyle={styles.scrollContent}>
               {Object.entries(filterOptions).map(([type, options]) => (
                 <View key={type} style={styles.filterGroup}>
-                  <Text style={styles.filterLabel}>
+                  <CustomText style={styles.filterLabel}>
                     {type.charAt(0).toUpperCase() + type.slice(1)}
-                  </Text>
+                  </CustomText>
                   <View style={styles.optionContainer}>
                     {options.map((option) => (
                       <TouchableOpacity
@@ -76,7 +76,7 @@ const FilterModal: FC<FilterModalProps> = ({
                           handleFilterChange(type as keyof Filters, option)
                         }
                       >
-                        <Text
+                        <CustomText
                           style={[
                             styles.filterButtonText,
                             localFilters[type as keyof Filters].includes(
@@ -85,7 +85,7 @@ const FilterModal: FC<FilterModalProps> = ({
                           ]}
                         >
                           {option}
-                        </Text>
+                        </CustomText>
                       </TouchableOpacity>
                     ))}
                   </View>
@@ -98,18 +98,22 @@ const FilterModal: FC<FilterModalProps> = ({
                 style={styles.resetButton}
                 onPress={handleResetFilters}
               >
-                <Text style={styles.resetButtonText}>Reset Filters</Text>
+                <CustomText style={styles.resetButtonText}>
+                  Reset Filters
+                </CustomText>
               </TouchableOpacity>
 
               <TouchableOpacity
                 style={styles.applyButton}
                 onPress={() => onApplyFilters(localFilters)}
               >
-                <Text style={styles.applyButtonText}>Apply Filters</Text>
+                <CustomText style={styles.applyButtonText}>
+                  Apply Filters
+                </CustomText>
               </TouchableOpacity>
 
               <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-                <Text style={styles.closeButtonText}>Close</Text>
+                <CustomText style={styles.closeButtonText}>Close</CustomText>
               </TouchableOpacity>
             </View>
           </View>
@@ -143,7 +147,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 24,
-    fontWeight: "bold",
+    fontFamily: "HostGrotesk-Medium",
     marginBottom: 20,
     textAlign: "center",
   },
@@ -151,7 +155,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   filterLabel: {
-    fontWeight: "bold",
+    fontFamily: "HostGrotesk-Medium",
     fontSize: 16,
     marginBottom: 10,
   },
@@ -189,7 +193,7 @@ const styles = StyleSheet.create({
   },
   resetButtonText: {
     color: "#fff",
-    fontWeight: "bold",
+    fontFamily: "HostGrotesk-Medium",
   },
   applyButton: {
     backgroundColor: "#4CAF50",
@@ -199,7 +203,7 @@ const styles = StyleSheet.create({
   },
   applyButtonText: {
     color: "#fff",
-    fontWeight: "bold",
+    fontFamily: "HostGrotesk-Medium",
   },
   closeButton: {
     backgroundColor: "#9e9e9e",
@@ -209,7 +213,7 @@ const styles = StyleSheet.create({
   },
   closeButtonText: {
     color: "#fff",
-    fontWeight: "bold",
+    fontFamily: "HostGrotesk-Medium",
   },
 });
 

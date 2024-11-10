@@ -22,7 +22,7 @@ const BackButton = ({ func }: BackButtonProps) => {
   };
   return (
     <TouchableOpacity onPress={handlePress} style={styles.backButton}>
-      <Ionicons name="chevron-back-outline" size={28} color="black" />
+      <Ionicons name="chevron-back-outline" size={28} color="#000" />
     </TouchableOpacity>
   );
 };
@@ -32,14 +32,9 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 60,
     left: 20,
-    backgroundColor: "#fff",
+    backgroundColor: "#c7c7c7",
     borderRadius: 25,
     padding: 5,
-    elevation: 5, // Android shadow
-    shadowColor: "#000", // iOS shadow
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
   },
 });
 

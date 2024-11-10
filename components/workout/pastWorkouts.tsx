@@ -1,7 +1,6 @@
 import React, { FC } from "react";
 import {
   View,
-  Text,
   StyleSheet,
   FlatList,
   Image,
@@ -11,6 +10,7 @@ import { useRouter } from "expo-router";
 import { format } from "date-fns";
 import { CompletedWorkout } from "@/types";
 import Divider from "../ui/divider";
+import CustomText from "../ui/customText";
 
 interface PastWorkoutsProps {
   completedWorkouts: CompletedWorkout[];
@@ -22,9 +22,9 @@ const PastWorkouts: FC<PastWorkoutsProps> = ({ completedWorkouts }) => {
   if (completedWorkouts.length === 0) {
     return (
       <View>
-        <Text style={styles.description}>
+        <CustomText style={styles.description}>
           You havent completed any workouts yet.
-        </Text>
+        </CustomText>
       </View>
     );
   }
@@ -57,12 +57,16 @@ const PastWorkouts: FC<PastWorkoutsProps> = ({ completedWorkouts }) => {
         style={styles.workoutImage}
       />
       <View style={styles.workoutInfo}>
-        <Text style={styles.workoutName}>{item.name}</Text>
+        <CustomText style={styles.workoutName}>{item.name}</CustomText>
         <View style={styles.innerInfo}>
-          <Text style={styles.infoText}>{item.tag} •</Text>
-          <Text style={styles.infoText}>{item.duration} mins •</Text>
-          <Text style={styles.infoText}>{item.activity_level} •</Text>
-          <Text style={styles.infoText}>{item.intensity}</Text>
+          <CustomText style={styles.infoText}>{item.tag} •</CustomText>
+          <CustomText style={styles.infoText}>
+            {item.duration} mins •
+          </CustomText>
+          <CustomText style={styles.infoText}>
+            {item.activity_level} •
+          </CustomText>
+          <CustomText style={styles.infoText}>{item.intensity}</CustomText>
         </View>
       </View>
     </TouchableOpacity>
@@ -75,11 +79,11 @@ const PastWorkouts: FC<PastWorkoutsProps> = ({ completedWorkouts }) => {
   ]) => (
     <View key={monthYear} style={styles.monthSection}>
       <View style={styles.monthHeader}>
-        <Text style={styles.monthTitle}>{monthYear}</Text>
-        <Text style={styles.monthSummary}>
+        <CustomText style={styles.monthTitle}>{monthYear}</CustomText>
+        <CustomText style={styles.monthSummary}>
           {workouts.length} {workouts.length === 1 ? "Workout" : "Workouts"} •{" "}
           {workouts.reduce((total, w) => total + w.duration, 0)} Minutes
-        </Text>
+        </CustomText>
       </View>
 
       <FlatList
@@ -101,7 +105,9 @@ const PastWorkouts: FC<PastWorkoutsProps> = ({ completedWorkouts }) => {
       keyExtractor={(item) => item[0]}
       contentContainerStyle={styles.container}
       ListEmptyComponent={
-        <Text style={styles.emptyMessage}>No workouts completed yet.</Text>
+        <CustomText style={styles.emptyMessage}>
+          No workouts completed yet.
+        </CustomText>
       }
     />
   );
@@ -124,7 +130,7 @@ const styles = StyleSheet.create({
   },
   monthTitle: {
     fontSize: 16,
-    fontWeight: "bold",
+    fontFamily: "HostGrotesk-Medium",
     color: "#4F46E5",
   },
   monthSummary: {
@@ -148,7 +154,7 @@ const styles = StyleSheet.create({
   },
   workoutName: {
     fontSize: 14,
-    fontWeight: "bold",
+    fontFamily: "HostGrotesk-Medium",
     marginBottom: 5,
   },
   infoText: {
