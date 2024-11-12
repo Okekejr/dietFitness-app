@@ -15,33 +15,50 @@ import { API_URL } from "@/constants/apiUrl";
 import {
   calculateDaysBetweenDates,
   workoutDays,
-  distributeWorkoutsAcrossWeek,
+  distributeWorkoutsAndDietsAcrossWeek,
 } from "@/utils";
-import { ProgressBar } from "react-native-paper";
-import { AssignedWorkoutT, WorkoutsT } from "@/types";
+import {
+  AssignedWorkoutT,
+  AssignedDietT,
+  WorkoutsT,
+  DietPlanEntity,
+} from "@/types";
 import useStreak from "@/hooks/useStreak";
 import Header from "@/components/header/header";
 import CustomText from "@/components/ui/customText";
-import { Ionicons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 
 export default function HomeScreen() {
   const router = useRouter();
   const { userData, refetchUserData } = useUserData();
   const [userId, setUserId] = useState("");
-  const [workoutSchedule, setWorkoutSchedule] = useState<AssignedWorkoutT[]>(
-    []
-  );
+  const [schedule, setSchedule] = useState<
+    { day: number; workouts: AssignedWorkoutT[]; diets: AssignedDietT[] }[]
+  >([]);
   const [selectedDay, setSelectedDay] = useState<number>();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const { streak, streakNumber } = useStreak(userId);
+
+  // Retry mechanism to refetch user data until it loads
+  const fetchUserDataWithRetry = async (retryCount = 3) => {
+    for (let i = 0; i < retryCount; i++) {
+      await refetchUserData();
+      if (userData) break;
+      await new Promise((resolve) => setTimeout(resolve, 500)); // Add delay between retries
+    }
+  };
 
   useEffect(() => {
     if (userData) {
       setUserId(userData.user_id);
+      setLoading(false);
+    } else {
+      fetchUserDataWithRetry(); // Retry loading userData if undefined
     }
   }, [userData]);
 
   useEffect(() => {
+    // Load schedule only when userId is ready
     if (userId) {
       refetchUserData();
       generateOrFetchWorkoutPlan();
@@ -63,138 +80,167 @@ export default function HomeScreen() {
         today
       );
 
-      // Fetch past used workouts from the database
-      const pastUsedWorkoutsResponse = await fetch(
-        `${API_URL}/api/user/getPastUsedWorkouts?userId=${userId}`
-      );
+      // Fetch past used workouts and diets from the database
+      const [pastUsedWorkoutsResponse, pastUsedDietsResponse] =
+        await Promise.all([
+          fetch(`${API_URL}/api/user/getPastUsedWorkouts?userId=${userId}`),
+          fetch(`${API_URL}/api/userDiet/getPastUsedDiets?userId=${userId}`),
+        ]);
 
-      if (!pastUsedWorkoutsResponse.ok) {
+      if (!pastUsedWorkoutsResponse.ok || !pastUsedDietsResponse) {
         const errorData = await pastUsedWorkoutsResponse.json();
-        console.error("Error fetching past used workouts:", errorData);
+        console.error("Error fetching past data:", errorData);
         return [];
       }
 
-      const pastUsedWorkouts: WorkoutsT[] =
-        await pastUsedWorkoutsResponse.json();
+      const pastUsedWorkouts: WorkoutsT[] = pastUsedWorkoutsResponse.ok
+        ? await pastUsedWorkoutsResponse.json()
+        : [];
+      const pastUsedDiets: DietPlanEntity[] = pastUsedDietsResponse.ok
+        ? await pastUsedDietsResponse.json()
+        : [];
 
-      // Try fetching the workout schedule for the current week
-      let workoutScheduleResponse = await fetch(
-        `${API_URL}/api/user/getWorkoutSchedule?userId=${userId}`
+      // Fetch schedule for the current week
+      let scheduleResponse = await fetch(
+        `${API_URL}/api/user/getSchedule?userId=${userId}`
       );
 
-      if (!workoutScheduleResponse.ok) {
-        const errorData = await workoutScheduleResponse.json();
-        console.error("Error fetching workout Schedule:", errorData);
-        return [];
+      let weeklySchedule = scheduleResponse.ok
+        ? await scheduleResponse.json()
+        : [];
+
+      let currentWeek = userData.current_workout_week;
+
+      // Check if no schedule exists
+      if (!weeklySchedule || weeklySchedule.length === 0) {
+        // If schedule is empty, generate a new one
+        const workoutsPerWeek = workoutDays(userData.activity_level);
+        const { assignedWorkouts, assignedDiets } =
+          distributeWorkoutsAndDietsAcrossWeek({
+            workoutPlan: userData.workout_plan,
+            dietPlan: userData.diet_plan,
+            workoutsPerWeek,
+            currentWeek,
+            pastUsedWorkouts,
+            pastUsedDiets,
+          });
+
+        // Generate the new weekly schedule
+        weeklySchedule = Array.from({ length: 7 }, (_, i) => ({
+          day: i + 1,
+          workouts: assignedWorkouts.filter((w) => w.day === i + 1),
+          diets: assignedDiets.filter((d) => d.day === i + 1),
+        }));
+
+        // Save the new schedule
+        await saveSchedule(userId, weeklySchedule, currentWeek, today);
       }
 
-      let workoutSchedule = await workoutScheduleResponse.json();
-
-      if (workoutSchedule.length === 0) {
-        console.log("No workout schedule found for the current week.");
-      }
-
-      let currentWorkoutWeek = userData.current_workout_week;
-
-      // Create a new workout schedule if one doesn't exist
-      if (!workoutSchedule || workoutSchedule.length === 0) {
-        const workoutsPerWeek = workoutDays(userData.activity_level); // Calculate workouts per week
-        workoutSchedule = distributeWorkoutsAcrossWeek({
-          workoutPlan: userData.workout_plan,
-          workoutsPerWeek,
-          currentWorkoutWeek,
-          pastUsedWorkouts,
-        });
-
-        await saveWorkoutSchedule(
-          userId,
-          workoutSchedule,
-          currentWorkoutWeek,
-          today
-        );
-      }
-
-      // If a week has passed, increment the workout week and generate a new schedule
       if (
         daysSinceWeekStart >= 7 &&
-        currentWorkoutWeek > userData.current_workout_week
+        currentWeek > userData.current_workout_week
       ) {
-        currentWorkoutWeek += 1;
+        currentWeek += 1; // Increment the current week number
         userData.week_start_date = today.toISOString();
 
-        const newWorkoutSchedule = distributeWorkoutsAcrossWeek({
-          workoutPlan: userData.workout_plan,
-          workoutsPerWeek: workoutDays(userData.activity_level),
-          currentWorkoutWeek,
-          pastUsedWorkouts,
-        });
+        const workoutsPerWeek = workoutDays(userData.activity_level);
+        const { assignedWorkouts, assignedDiets } =
+          distributeWorkoutsAndDietsAcrossWeek({
+            workoutPlan: userData.workout_plan,
+            dietPlan: userData.diet_plan,
+            workoutsPerWeek,
+            currentWeek,
+            pastUsedWorkouts,
+            pastUsedDiets,
+          });
 
-        await saveWorkoutSchedule(
-          userId,
-          newWorkoutSchedule,
-          currentWorkoutWeek,
-          today
-        );
-        workoutSchedule = newWorkoutSchedule;
-      } else {
-        console.log("Already workout for the week:");
+        // Generate the new weekly schedule
+        weeklySchedule = Array.from({ length: 7 }, (_, i) => ({
+          day: i + 1,
+          workouts: assignedWorkouts.filter((w) => w.day === i + 1),
+          diets: assignedDiets.filter((d) => d.day === i + 1),
+        }));
+
+        // Save the new schedule
+        await saveSchedule(userId, weeklySchedule, currentWeek, today);
       }
 
-      setWorkoutSchedule(workoutSchedule);
+      // Set the fetched or newly generated schedule
+      setSchedule(weeklySchedule);
     } catch (error) {
-      console.error("Error generating or fetching workout plan:", error);
+      console.error("Error generating or fetching schedule:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const saveWorkoutSchedule = async (
+  const saveSchedule = async (
     userId: string,
-    schedule: AssignedWorkoutT[],
+    schedule: {
+      day: number;
+      workouts: AssignedWorkoutT[];
+      diets: AssignedDietT[];
+    }[],
     weekNumber: number,
     startDate: Date
   ) => {
     try {
-      // Save the new workout schedule
-      const saveWorkout = await fetch(
-        `${API_URL}/api/user/saveWorkoutSchedule`,
+      // Save the full schedule (workouts + diets)
+      const saveScheduleResponse = await fetch(
+        `${API_URL}/api/user/saveSchedule`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             userId,
-            currentWorkoutWeek: weekNumber,
+            currentWeek: weekNumber,
             weekStartDate: startDate.toISOString(),
-            workoutSchedule: schedule,
+            schedule,
           }),
         }
       );
 
-      if (saveWorkout.ok) {
-        // Save the used workouts
+      if (saveScheduleResponse.ok) {
+        // Save the used workouts after the schedule is saved
         await fetch(`${API_URL}/api/user/saveUsedWorkouts`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             userId,
-            usedWorkouts: schedule.map((workout) => ({
-              workoutId: workout.workout.id,
-              weekNumber,
-              dateAssigned: startDate.toISOString(),
-            })),
+            usedWorkouts: schedule.flatMap((day) =>
+              day.workouts.map((workout) => ({
+                workoutId: workout.workout.id,
+                weekNumber,
+                dateAssigned: startDate.toISOString(),
+              }))
+            ),
+          }),
+        });
+
+        // Save the used diets after the schedule is saved
+        await fetch(`${API_URL}/api/userDiet/saveUsedDiets`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userId,
+            usedDiets: schedule.flatMap((day) =>
+              day.diets.map((diet) => ({
+                dietId: diet.diet.id,
+                weekNumber,
+                dateAssigned: startDate.toISOString(),
+              }))
+            ),
           }),
         });
       }
     } catch (error) {
-      console.error("Error saving workout schedule:", error);
+      console.error("Error saving schedule:", error);
     }
   };
 
   const handleDaySelect = (day: number) => setSelectedDay(day);
 
-  const workoutsForDay = workoutSchedule.filter(
-    (workout) => workout.day === selectedDay
-  );
+  const itemsForDay = schedule.find((item) => item.day === selectedDay);
 
   const handleWorkoutClick = (id: number) => {
     router.push({
@@ -203,44 +249,78 @@ export default function HomeScreen() {
     });
   };
 
-  const renderDayButton = (day: number) => (
-    <TouchableOpacity
-      key={day}
-      onPress={() => handleDaySelect(day)}
-      style={[
-        styles.calendarCard,
-        selectedDay === day && styles.selectedCalendarCard,
-      ]}
-    >
-      <View style={styles.dayInfoContainer}>
-        <View
-          style={[
-            styles.borderIndicator,
-            { backgroundColor: day === selectedDay ? "green" : "#E0E0E0" },
-          ]}
-        />
-        <CustomText style={styles.dayText}>Day {day}</CustomText>
-      </View>
+  const handleDietClick = (id: number) => {
+    router.push({
+      pathname: `/diet/[id]`,
+      params: { id: id.toString() },
+    });
+  };
 
-      {/* Filter workouts for this specific day */}
-      {workoutSchedule.some((work) => work.day === day) ? (
-        workoutSchedule
-          .filter((work) => work.day === day)
-          .map((work) => (
-            <View key={work.workout.id} style={styles.workoutDetails}>
-              <CustomText style={styles.workoutName}>
-                {work.workout.name}
-              </CustomText>
-              <CustomText style={styles.workoutDuration}>
-                {work.workout.duration} mins
-              </CustomText>
-            </View>
-          ))
-      ) : (
-        <CustomText style={styles.restDayText}>Rest day</CustomText>
-      )}
-    </TouchableOpacity>
-  );
+  const renderDayButton = (day: number) => {
+    // Find the schedule for the selected day
+    const itemsForDay = schedule.find((item) => item.day === day);
+
+    // Check if there's no workout or diet for the day
+    const isRestDay =
+      !itemsForDay ||
+      (itemsForDay.workouts.length === 0 && itemsForDay.diets.length === 0);
+
+    return (
+      <TouchableOpacity
+        key={day}
+        onPress={() => handleDaySelect(day)}
+        style={[
+          styles.calendarCard,
+          selectedDay === day && styles.selectedCalendarCard,
+        ]}
+      >
+        <View style={styles.dayInfoContainer}>
+          <View
+            style={[
+              styles.borderIndicator,
+              { backgroundColor: day === selectedDay ? "green" : "#E0E0E0" },
+            ]}
+          />
+          <CustomText style={styles.dayText}>
+            Day {day} {isRestDay ? "- Rest Day" : ""}
+          </CustomText>
+        </View>
+
+        {/* Display workouts if available */}
+        {itemsForDay && itemsForDay.workouts.length > 0
+          ? itemsForDay.workouts.map((workout) => (
+              <View key={workout.workout.id} style={styles.workoutDetails}>
+                <CustomText style={styles.workoutName}>
+                  {workout.workout.name}
+                </CustomText>
+                <CustomText style={styles.workoutDuration}>
+                  {workout.workout.duration} mins
+                </CustomText>
+              </View>
+            ))
+          : null}
+
+        {/* Display diets if available */}
+        {itemsForDay && itemsForDay.diets.length > 0
+          ? itemsForDay.diets.map((diet) => (
+              <View key={diet.diet.id} style={styles.workoutDetails}>
+                <CustomText style={styles.workoutName}>
+                  {diet.diet.name}
+                </CustomText>
+                <CustomText style={styles.workoutDuration}>
+                  {diet.diet.meal_type}
+                </CustomText>
+              </View>
+            ))
+          : null}
+
+        {/* If no workout or diet for the day */}
+        {isRestDay && (
+          <CustomText style={styles.restDayText}>Rest day</CustomText>
+        )}
+      </TouchableOpacity>
+    );
+  };
 
   const renderWorkout = ({ item }: { item: AssignedWorkoutT }) => (
     <TouchableOpacity
@@ -249,6 +329,18 @@ export default function HomeScreen() {
     >
       <CustomText style={styles.workoutName}>{item.workout.name}</CustomText>
       <CustomText>{item.workout.duration} mins</CustomText>
+    </TouchableOpacity>
+  );
+
+  const renderDiet = ({ item }: { item: AssignedDietT }) => (
+    <TouchableOpacity
+      style={styles.dietCard}
+      onPress={() => handleDietClick(item.diet.id)}
+    >
+      <CustomText style={styles.dietName}>{item.diet.name}</CustomText>
+      <CustomText>Meal type: {item.diet.meal_type}</CustomText>
+      <CustomText>Description: {item.diet.description} calories</CustomText>
+      <CustomText>Calories: {item.diet.calories} kcal</CustomText>
     </TouchableOpacity>
   );
 
@@ -289,23 +381,32 @@ export default function HomeScreen() {
         </ScrollView>
 
         {/* Workouts for Selected Day */}
-        <View style={styles.workoutListContainer}>
-          <CustomText style={styles.heading}>
-            Workouts for Day {selectedDay}
-          </CustomText>
-          {workoutsForDay.length > 0 ? (
+        <View style={{ marginBottom: 24, marginTop: 12 }}>
+          <CustomText style={styles.sectionTitle}>Your Workouts</CustomText>
+          {itemsForDay && itemsForDay.workouts.length > 0 ? (
             <FlatList
-              data={workoutsForDay}
               scrollEnabled={false}
-              keyExtractor={(item) => item.workout.id.toString()}
+              data={itemsForDay.workouts}
               renderItem={renderWorkout}
+              keyExtractor={(item) => item.workout.id.toString()}
             />
           ) : (
-            <CustomText style={styles.emptyText}>
-              No workouts assigned for this day.
-            </CustomText>
+            <CustomText>No workouts scheduled for this day.</CustomText>
           )}
         </View>
+
+        {/* Diets for Selected Day */}
+        <CustomText style={styles.sectionTitle}>Your Meals</CustomText>
+        {itemsForDay && itemsForDay.diets.length > 0 ? (
+          <FlatList
+            scrollEnabled={false}
+            data={itemsForDay.diets}
+            renderItem={renderDiet}
+            keyExtractor={(item) => item.diet.id.toString()}
+          />
+        ) : (
+          <CustomText>No meals scheduled for this day.</CustomText>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -335,7 +436,22 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 10,
   },
-
+  dietCard: {
+    backgroundColor: "#e5e5e5",
+    padding: 15,
+    gap: 8,
+    marginBottom: 10,
+    borderRadius: 10,
+  },
+  dietName: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontFamily: "HostGrotesk-Medium",
+    marginVertical: 10,
+  },
   borderIndicator: {
     width: 2,
     height: "100%",

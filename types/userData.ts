@@ -1,3 +1,4 @@
+import { DietPlanEntity } from "./diet";
 import { WorkoutsT } from "./workout";
 
 export interface UserDataT {
@@ -18,6 +19,7 @@ export interface UserDataT {
   current_workout_week: number;
   week_start_date: string;
   streak: number;
+  diet_plan: DietPlanEntity[];
 }
 
 export interface WorkoutBreakdownT {

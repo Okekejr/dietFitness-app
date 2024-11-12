@@ -35,6 +35,12 @@ export interface DietPlanEntity {
   activity_level: string;
   dietary_restrictions?: string[] | null;
 }
+
+export interface AssignedDietT {
+  day: number; // Represents the day of the week (1 for Monday, 7 for Sunday)
+  diet: DietPlanEntity; // The diet assigned for this day
+  week: number; // The week number this diet is assigned for
+}
 export interface WorkoutData {
   workout_plan?: WorkoutPlanEntity[] | null;
   diet_plan?: DietPlanEntity[] | null;

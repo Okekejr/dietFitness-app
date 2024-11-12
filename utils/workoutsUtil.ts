@@ -1,4 +1,9 @@
-import { AssignedWorkoutT, WorkoutsT } from "@/types";
+import {
+  AssignedWorkoutT,
+  AssignedDietT,
+  WorkoutsT,
+  DietPlanEntity,
+} from "@/types";
 
 export const workoutDays = (activityLevel: string): number => {
   // Determine the number of workouts per month based on activity level
@@ -23,28 +28,39 @@ export const calculateDaysBetweenDates = (
 
 interface EvenWorkoutPerWeekT {
   workoutPlan: WorkoutsT[];
+  dietPlan: DietPlanEntity[];
   workoutsPerWeek: number;
-  currentWorkoutWeek: number; // Add currentWorkoutWeek as an input parameter
-  pastUsedWorkouts: WorkoutsT[]; // Add pastUsedWorkouts to exclude from the new week
+  currentWeek: number;
+  pastUsedWorkouts: WorkoutsT[];
+  pastUsedDiets: DietPlanEntity[];
 }
 
-export const distributeWorkoutsAcrossWeek = ({
+export const distributeWorkoutsAndDietsAcrossWeek = ({
   workoutPlan,
   workoutsPerWeek,
-  currentWorkoutWeek,
+  dietPlan,
+  currentWeek,
   pastUsedWorkouts,
-}: EvenWorkoutPerWeekT): AssignedWorkoutT[] => {
+  pastUsedDiets, // Include pastUsedDiets
+}: EvenWorkoutPerWeekT): {
+  assignedWorkouts: AssignedWorkoutT[];
+  assignedDiets: AssignedDietT[];
+} => {
   const assignedWorkouts: AssignedWorkoutT[] = [];
-  const availableDays = [1, 2, 3, 4, 5, 6, 7]; // Representing Day 1 to Day 7
-  let lastAssignedDay = -1; // Initialize to an invalid day to start
+  const assignedDiets: AssignedDietT[] = [];
+  const availableDays = [1, 2, 3, 4, 5, 6, 7];
+  let lastAssignedDay = -1;
 
-  // Filter out workouts that were used in past weeks to get only the new ones
+  // Filter out workouts and diets used in past weeks
   const newWorkouts = workoutPlan.filter(
     (workout) =>
       !pastUsedWorkouts.some((usedWorkout) => usedWorkout.id === workout.id)
   );
+  const newDiets = dietPlan.filter(
+    (diet) => !pastUsedDiets.some((usedDiet) => usedDiet.id === diet.id)
+  );
 
-  // If there are not enough new workouts to cover the week, recycle the remaining workouts
+  // Select workouts
   const workoutsToUse =
     newWorkouts.length >= workoutsPerWeek
       ? newWorkouts.slice(0, workoutsPerWeek)
@@ -53,30 +69,37 @@ export const distributeWorkoutsAcrossWeek = ({
           ...workoutPlan.slice(0, workoutsPerWeek - newWorkouts.length),
         ];
 
-  // Distribute workouts randomly across the available days
   workoutsToUse.forEach((workout) => {
-    // Filter available days to avoid assigning workouts on consecutive days
     const nonConsecutiveDays = availableDays.filter(
       (day) => Math.abs(day - lastAssignedDay) > 1
     );
     const possibleDays =
       nonConsecutiveDays.length > 0 ? nonConsecutiveDays : availableDays;
 
-    // Randomly pick a day from the possible days
     const randomDayIndex = Math.floor(Math.random() * possibleDays.length);
     const selectedDay = possibleDays[randomDayIndex];
 
-    // Remove the selected day from availableDays to prevent it from being used again
     availableDays.splice(availableDays.indexOf(selectedDay), 1);
-    lastAssignedDay = selectedDay; // Update lastAssignedDay to the day we just assigned
+    lastAssignedDay = selectedDay;
 
-    // Assign the workout to the selected day
     assignedWorkouts.push({
       day: selectedDay,
       workout: workout,
-      week: currentWorkoutWeek,
+      week: currentWeek,
     });
   });
 
-  return assignedWorkouts;
+  // Assign diets to each day of the week, avoiding past-used diets
+  availableDays.forEach((day) => {
+    const randomDietIndex = Math.floor(Math.random() * newDiets.length);
+    const selectedDiet = newDiets[randomDietIndex];
+
+    assignedDiets.push({
+      day: day,
+      diet: selectedDiet,
+      week: currentWeek,
+    });
+  });
+
+  return { assignedWorkouts, assignedDiets };
 };
