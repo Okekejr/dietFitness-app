@@ -139,7 +139,10 @@ export default function ProfileScreen() {
         <Ionicons name="chevron-forward" size={24} color="#000" />
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.box}>
+      <TouchableOpacity
+        style={styles.box}
+        onPress={() => router.push("/helpScreen")}
+      >
         <Ionicons name="help-circle-outline" size={24} color="#000" />
         <CustomText style={styles.boxText}>Help and Info</CustomText>
         <Ionicons name="chevron-forward" size={24} color="#000" />
