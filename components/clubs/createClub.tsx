@@ -17,6 +17,7 @@ import * as Sharing from "expo-sharing";
 import { useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import CustomText from "../ui/customText";
+import * as Haptics from "expo-haptics";
 
 interface CreateClubProps {
   pickImage: () => Promise<void>;
@@ -136,12 +137,14 @@ export const CreateClub = ({
           <TextInput
             style={styles.input}
             placeholder="Club Name"
+            placeholderTextColor="#c7c7c7"
             value={name}
             onChangeText={setName}
           />
           <TextInput
             style={[styles.input, styles.textArea]}
             placeholder="Club Description"
+            placeholderTextColor="#c7c7c7"
             value={description}
             onChangeText={setDescription}
             multiline
@@ -149,6 +152,7 @@ export const CreateClub = ({
           <TextInput
             style={styles.input}
             placeholder="Location (City, Area, etc.)"
+            placeholderTextColor="#c7c7c7"
             value={location}
             onChangeText={setLocation}
           />
@@ -168,7 +172,10 @@ export const CreateClub = ({
           </View>
 
           <TouchableOpacity
-            onPress={handleCreateClub}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              handleCreateClub();
+            }}
             disabled={loading}
             style={styles.button}
           >
@@ -260,7 +267,7 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 10,
     marginVertical: 10,
-    width: "80%",
+    width: "100%",
     alignItems: "center",
   },
   header: {

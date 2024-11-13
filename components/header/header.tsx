@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Image, StyleSheet, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import { useUserData } from "@/context/userDataContext";
 import { getInitials } from "@/utils";
 import CustomText from "../ui/customText";
+import * as Haptics from "expo-haptics";
 
 interface HeaderProps {
   children?: React.ReactNode;
@@ -33,6 +34,7 @@ const Header: React.FC<HeaderProps> = ({ children, headerTitle }) => {
         <TouchableOpacity
           style={styles.profileContainer}
           onPress={() => {
+            Haptics.selectionAsync();
             router.push("/profile");
             refetchUserData();
           }}

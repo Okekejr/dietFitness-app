@@ -16,6 +16,7 @@ import {
   calculateDaysBetweenDates,
   workoutDays,
   distributeWorkoutsAndDietsAcrossWeek,
+  hasMonthPassed,
 } from "@/utils";
 import {
   AssignedWorkoutT,
@@ -80,14 +81,21 @@ export default function HomeScreen() {
         today
       );
 
-      // Fetch past used workouts and diets from the database
-      const [pastUsedWorkoutsResponse, pastUsedDietsResponse] =
-        await Promise.all([
-          fetch(`${API_URL}/api/user/getPastUsedWorkouts?userId=${userId}`),
-          fetch(`${API_URL}/api/userDiet/getPastUsedDiets?userId=${userId}`),
-        ]);
+      if (hasMonthPassed(userData.week_start_date)) {
+        // Make API request here since a month has passed
+        console.log(
+          "A month has passed since the last plan, make the request."
+        );
+      } else {
+        console.log("A month hasn't passed yet.");
+      }
 
-      if (!pastUsedWorkoutsResponse.ok || !pastUsedDietsResponse) {
+      // Fetch past used workouts and diets from the database
+      const pastUsedWorkoutsResponse = await fetch(
+        `${API_URL}/api/user/getPastUsedWorkouts?userId=${userId}`
+      );
+
+      if (!pastUsedWorkoutsResponse.ok) {
         const errorData = await pastUsedWorkoutsResponse.json();
         console.error("Error fetching past data:", errorData);
         return [];
@@ -95,9 +103,6 @@ export default function HomeScreen() {
 
       const pastUsedWorkouts: WorkoutsT[] = pastUsedWorkoutsResponse.ok
         ? await pastUsedWorkoutsResponse.json()
-        : [];
-      const pastUsedDiets: DietPlanEntity[] = pastUsedDietsResponse.ok
-        ? await pastUsedDietsResponse.json()
         : [];
 
       // Fetch schedule for the current week
@@ -122,7 +127,6 @@ export default function HomeScreen() {
             workoutsPerWeek,
             currentWeek,
             pastUsedWorkouts,
-            pastUsedDiets,
           });
 
         // Generate the new weekly schedule
@@ -151,7 +155,6 @@ export default function HomeScreen() {
             workoutsPerWeek,
             currentWeek,
             pastUsedWorkouts,
-            pastUsedDiets,
           });
 
         // Generate the new weekly schedule
@@ -216,22 +219,6 @@ export default function HomeScreen() {
             ),
           }),
         });
-
-        // Save the used diets after the schedule is saved
-        await fetch(`${API_URL}/api/userDiet/saveUsedDiets`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            userId,
-            usedDiets: schedule.flatMap((day) =>
-              day.diets.map((diet) => ({
-                dietId: diet.diet.id,
-                weekNumber,
-                dateAssigned: startDate.toISOString(),
-              }))
-            ),
-          }),
-        });
       }
     } catch (error) {
       console.error("Error saving schedule:", error);
@@ -265,10 +252,17 @@ export default function HomeScreen() {
       !itemsForDay ||
       (itemsForDay.workouts.length === 0 && itemsForDay.diets.length === 0);
 
+    // Count workouts and meals
+    const workoutCount = itemsForDay ? itemsForDay.workouts.length : 0;
+    const mealCount = itemsForDay ? itemsForDay.diets.length : 0;
+
     return (
       <TouchableOpacity
         key={day}
-        onPress={() => handleDaySelect(day)}
+        onPress={() => {
+          Haptics.selectionAsync();
+          handleDaySelect(day);
+        }}
         style={[
           styles.calendarCard,
           selectedDay === day && styles.selectedCalendarCard,
@@ -286,33 +280,16 @@ export default function HomeScreen() {
           </CustomText>
         </View>
 
-        {/* Display workouts if available */}
-        {itemsForDay && itemsForDay.workouts.length > 0
-          ? itemsForDay.workouts.map((workout) => (
-              <View key={workout.workout.id} style={styles.workoutDetails}>
-                <CustomText style={styles.workoutName}>
-                  {workout.workout.name}
-                </CustomText>
-                <CustomText style={styles.workoutDuration}>
-                  {workout.workout.duration} mins
-                </CustomText>
-              </View>
-            ))
-          : null}
-
-        {/* Display diets if available */}
-        {itemsForDay && itemsForDay.diets.length > 0
-          ? itemsForDay.diets.map((diet) => (
-              <View key={diet.diet.id} style={styles.workoutDetails}>
-                <CustomText style={styles.workoutName}>
-                  {diet.diet.name}
-                </CustomText>
-                <CustomText style={styles.workoutDuration}>
-                  {diet.diet.meal_type}
-                </CustomText>
-              </View>
-            ))
-          : null}
+        {/* Short Info: Display workout and meal counts */}
+        {!isRestDay && (
+          <View style={styles.summaryContainer}>
+            <CustomText style={styles.summaryText}>
+              Today:
+              {"\n"}• {workoutCount} workout{workoutCount !== 1 && "s"}
+              {"\n"}• {mealCount} meal{mealCount !== 1 && "s"}
+            </CustomText>
+          </View>
+        )}
 
         {/* If no workout or diet for the day */}
         {isRestDay && (
@@ -325,24 +302,56 @@ export default function HomeScreen() {
   const renderWorkout = ({ item }: { item: AssignedWorkoutT }) => (
     <TouchableOpacity
       style={styles.workoutCard}
-      onPress={() => handleWorkoutClick(item.workout.id)}
+      onPress={() => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        handleWorkoutClick(item.workout.id);
+      }}
     >
-      <CustomText style={styles.workoutName}>{item.workout.name}</CustomText>
-      <CustomText>{item.workout.duration} mins</CustomText>
+      <View style={styles.dietContent}>
+        <CustomText style={styles.workoutName}>{item.workout.name}</CustomText>
+        <CustomText>Duration: {item.workout.duration} mins</CustomText>
+        <CustomText>Description: {item.workout.description}</CustomText>
+        <CustomText>Intensity: {item.workout.intensity}</CustomText>
+      </View>
+
+      {/* "Tap for more info..." aligned to bottom right */}
+      <View style={styles.moreInfoContainer}>
+        <CustomText style={styles.moreInfoText}>
+          Tap for more info...
+        </CustomText>
+      </View>
     </TouchableOpacity>
   );
 
-  const renderDiet = ({ item }: { item: AssignedDietT }) => (
-    <TouchableOpacity
-      style={styles.dietCard}
-      onPress={() => handleDietClick(item.diet.id)}
-    >
-      <CustomText style={styles.dietName}>{item.diet.name}</CustomText>
-      <CustomText>Meal type: {item.diet.meal_type}</CustomText>
-      <CustomText>Description: {item.diet.description} calories</CustomText>
-      <CustomText>Calories: {item.diet.calories} kcal</CustomText>
-    </TouchableOpacity>
-  );
+  const renderDiet = ({ item }: { item: AssignedDietT }) => {
+    if (!item.diet) {
+      return null; // or return a placeholder component if needed
+    }
+
+    return (
+      <TouchableOpacity
+        style={styles.dietCard}
+        onPress={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          handleDietClick(item.diet.id);
+        }}
+      >
+        <View style={styles.dietContent}>
+          <CustomText style={styles.dietName}>{item.diet.name}</CustomText>
+          <CustomText>Meal type: {item.diet.meal_type}</CustomText>
+          <CustomText>Description: {item.diet.description}</CustomText>
+          <CustomText>Calories: {item.diet.calories} kcal</CustomText>
+        </View>
+
+        {/* "Tap for more info..." aligned to bottom right */}
+        <View style={styles.moreInfoContainer}>
+          <CustomText style={styles.moreInfoText}>
+            Tap for more info...
+          </CustomText>
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
   if (loading) {
     return (
@@ -355,7 +364,11 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <Header>
-        <TouchableOpacity>
+        <TouchableOpacity
+          onPress={() =>
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
+          }
+        >
           <LinearGradient
             colors={["#4F46E5", "#feb47b"]}
             start={{ x: 0.9, y: 0.2 }}
@@ -397,12 +410,14 @@ export default function HomeScreen() {
 
         {/* Diets for Selected Day */}
         <CustomText style={styles.sectionTitle}>Your Meals</CustomText>
-        {itemsForDay && itemsForDay.diets.length > 0 ? (
+        {itemsForDay && itemsForDay.diets && itemsForDay.diets.length > 0 ? (
           <FlatList
             scrollEnabled={false}
             data={itemsForDay.diets}
             renderItem={renderDiet}
-            keyExtractor={(item) => item.diet.id.toString()}
+            keyExtractor={(item, index) =>
+              item.diet?.id?.toString() || `day-${item.day}-diet-${index}`
+            }
           />
         ) : (
           <CustomText>No meals scheduled for this day.</CustomText>
@@ -437,6 +452,9 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   dietCard: {
+    display: "flex",
+    flexDirection: "column",
+    width: "100%",
     backgroundColor: "#e5e5e5",
     padding: 15,
     gap: 8,
@@ -445,7 +463,20 @@ const styles = StyleSheet.create({
   },
   dietName: {
     fontSize: 18,
-    fontWeight: "bold",
+    fontFamily: "HostGrotesk-Medium",
+  },
+  dietContent: {
+    flexDirection: "column",
+    alignItems: "flex-start",
+    gap: 8,
+    flex: 1,
+  },
+  moreInfoContainer: {
+    alignSelf: "flex-end", // aligns to the right within the card
+  },
+  moreInfoText: {
+    fontSize: 12,
+    color: "#4F46E5",
   },
   sectionTitle: {
     fontSize: 20,
@@ -478,11 +509,11 @@ const styles = StyleSheet.create({
   calendar: {
     flexDirection: "row",
     marginVertical: 10,
+    gap: 10,
   },
   calendarCard: {
     width: 200,
     height: 200,
-    marginHorizontal: 5,
     padding: 15,
     borderWidth: 1,
     borderColor: "#c7c7c7",
@@ -490,7 +521,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     elevation: 3,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 5 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     justifyContent: "space-between",
@@ -527,7 +558,6 @@ const styles = StyleSheet.create({
   workoutName: {
     fontSize: 18,
     fontFamily: "HostGrotesk-Medium",
-    marginBottom: 4,
     color: "#000",
   },
   workoutDetails: {
@@ -548,6 +578,15 @@ const styles = StyleSheet.create({
     marginVertical: 5,
     backgroundColor: "#e0e0e0",
     borderRadius: 8,
+  },
+  summaryContainer: {
+    marginTop: 10,
+    paddingHorizontal: 10,
+  },
+  summaryText: {
+    fontSize: 16,
+    color: "#333",
+    fontWeight: "bold",
   },
   streakText: {
     fontSize: 18,

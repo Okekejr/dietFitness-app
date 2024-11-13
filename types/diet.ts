@@ -31,6 +31,7 @@ export interface DietPlanEntity {
   created_at: string;
   recipe_url: string;
   description: string;
+  diet_type: string;
   ingredients?: string[] | null;
   activity_level: string;
   dietary_restrictions?: string[] | null;

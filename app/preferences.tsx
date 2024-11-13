@@ -17,11 +17,10 @@ export default function PreferencesScreen() {
   const router = useRouter();
 
   const togglePreference = (key: string, value: string) => {
-    const preferences =
-      formData.preferences[key as keyof typeof formData.preferences];
-    const newPreferences = preferences.includes(value)
-      ? preferences.filter((item: string) => item !== value)
-      : [...preferences, value];
+    // Directly set the newPreferences to contain only the selected value
+    const newPreferences = [value]; // Ensures only one item can be selected at a time
+
+    // Update the form data with the new preferences
     updateFormData("preferences", {
       ...formData.preferences,
       [key]: newPreferences,

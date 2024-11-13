@@ -68,7 +68,8 @@
     "react-native-webview": "13.8.6",
     "react-native-youtube-iframe": "^2.3.0",
     "supertokens-react-native": "^5.1.2",
-    "expo-haptics": "~13.0.1"
+    "expo-haptics": "~13.0.1",
+    "expo-image": "~1.13.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

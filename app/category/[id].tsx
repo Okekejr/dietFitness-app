@@ -2,13 +2,13 @@ import React, { useEffect, useState } from "react";
 import {
   View,
   StyleSheet,
-  Image,
   FlatList,
   ActivityIndicator,
   TouchableOpacity,
   Dimensions,
   ScrollView,
 } from "react-native";
+import { Image } from "expo-image";
 import { useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { API_URL } from "@/constants/apiUrl";
@@ -18,6 +18,7 @@ import { CategoryT, WorkoutsT } from "@/types";
 import { useUserData } from "@/context/userDataContext";
 import BackButton from "@/components/ui/backButton";
 import CustomText from "@/components/ui/customText";
+import * as Haptics from "expo-haptics";
 
 const { height } = Dimensions.get("window");
 
@@ -115,8 +116,11 @@ export default function CategoryScreen() {
       {/* Full-width Image Section with Overlay */}
       <View style={styles.imageContainer}>
         <Image
-          source={{ uri: category.image_url, cache: "force-cache" }}
+          source={{ uri: category.image_url }}
           style={styles.image}
+          contentFit="cover"
+          cachePolicy="disk"
+          placeholder={require("../../assets/img/avatar-placeholder.png")}
         />
         <BackButton />
         <View style={styles.overlay}>
@@ -138,7 +142,10 @@ export default function CategoryScreen() {
         </CustomText>
         <TouchableOpacity
           style={styles.filterButton}
-          onPress={() => setFilterModalVisible(true)}
+          onPress={() => {
+            Haptics.selectionAsync();
+            setFilterModalVisible(true);
+          }}
         >
           <CustomText style={styles.filterButtonText}>Filters</CustomText>
           <Ionicons name="filter-outline" size={18} color="#fff" />

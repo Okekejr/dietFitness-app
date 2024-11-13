@@ -17,6 +17,7 @@ import { useUserData } from "@/context/userDataContext";
 import { useQuery } from "@tanstack/react-query";
 import { CompletedWorkout, OverviewStatsT } from "@/types";
 import CustomText from "@/components/ui/customText";
+import * as Haptics from "expo-haptics";
 
 const { width } = Dimensions.get("window");
 const Tabs = ["Overview", "History", "Achievements"];
@@ -86,7 +87,10 @@ export default function SummaryScreen() {
         {Tabs.map((tab, index) => (
           <TouchableOpacity
             key={index}
-            onPress={() => handleTabPress(index)}
+            onPress={() => {
+              Haptics.selectionAsync();
+              handleTabPress(index);
+            }}
             style={styles.tab}
           >
             <CustomText

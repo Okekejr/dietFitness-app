@@ -1,8 +1,11 @@
 import React, { FC, memo } from "react";
-import { View, TouchableOpacity, Image, StyleSheet } from "react-native";
+import { View, TouchableOpacity, StyleSheet } from "react-native";
+import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { CategoryT } from "@/types";
 import CustomText from "../ui/customText";
+import * as Haptics from "expo-haptics";
+
 interface CategoriesCompProps {
   category: CategoryT;
 }
@@ -10,17 +13,24 @@ interface CategoriesCompProps {
 const CategoriesComp: FC<CategoriesCompProps> = ({ category }) => {
   const router = useRouter();
 
+  const handleRoute = () => {
+    router.push({ pathname: `/category/[id]`, params: { id: category.id } });
+  };
+
   return (
     <TouchableOpacity
       style={styles.card}
-      onPress={() =>
-        router.push({ pathname: `/category/[id]`, params: { id: category.id } })
-      }
+      onPress={() => {
+        Haptics.selectionAsync();
+        handleRoute();
+      }}
     >
       <Image
-        source={{ uri: category.image_url, cache: "force-cache" }}
+        source={{ uri: category.image_url }}
         style={styles.image}
-        resizeMode="cover"
+        contentFit="cover"
+        cachePolicy="disk"
+        placeholder={require("../../assets/img/avatar-placeholder.png")}
       />
 
       <View style={styles.textContainer}>

@@ -4,9 +4,9 @@ import {
   StyleSheet,
   FlatList,
   TouchableOpacity,
-  Image,
   ActivityIndicator,
 } from "react-native";
+import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { API_URL } from "@/constants/apiUrl";
 import { WorkoutsT } from "@/types/workout";
@@ -14,9 +14,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import CustomText from "@/components/ui/customText";
 import { DietPlanEntity, recommendationData } from "@/types";
 import { workoutDays } from "@/utils";
+import { useUserData } from "@/context/userDataContext";
+import * as Haptics from "expo-haptics";
 
 export default function RecommendationsScreen() {
   const router = useRouter();
+  const { refetchUserData } = useUserData();
   const [loading, setLoading] = useState(true);
   const [recommendations, setRecommendations] = useState<WorkoutsT[]>([]);
   const [workoutData, setWorkoutData] = useState<recommendationData>();
@@ -54,7 +57,13 @@ export default function RecommendationsScreen() {
 
   const renderRecommendationCard = ({ item }: { item: WorkoutsT }) => (
     <View style={styles.card}>
-      <Image source={{ uri: item.image_url }} style={styles.cardImage} />
+      <Image
+        source={{ uri: item.image_url }}
+        style={styles.cardImage}
+        contentFit="cover"
+        cachePolicy="disk"
+        placeholder={require("../assets/img/avatar-placeholder.png")}
+      />
       <View style={styles.cardContent}>
         <CustomText style={styles.cardTitle}>{item.name}</CustomText>
         <CustomText style={styles.cardDetail}>
@@ -72,7 +81,13 @@ export default function RecommendationsScreen() {
 
   const renderMealCard = ({ item }: { item: any }) => (
     <View style={styles.mealCard}>
-      <Image source={{ uri: item.image_url }} style={styles.cardImage} />
+      <Image
+        source={{ uri: item.image_url }}
+        style={styles.cardImage}
+        contentFit="cover"
+        cachePolicy="disk"
+        placeholder={require("../assets/img/avatar-placeholder.png")}
+      />
       <View style={styles.cardContent}>
         <CustomText style={styles.cardTitle}>{item.name}</CustomText>
         <CustomText style={styles.cardDetail}>
@@ -92,6 +107,11 @@ export default function RecommendationsScreen() {
       </View>
     );
   }
+
+  const handleRoute = () => {
+    refetchUserData();
+    router.replace("/"); // User found
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -149,7 +169,13 @@ export default function RecommendationsScreen() {
         </CustomText>
       </View>
 
-      <TouchableOpacity style={styles.button} onPress={() => router.push("/")}>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          handleRoute();
+        }}
+      >
         <CustomText style={styles.buttonText}>Get Started</CustomText>
       </TouchableOpacity>
     </SafeAreaView>

@@ -20,6 +20,7 @@ import { ClubData } from "@/types";
 import { useRouter } from "expo-router";
 import JoinClub from "@/components/clubs/joinClub";
 import CustomText from "@/components/ui/customText";
+import * as Haptics from "expo-haptics";
 
 const ClubScreen = () => {
   const [name, setName] = useState<string>("");
@@ -168,12 +169,21 @@ const ClubScreen = () => {
         {/* Create Club and Join Club Buttons */}
         <TouchableOpacity
           style={styles.button}
-          onPress={() => setCreateModalVisible(true)}
+          onPress={() => {
+            Haptics.selectionAsync();
+            setCreateModalVisible(true);
+          }}
         >
           <CustomText style={styles.buttonText}>Create a Club</CustomText>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={handleJoinClub} style={styles.buttonJoin}>
+        <TouchableOpacity
+          onPress={() => {
+            Haptics.selectionAsync();
+            handleJoinClub();
+          }}
+          style={styles.buttonJoin}
+        >
           <CustomText style={styles.buttonText}>Join a Club</CustomText>
         </TouchableOpacity>
       </View>

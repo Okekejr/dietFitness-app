@@ -10,6 +10,7 @@ import {
   Dimensions,
 } from "react-native";
 import CustomText from "../ui/customText";
+import * as Haptics from "expo-haptics";
 
 interface FilterModalProps {
   visible: boolean;
@@ -72,9 +73,10 @@ const FilterModal: FC<FilterModalProps> = ({
                             option
                           ) && styles.selectedFilterButton,
                         ]}
-                        onPress={() =>
-                          handleFilterChange(type as keyof Filters, option)
-                        }
+                        onPress={() => {
+                          Haptics.selectionAsync();
+                          handleFilterChange(type as keyof Filters, option);
+                        }}
                       >
                         <CustomText
                           style={[
@@ -96,7 +98,10 @@ const FilterModal: FC<FilterModalProps> = ({
             <View style={styles.actionButtons}>
               <TouchableOpacity
                 style={styles.resetButton}
-                onPress={handleResetFilters}
+                onPress={() => {
+                  Haptics.selectionAsync();
+                  handleResetFilters();
+                }}
               >
                 <CustomText style={styles.resetButtonText}>
                   Reset Filters
@@ -105,14 +110,23 @@ const FilterModal: FC<FilterModalProps> = ({
 
               <TouchableOpacity
                 style={styles.applyButton}
-                onPress={() => onApplyFilters(localFilters)}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  onApplyFilters(localFilters);
+                }}
               >
                 <CustomText style={styles.applyButtonText}>
                   Apply Filters
                 </CustomText>
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => {
+                  Haptics.selectionAsync();
+                  onClose();
+                }}
+              >
                 <CustomText style={styles.closeButtonText}>Close</CustomText>
               </TouchableOpacity>
             </View>

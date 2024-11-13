@@ -1,5 +1,6 @@
 import React, { FC, useEffect, useState } from "react";
-import { View, Image, TouchableOpacity, StyleSheet } from "react-native";
+import { View, TouchableOpacity, StyleSheet } from "react-native";
+import { Image } from "expo-image";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { API_URL } from "@/constants/apiUrl";
 import { WorkoutsT } from "@/types/workout";
@@ -113,8 +114,11 @@ const WorkoutCard: FC<WorkoutCardProps> = ({ workout, userId }) => {
   return (
     <TouchableOpacity style={styles.workoutCard} onPress={handleNavigate}>
       <Image
-        source={{ uri: workout.image_url, cache: "force-cache" }}
+        source={{ uri: workout.image_url }}
         style={styles.workoutImage}
+        contentFit="cover"
+        cachePolicy="disk"
+        placeholder={require("../../assets/img/avatar-placeholder.png")}
       />
       <View style={styles.workoutInfo}>
         <CustomText style={styles.workoutName}>{workout.name}</CustomText>

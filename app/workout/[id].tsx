@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
   View,
-  Image,
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
@@ -9,6 +8,7 @@ import {
   ScrollView,
   Modal,
 } from "react-native";
+import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { API_URL } from "@/constants/apiUrl";
@@ -20,6 +20,7 @@ import { useUserData } from "@/context/userDataContext";
 import { useQueryClient } from "@tanstack/react-query";
 import BackButton from "@/components/ui/backButton";
 import CustomText from "@/components/ui/customText";
+import * as Haptics from "expo-haptics";
 
 const { height } = Dimensions.get("window");
 
@@ -136,8 +137,6 @@ const WorkoutDetailsScreen = () => {
   };
 
   const handleFavorite = async () => {
-    setLoading(true);
-
     if (!workout) {
       return;
     }
@@ -167,8 +166,6 @@ const WorkoutDetailsScreen = () => {
       }
     } catch (error) {
       console.error("Error updating favorite status:", error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -216,13 +213,19 @@ const WorkoutDetailsScreen = () => {
       {/* Workout Image with Back Button and Favorite Icon */}
       <View style={styles.imageContainer}>
         <Image
-          source={{ uri: workout.image_url, cache: "force-cache" }}
+          source={{ uri: workout.image_url }}
           style={styles.image}
+          contentFit="cover"
+          cachePolicy="disk"
+          placeholder={require("../../assets/img/avatar-placeholder.png")}
         />
         <BackButton />
         <TouchableOpacity
           style={styles.favoriteButton}
-          onPress={handleFavorite}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            handleFavorite();
+          }}
         >
           <MaterialIcons
             name={isFavorite ? "bookmark" : "bookmark-outline"}
@@ -344,6 +347,7 @@ const styles = StyleSheet.create({
   workoutName: {
     fontSize: 24,
     fontFamily: "HostGrotesk-Medium",
+    color: "#333",
     marginBottom: 20,
   },
   infoText: {

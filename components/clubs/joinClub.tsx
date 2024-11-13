@@ -16,6 +16,7 @@ import { API_URL } from "@/constants/apiUrl";
 import { useUserData } from "@/context/userDataContext";
 import BackButton from "../ui/backButton";
 import CustomText from "../ui/customText";
+import * as Haptics from "expo-haptics";
 
 interface JoinClubProps {
   onClose: () => void;
@@ -141,7 +142,10 @@ const JoinClub = ({ onClose }: JoinClubProps) => {
           />
           {scanned && (
             <TouchableOpacity
-              onPress={() => setScanned(false)}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setScanned(false);
+              }}
               style={styles.scanButton}
             >
               <CustomText style={styles.scanButtonText}>Scan Again</CustomText>
@@ -153,13 +157,17 @@ const JoinClub = ({ onClose }: JoinClubProps) => {
           <TextInput
             style={styles.input}
             placeholder="Enter Invite Code"
+            placeholderTextColor="#c7c7c7"
             value={code}
             onChangeText={setCode}
             autoCapitalize="characters"
           />
           <TouchableOpacity
             style={styles.submitButton}
-            onPress={() => handleJoinClub(code)}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              handleJoinClub(code);
+            }}
           >
             <CustomText style={styles.submitButtonText}>Join Club</CustomText>
           </TouchableOpacity>
@@ -187,6 +195,7 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 10,
     alignItems: "center",
+    width: "100%",
   },
   submitButtonText: {
     color: "#FFF",
