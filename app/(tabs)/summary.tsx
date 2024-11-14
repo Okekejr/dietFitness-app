@@ -18,6 +18,7 @@ import { useQuery } from "@tanstack/react-query";
 import { CompletedWorkout, OverviewStatsT } from "@/types";
 import CustomText from "@/components/ui/customText";
 import * as Haptics from "expo-haptics";
+import { Ionicons } from "@expo/vector-icons";
 
 const { width } = Dimensions.get("window");
 const Tabs = ["Overview", "History", "Achievements"];
@@ -80,7 +81,15 @@ export default function SummaryScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Header headerTitle="Summary" />
+      <Header headerTitle="Summary">
+        <TouchableOpacity
+          onPress={() =>
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
+          }
+        >
+          <Ionicons name="add" size={24} color="#000" />
+        </TouchableOpacity>
+      </Header>
 
       {/* Tabs */}
       <View style={styles.tabsContainer}>

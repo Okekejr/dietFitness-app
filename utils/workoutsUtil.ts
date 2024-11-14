@@ -104,12 +104,19 @@ export const distributeWorkoutsAndDietsAcrossWeek = ({
 
   workoutDays.forEach((day) => {
     const workoutMeals = [];
-    for (let i = 0; i < 2; i++) {
-      const randomDietIndex = Math.floor(Math.random() * dietPlan.length);
-      const selectedDiet = dietPlan[randomDietIndex];
+    const firstMealIndex = Math.floor(Math.random() * dietPlan.length);
+    const firstMeal = dietPlan[firstMealIndex];
 
-      workoutMeals.push(selectedDiet);
-    }
+    workoutMeals.push(firstMeal);
+
+    // Filter diets to ensure the second meal has a different meal_type
+    const filteredDietPlan = dietPlan.filter(
+      (diet) => diet.meal_type !== firstMeal.meal_type
+    );
+    const secondMealIndex = Math.floor(Math.random() * filteredDietPlan.length);
+    const secondMeal = filteredDietPlan[secondMealIndex];
+
+    workoutMeals.push(secondMeal);
 
     workoutMeals.forEach((diet) => {
       assignedDiets.push({

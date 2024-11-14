@@ -9,7 +9,7 @@ import {
   TouchableOpacity,
   Modal,
 } from "react-native";
-import { Href, useFocusEffect, useRouter } from "expo-router";
+import { Href, useRouter } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import { API_URL } from "@/constants/apiUrl";
 import WorkoutCompCard from "@/components/workout/workoutCompCard";
@@ -139,20 +139,6 @@ export default function WorkoutsScreen() {
     queryFn: fetchFavoritedWorkouts,
   });
 
-  // useFocusEffect(
-  //   React.useCallback(() => {
-  //     refetch();
-  //     refetchWorkouts();
-  //     refetchCompletedWorkouts();
-  //     refetchFavoritedWorkouts();
-  //   }, [
-  //     refetch,
-  //     refetchWorkouts,
-  //     refetchCompletedWorkouts,
-  //     refetchFavoritedWorkouts,
-  //   ])
-  // );
-
   // Open Search Modal
   const openSearchModal = () => {
     setSearchModalVisible(true);
@@ -258,7 +244,7 @@ export default function WorkoutsScreen() {
       {/* Search Modal */}
       <Modal visible={isSearchModalVisible} transparent animationType="slide">
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+          <SafeAreaView style={styles.modalContent}>
             {/* Header Row */}
             <View style={styles.searchHeader}>
               <TextInput
@@ -286,30 +272,27 @@ export default function WorkoutsScreen() {
             </View>
 
             {/* Search Results */}
-            {searchResults.length > 0 ? (
-              <FlatList
-                data={searchResults}
-                keyExtractor={(item) => item.id.toString()}
-                renderItem={({ item }) => (
-                  <TouchableOpacity
-                    onPress={() => handleNavigate(item.id)}
-                    style={styles.resultItem}
-                  >
-                    <CustomText style={styles.resultText}>
-                      {item.name}
-                    </CustomText>
-                    <CustomText style={styles.resultTime}>
-                      {item.duration} mins
-                    </CustomText>
-                  </TouchableOpacity>
-                )}
-              />
-            ) : (
-              <View style={styles.noResults}>
-                <CustomText>No results</CustomText>
-              </View>
-            )}
-          </View>
+            <FlatList
+              data={searchResults}
+              keyExtractor={(item) => item.id.toString()}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  onPress={() => handleNavigate(item.id)}
+                  style={styles.resultItem}
+                >
+                  <CustomText style={styles.resultText}>{item.name}</CustomText>
+                  <CustomText style={styles.resultTime}>
+                    {item.duration} mins
+                  </CustomText>
+                </TouchableOpacity>
+              )}
+              ListEmptyComponent={() => (
+                <View style={styles.noResults}>
+                  <CustomText>No results</CustomText>
+                </View>
+              )}
+            />
+          </SafeAreaView>
         </View>
       </Modal>
 
@@ -382,21 +365,23 @@ const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.5)",
-    justifyContent: "center",
+    justifyContent: "flex-start",
   },
   modalContent: {
     backgroundColor: "#fff",
-    margin: 20,
+    marginHorizontal: 20,
+    marginTop: 170,
     borderRadius: 10,
     padding: 15,
-    maxHeight: "40%",
+    maxHeight: "60%",
+    overflow: "hidden",
   },
   searchHeader: {
     flexDirection: "row",
     alignItems: "center",
     borderBottomWidth: 1,
     borderColor: "#ddd",
-    paddingBottom: 10,
+    padding: 10,
     marginBottom: 10,
   },
   modalSearchInput: {
