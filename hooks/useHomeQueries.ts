@@ -23,6 +23,7 @@ export const useHomeQueries = ({
     { day: number; workouts: AssignedWorkoutT[]; diets: AssignedDietT[] }[]
   >([]);
   const [loading, setLoading] = useState(true);
+  const [currentWeekNum, setCurrentWeekNum] = useState(0);
 
   // Retry mechanism to refetch user data until it loads
   const fetchUserDataWithRetry = async (retryCount = 3) => {
@@ -47,6 +48,8 @@ export const useHomeQueries = ({
         new Date(formattedWeekStartDate),
         today
       );
+
+      setCurrentWeekNum(userData.current_workout_week);
 
       if (hasMonthPassed(userData.week_start_date)) {
         // Make API request here since a month has passed
@@ -198,5 +201,6 @@ export const useHomeQueries = ({
     setLoading,
     fetchUserDataWithRetry,
     generateOrFetchWorkoutPlan,
+    currentWeekNum,
   };
 };

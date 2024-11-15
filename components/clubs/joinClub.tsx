@@ -133,7 +133,7 @@ const JoinClub = ({ onClose }: JoinClubProps) => {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <BackButton func={onClose} />
+        <BackButton func={onClose} icon="close" />
         <View style={styles.cameraContainer}>
           <CameraView
             style={StyleSheet.absoluteFillObject}

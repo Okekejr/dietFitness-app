@@ -1,11 +1,6 @@
 import React, { FC } from "react";
-import {
-  View,
-  StyleSheet,
-  FlatList,
-  Image,
-  TouchableOpacity,
-} from "react-native";
+import { View, StyleSheet, FlatList, TouchableOpacity } from "react-native";
+import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { format } from "date-fns";
 import { CompletedWorkout } from "@/types";
@@ -53,20 +48,29 @@ const PastWorkouts: FC<PastWorkoutsProps> = ({ completedWorkouts }) => {
       }
     >
       <Image
-        source={{ uri: item.image_url, cache: "force-cache" }}
+        source={{ uri: item.image_url }}
         style={styles.workoutImage}
+        contentFit="cover"
+        cachePolicy="disk"
+        placeholder={require("../../assets/img/avatar-placeholder.png")}
       />
       <View style={styles.workoutInfo}>
-        <CustomText style={styles.workoutName}>{item.name}</CustomText>
+        {item.name && (
+          <CustomText style={styles.workoutName}>{item.name}</CustomText>
+        )}
         <View style={styles.innerInfo}>
           <CustomText style={styles.infoText}>{item.tag} •</CustomText>
           <CustomText style={styles.infoText}>
             {item.duration} mins •
           </CustomText>
-          <CustomText style={styles.infoText}>
-            {item.activity_level} •
-          </CustomText>
-          <CustomText style={styles.infoText}>{item.intensity}</CustomText>
+          {item.activity_level && (
+            <CustomText style={styles.infoText}>
+              {item.activity_level} •
+            </CustomText>
+          )}
+          {item.intensity && (
+            <CustomText style={styles.infoText}>{item.intensity}</CustomText>
+          )}
         </View>
       </View>
     </TouchableOpacity>

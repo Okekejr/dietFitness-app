@@ -10,53 +10,57 @@ const useStreak = (userId: string) => {
       try {
         const today = new Date().toISOString().split("T")[0];
 
+        // Fetch the cached streak and last update date
+        const cachedStreak = await AsyncStorage.getItem("userStreak");
+        const cachedDate = await AsyncStorage.getItem("lastUpdateDate");
+
+        if (cachedDate === today && cachedStreak) {
+          setStreak(Number(cachedStreak));
+          return;
+        }
+
         // Fetch streak from the server
         const response = await fetch(
           `${API_URL}/api/user/streak?userId=${userId}`
         );
         const data = await response.json();
 
-        if (response.ok) {
-          const { streak: serverStreak, lastActivityDate } = data;
+        if (!response.ok) throw new Error(data.error);
 
-          // Check if the streak needs to be updated
-          const lastActivity = new Date(lastActivityDate)
-            .toISOString()
-            .split("T")[0];
+        const { streak: serverStreak, lastActivityDate } = data;
 
-          if (lastActivity !== today) {
-            const updateResponse = await fetch(
-              `${API_URL}/api/user/updateStreak`,
-              {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ userId, todayDate: today }),
-              }
-            );
+        // Update streak if needed
+        if (lastActivityDate.split("T")[0] !== today) {
+          const updateResponse = await fetch(
+            `${API_URL}/api/user/updateStreak`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ userId, todayDate: today }),
+            }
+          );
 
-            const updatedData = await updateResponse.json();
-            setStreak(updatedData.streak);
+          const updatedData = await updateResponse.json();
+          if (!updateResponse.ok) throw new Error(updatedData.error);
 
-            // Save updated streak to local storage
-            await AsyncStorage.setItem(
-              "userStreak",
-              updatedData.streak.toString()
-            );
-          } else {
-            setStreak(serverStreak);
-          }
+          setStreak(updatedData.streak);
+          await AsyncStorage.setItem(
+            "userStreak",
+            updatedData.streak.toString()
+          );
+          await AsyncStorage.setItem("lastUpdateDate", today);
+        } else {
+          setStreak(serverStreak);
         }
       } catch (error) {
         console.error("Error updating streak:", error);
       }
     };
 
-    updateStreak();
+    if (userId) updateStreak();
   }, [userId]);
 
-  let streakNumber = streak.toString();
-
-  return { streak, streakNumber };
+  return { streak };
 };
 
 export default useStreak;

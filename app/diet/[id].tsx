@@ -3,7 +3,7 @@ import CustomText from "@/components/ui/customText";
 import { API_URL } from "@/constants/apiUrl";
 import { DietPlanEntity } from "@/types";
 import { getYouTubeVideoId } from "@/utils";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams } from "expo-router";
 import { useRef } from "react";
 import { Dimensions } from "react-native";

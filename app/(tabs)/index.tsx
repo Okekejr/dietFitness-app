@@ -26,11 +26,12 @@ export default function HomeScreen() {
     schedule,
     loading,
     setLoading,
+    currentWeekNum,
     fetchUserDataWithRetry,
     generateOrFetchWorkoutPlan,
   } = useHomeQueries({ userData, userId, refetchUserData });
   const [selectedDay, setSelectedDay] = useState<number>();
-  const { streak, streakNumber } = useStreak(userId);
+  const { streak } = useStreak(userId);
 
   useEffect(() => {
     if (userData) {
@@ -203,11 +204,17 @@ export default function HomeScreen() {
       <ScrollView style={styles.innerContainer}>
         {/* Streak Progress Bar */}
         <View style={styles.streakContainer}>
-          {streakNumber && (
+          {streak > 0 && (
             <CustomText style={styles.streakText}>
-              🔥 {streakNumber} day streak
+              🔥 {streak} day streak
             </CustomText>
           )}
+        </View>
+
+        <View>
+          <CustomText style={styles.streakText}>
+            Week {currentWeekNum}
+          </CustomText>
         </View>
 
         {/* Weekly Calendar */}

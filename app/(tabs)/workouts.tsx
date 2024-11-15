@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   StyleSheet,
@@ -10,133 +10,44 @@ import {
   Modal,
 } from "react-native";
 import { Href, useRouter } from "expo-router";
-import { useQuery } from "@tanstack/react-query";
-import { API_URL } from "@/constants/apiUrl";
 import WorkoutCompCard from "@/components/workout/workoutCompCard";
 import { FlatList } from "react-native";
-import { CategoryT, WorkoutsT } from "@/types";
+import { CategoryT } from "@/types";
 import FeaturedWorkoutsComp from "@/components/featuredWorkout/featuredWorkout";
 import { useUserData } from "@/context/userDataContext";
 import Header from "@/components/header/header";
 import CategoriesComp from "@/components/categories/categoriesComp";
 import { Ionicons } from "@expo/vector-icons";
 import CustomText from "@/components/ui/customText";
-
-// Fetch function
-const fetchCategories = async () => {
-  const response = await fetch(`${API_URL}/api/categories`);
-  if (!response.ok) throw new Error("Failed to fetch categories");
-  const data = await response.json();
-  return data.slice(0, 5);
-};
-
-const fetchWorkouts = async (): Promise<WorkoutsT[]> => {
-  const response = await fetch(`${API_URL}/api/workouts`);
-  if (!response.ok) throw new Error("Failed to fetch workouts");
-  return response.json();
-};
+import { useWorkoutQueries } from "@/hooks/useWorkoutQueries";
 
 export default function WorkoutsScreen() {
   const { userData } = useUserData();
   const router = useRouter();
 
-  // State for Search Modal
-  const [isSearchModalVisible, setSearchModalVisible] = useState(false);
-  const [searchText, setSearchText] = useState("");
-  const [searchResults, setSearchResults] = useState<WorkoutsT[]>([]);
-  const searchInputRef = useRef<TextInput>(null);
-  const normalInputRef = useRef<TextInput>(null);
-
-  const fetchCompletedWorkouts = async (): Promise<WorkoutsT[]> => {
-    if (!userData) return [];
-
-    if (userData) {
-      const userId = userData.user_id;
-
-      try {
-        const response = await fetch(
-          `${API_URL}/api/completedWorkouts?userId=${userId}`
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch completed workouts");
-        }
-
-        return await response.json();
-      } catch (error) {
-        console.error("Error fetching completed workouts:", error);
-        throw error;
-      }
-    } else {
-      console.warn("No user data available.");
-      return [];
-    }
-  };
-
-  const fetchFavoritedWorkouts = async (): Promise<WorkoutsT[]> => {
-    if (!userData) return [];
-
-    if (userData) {
-      const userId = userData.user_id;
-
-      try {
-        const response = await fetch(
-          `${API_URL}/api/favorites?userId=${userId}`
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch favorited workouts");
-        }
-
-        return await response.json();
-      } catch (error) {
-        console.error("Error fetching favorited workouts:", error);
-        throw error;
-      }
-    } else {
-      console.warn("No user data available.");
-      return [];
-    }
-  };
-
   const {
-    data: categories,
-    isLoading,
+    categories,
+    completed,
+    favorited,
+    workouts,
+    isCompletedError,
+    isCompletedLoading,
     isError,
-    refetch,
-  } = useQuery({
-    queryKey: ["categories"],
-    queryFn: fetchCategories,
-  });
-
-  const {
-    data: workouts = [],
-    isLoading: isWorkoutsLoading,
-    isError: isWorkoutsError,
-    refetch: refetchWorkouts,
-  } = useQuery({
-    queryKey: ["allWorkouts"],
-    queryFn: fetchWorkouts,
-  });
-
-  const {
-    data: completed = [],
-    isLoading: isCompletedLoading,
-    isError: isCompletedError,
-    refetch: refetchCompletedWorkouts,
-  } = useQuery({
-    queryKey: ["completedWorkouts"],
-    queryFn: fetchCompletedWorkouts,
-  });
-
-  const {
-    data: favorited = [],
-    isLoading: isFavoritedLoading,
-    isError: isFavoritedError,
-    refetch: refetchFavoritedWorkouts,
-  } = useQuery({
-    queryKey: ["favoritedWorkouts"],
-    queryFn: fetchFavoritedWorkouts,
+    isFavoritedError,
+    isFavoritedLoading,
+    isLoading,
+    isWorkoutsError,
+    isWorkoutsLoading,
+    searchInputRef,
+    searchText,
+    setSearchModalVisible,
+    setSearchResults,
+    setSearchText,
+    normalInputRef,
+    isSearchModalVisible,
+    searchResults,
+  } = useWorkoutQueries({
+    userData,
   });
 
   // Open Search Modal

@@ -121,7 +121,7 @@ export const CreateClub = ({
       >
         <View style={styles.modalContainer}>
           <CustomText style={styles.modalTitle}>Create a Club</CustomText>
-          <BackButton func={() => setCreateModalVisible(false)} />
+          <BackButton func={() => setCreateModalVisible(false)} icon="close" />
 
           <TouchableOpacity onPress={pickImage} style={styles.avatarContainer}>
             <Image

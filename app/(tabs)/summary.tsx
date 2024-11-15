@@ -7,6 +7,7 @@ import {
   Animated,
   ScrollView,
   Dimensions,
+  Modal,
 } from "react-native";
 import AchievementsTab from "@/components/achievements/achievementTab";
 import Header from "@/components/header/header";
@@ -19,6 +20,7 @@ import { CompletedWorkout, OverviewStatsT } from "@/types";
 import CustomText from "@/components/ui/customText";
 import * as Haptics from "expo-haptics";
 import { Ionicons } from "@expo/vector-icons";
+import AddCustomActivity from "@/components/customActivity/customActivityModal";
 
 const { width } = Dimensions.get("window");
 const Tabs = ["Overview", "History", "Achievements"];
@@ -35,6 +37,8 @@ export default function SummaryScreen() {
   const indicatorPosition = useRef(new Animated.Value(0)).current;
   const { userData } = useUserData();
   const [userId, setUserId] = useState<string>("");
+  const [customActivityModalVisible, setCustomActivityModalVisible] =
+    useState(false);
 
   useEffect(() => {
     if (userData) {
@@ -79,14 +83,14 @@ export default function SummaryScreen() {
     }).start();
   };
 
+  const handleAddCustomActivity = () => {
+    setCustomActivityModalVisible(true);
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <Header headerTitle="Summary">
-        <TouchableOpacity
-          onPress={() =>
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
-          }
-        >
+        <TouchableOpacity onPress={() => handleAddCustomActivity()}>
           <Ionicons name="add" size={24} color="#000" />
         </TouchableOpacity>
       </Header>
@@ -132,6 +136,12 @@ export default function SummaryScreen() {
         {activeTab === 1 && <PastWorkouts completedWorkouts={completed} />}
         {activeTab === 2 && <AchievementsTab />}
       </ScrollView>
+
+      <Modal visible={customActivityModalVisible} animationType="slide">
+        <AddCustomActivity
+          onClose={() => setCustomActivityModalVisible(false)}
+        />
+      </Modal>
     </SafeAreaView>
   );
 }

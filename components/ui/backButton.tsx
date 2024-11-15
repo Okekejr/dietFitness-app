@@ -8,9 +8,13 @@ import { useRouter } from "expo-router";
 
 interface BackButtonProps {
   func?: (event: GestureResponderEvent) => void;
+  icon?: keyof typeof Ionicons.glyphMap;
 }
 
-const BackButton = ({ func }: BackButtonProps) => {
+const BackButton = ({
+  func,
+  icon = "chevron-back-outline",
+}: BackButtonProps) => {
   const router = useRouter();
 
   const handlePress = (event: GestureResponderEvent) => {
@@ -22,7 +26,7 @@ const BackButton = ({ func }: BackButtonProps) => {
   };
   return (
     <TouchableOpacity onPress={handlePress} style={styles.backButton}>
-      <Ionicons name="chevron-back-outline" size={28} color="#000" />
+      <Ionicons name={icon} size={28} color="#000" />
     </TouchableOpacity>
   );
 };
