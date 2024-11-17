@@ -89,7 +89,7 @@ export default function SummaryScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Header headerTitle="Summary">
+      <Header showProfileImage headerTitle="Summary">
         <TouchableOpacity onPress={() => handleAddCustomActivity()}>
           <Ionicons name="add" size={24} color="#000" />
         </TouchableOpacity>

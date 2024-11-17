@@ -129,7 +129,7 @@ export default function FavoriteWorkoutsScreen() {
             style={styles.closeButton}
             onPress={() => router.back()}
           >
-            <Ionicons name="close" size={28} color="#000" />
+            <Ionicons name="close" size={24} color="#000" />
           </TouchableOpacity>
         </View>
         <View style={styles.centeredContainer}>
@@ -156,7 +156,7 @@ export default function FavoriteWorkoutsScreen() {
           style={styles.backButton}
           onPress={() => router.back()}
         >
-          <Ionicons name="chevron-back-outline" size={28} color="#000" />
+          <Ionicons name="chevron-back-outline" size={24} color="#000" />
         </TouchableOpacity>
       </View>
 
@@ -236,6 +236,7 @@ const styles = StyleSheet.create({
   topBar: {
     alignItems: "flex-start",
     marginLeft: 10,
+    marginTop: 10,
   },
   backButton: {
     backgroundColor: "#c7c7c7",

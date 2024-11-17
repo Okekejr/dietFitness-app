@@ -9,9 +9,14 @@ import * as Haptics from "expo-haptics";
 interface HeaderProps {
   children?: React.ReactNode;
   headerTitle?: string;
+  showProfileImage?: boolean;
 }
 
-const Header: React.FC<HeaderProps> = ({ children, headerTitle }) => {
+const Header: React.FC<HeaderProps> = ({
+  children,
+  headerTitle,
+  showProfileImage,
+}) => {
   const router = useRouter();
   const { userData, refetchUserData } = useUserData();
   const [userId, setUserId] = useState("");
@@ -31,27 +36,30 @@ const Header: React.FC<HeaderProps> = ({ children, headerTitle }) => {
   return (
     <View style={styles.outerContainer}>
       <View style={styles.headerContainer}>
-        <TouchableOpacity
-          style={styles.profileContainer}
-          onPress={() => {
-            Haptics.selectionAsync();
-            router.push("/profile");
-            refetchUserData();
-          }}
-        >
-          {userData?.profile_picture ? (
-            <Image
-              source={{ uri: userData.profile_picture, cache: "force-cache" }}
-              style={styles.profileImage}
-            />
-          ) : (
-            <View style={styles.profileFallback}>
-              <CustomText style={styles.initials}>
-                {userData?.name ? getInitials(userData.name) : "?"}
-              </CustomText>
-            </View>
-          )}
-        </TouchableOpacity>
+        {showProfileImage && (
+          <TouchableOpacity
+            style={styles.profileContainer}
+            onPress={() => {
+              Haptics.selectionAsync();
+              router.push("/profile");
+              refetchUserData();
+            }}
+          >
+            {userData?.profile_picture ? (
+              <Image
+                source={{ uri: userData.profile_picture, cache: "force-cache" }}
+                style={styles.profileImage}
+              />
+            ) : (
+              <View style={styles.profileFallback}>
+                <CustomText style={styles.initials}>
+                  {userData?.name ? getInitials(userData.name) : "?"}
+                </CustomText>
+              </View>
+            )}
+          </TouchableOpacity>
+        )}
+
         <View style={styles.childrenContainer}>{children}</View>
       </View>
       {headerTitle && (

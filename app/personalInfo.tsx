@@ -68,7 +68,7 @@ export default function PersonalInfoScreen() {
 
           {/* Age Input */}
           <View style={styles.formGroup}>
-            <CustomText style={styles.label}>Age</CustomText>
+            <CustomText style={styles.label}>Age (yrs)</CustomText>
             <TextInput
               placeholder="e.g., 25"
               keyboardType="numeric"

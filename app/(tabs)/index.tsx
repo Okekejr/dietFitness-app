@@ -186,7 +186,7 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Header>
+      <Header showProfileImage>
         <TouchableOpacity
           onPress={() =>
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)

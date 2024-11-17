@@ -13,7 +13,7 @@ export default function HelpScreen() {
           style={styles.backButton}
           onPress={() => router.back()}
         >
-          <Ionicons name="chevron-back" size={28} color="#000" />
+          <Ionicons name="chevron-back" size={24} color="#000" />
         </TouchableOpacity>
       </View>
 
@@ -42,6 +42,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#c7c7c7",
     borderRadius: 25,
     padding: 5,
+    marginTop: 10,
   },
   scrollContent: {
     alignItems: "center",

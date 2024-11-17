@@ -2,9 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import {
   View,
   TextInput,
-  Button,
   StyleSheet,
-  Image,
   Switch,
   Alert,
   Platform,
@@ -15,19 +13,14 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Picker } from "@react-native-picker/picker";
-import * as ImagePicker from "expo-image-picker";
 import { API_URL } from "@/constants/apiUrl";
 import { useUserData } from "@/context/userDataContext";
 import { Ionicons } from "@expo/vector-icons";
-import * as FileSystem from "expo-file-system";
 import CustomText from "@/components/ui/customText";
 
 export default function EditProfileScreen() {
   const { userData, refetchUserData } = useUserData();
   const router = useRouter();
-  const [profilePicture, setProfilePicture] = useState(
-    userData?.profile_picture || ""
-  );
   const [activityLevel, setActivityLevel] = useState(
     userData?.activity_level || ""
   );
@@ -62,57 +55,19 @@ export default function EditProfileScreen() {
   // Track form changes
   useEffect(() => {
     const hasChanges =
-      profilePicture !== initialState.profilePicture ||
       activityLevel !== initialState.activityLevel ||
       JSON.stringify(allergies) !== JSON.stringify(initialState.allergies) ||
       JSON.stringify(preferences) !== JSON.stringify(initialState.preferences);
     setIsFormChanged(hasChanges);
-  }, [profilePicture, activityLevel, allergies, preferences, initialState]);
-
-  // Handle image selection
-  const pickImage = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.5,
-    });
-
-    if (!result.canceled) {
-      const { uri } = result.assets[0];
-
-      try {
-        const fileInfo = await FileSystem.getInfoAsync(uri);
-
-        // Check if the file exists and has a size
-        if (
-          fileInfo.exists &&
-          fileInfo.size &&
-          fileInfo.size > 3 * 1024 * 1024
-        ) {
-          Alert.alert(
-            "Error",
-            "File size exceeds 3MB limit. Please select a smaller image."
-          );
-          return;
-        }
-
-        // If valid, set the image
-        setProfilePicture(uri);
-      } catch (error) {
-        console.error("Error getting file info:", error);
-        Alert.alert("Error", "Could not get image file info.");
-      }
-    }
-  };
+  }, [activityLevel, allergies, preferences, initialState]);
 
   const togglePreference = (key: "diet" | "workout", value: string) => {
     // Ensure only one preference is selected at a time
-    const newPreferences = [value]; // Overrides any existing preferences with the new value
+    const newPreferences = [value];
     // Update the preferences state
     setPreferences((prev) => ({
       ...prev,
-      [key]: newPreferences, // Replace the entire array with the new preference
+      [key]: newPreferences,
     }));
   };
 
@@ -125,44 +80,25 @@ export default function EditProfileScreen() {
     try {
       setLoading(true);
 
-      if (profilePicture && profilePicture !== userData?.profile_picture) {
-        const formData = new FormData();
-        formData.append("profilePicture", {
-          uri: profilePicture,
-          type: "image/jpeg",
-          name: `${userData?.user_id}.jpg`,
-        } as any);
-
-        const response = await fetch(
-          `${API_URL}/api/upload-profile-picture/${userData?.user_id}`,
-          {
-            method: "POST",
-            body: formData,
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(
-            errorData.error || "Failed to upload profile picture."
-          );
+      const response = await fetch(
+        `${API_URL}/api/users/${userData?.user_id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            activity_level: activityLevel,
+            allergies,
+            preferences,
+          }),
         }
-      }
+      );
 
-      await fetch(`${API_URL}/api/users/${userData?.user_id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          activity_level: activityLevel,
-          allergies,
-          preferences,
-        }),
-      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to upload profile picture.");
+      }
 
       Alert.alert("Success", "Profile updated successfully!");
       refetchUserData();
@@ -183,7 +119,10 @@ export default function EditProfileScreen() {
       >
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.header}>
-            <TouchableOpacity onPress={() => router.back()}>
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => router.back()}
+            >
               <Ionicons name="chevron-back" size={24} color="black" />
             </TouchableOpacity>
 
@@ -201,18 +140,6 @@ export default function EditProfileScreen() {
               </CustomText>
             </TouchableOpacity>
           </View>
-          <TouchableOpacity onPress={pickImage} style={styles.avatarContainer}>
-            <Image
-              source={
-                profilePicture
-                  ? { uri: profilePicture }
-                  : require("../assets/img/avatar-placeholder.png")
-              }
-              style={styles.avatar}
-            />
-          </TouchableOpacity>
-
-          <Button title="Upload Picture" onPress={pickImage} />
 
           <View style={styles.formGroup}>
             <CustomText style={styles.heading}>Preferences</CustomText>
@@ -310,6 +237,9 @@ const styles = StyleSheet.create({
   backButton: {
     alignSelf: "flex-start",
     marginBottom: 20,
+    backgroundColor: "#c7c7c7",
+    borderRadius: 25,
+    padding: 5,
   },
   saveText: { fontSize: 18 },
   header: {
@@ -317,15 +247,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     width: "100%",
     marginBottom: 10,
-  },
-  avatarContainer: {
-    marginBottom: 5,
-  },
-  avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: "#e0e0e0",
   },
   formGroup: {
     width: "100%",

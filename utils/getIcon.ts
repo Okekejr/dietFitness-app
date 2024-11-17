@@ -1,3 +1,4 @@
+import { UserDataT } from "@/types";
 import { WorkoutsT } from "@/types/workout";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -55,6 +56,19 @@ export const getTabTitle = (routeName: string) => {
       return "Run Club";
     default:
       return "Tab";
+  }
+};
+
+export const measurement = (data: string) => {
+  switch (data) {
+    case "age":
+      return "yrs";
+    case "weight":
+      return "kg";
+    case "height":
+      return "cm";
+    default:
+      return "";
   }
 };
 

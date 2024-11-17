@@ -7,7 +7,7 @@ import {
   Image,
   ActivityIndicator,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { Href, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { getInitials } from "@/utils";
@@ -18,6 +18,15 @@ import { API_URL } from "@/constants/apiUrl";
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import CustomText from "@/components/ui/customText";
+import { FlatList } from "react-native";
+
+type ProfileConfig = {
+  key: string;
+  name: string;
+  leftIcon: keyof typeof Ionicons.glyphMap;
+  rightIcon: keyof typeof Ionicons.glyphMap;
+  hrefLink: Href<string>;
+}[];
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -100,61 +109,93 @@ export default function ProfileScreen() {
     }
   };
 
+  const profileSetting: ProfileConfig = [
+    {
+      key: "Edit Experience",
+      name: "Edit Experience",
+      leftIcon: "pulse-outline",
+      rightIcon: "chevron-forward",
+      hrefLink: "/editProfile",
+    },
+    {
+      key: "Settings",
+      name: "Settings",
+      leftIcon: "settings-outline",
+      rightIcon: "chevron-forward",
+      hrefLink: "/helpScreen",
+    },
+    {
+      key: "Contact and FAQ",
+      name: "Contact and FAQ",
+      leftIcon: "information-circle-outline",
+      rightIcon: "chevron-forward",
+      hrefLink: "/helpScreen",
+    },
+  ];
+
   return (
     <SafeAreaView style={styles.container}>
       <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-        <Ionicons name="chevron-back" size={28} color="#000" />
+        <Ionicons name="chevron-back" size={24} color="#000" />
       </TouchableOpacity>
 
-      <TouchableOpacity
-        style={styles.profileBox}
-        onPress={() => router.push("/editProfile")}
-      >
-        {userData?.profile_picture ? (
-          <Image
-            source={{ uri: userData.profile_picture }}
-            style={styles.avatar}
-          />
-        ) : (
-          <View style={styles.avatarFallback}>
-            <CustomText style={styles.avatarText}>
-              {userData && getInitials(userData.name)}
+      <CustomText style={styles.headerText}>Profile</CustomText>
+
+      <View style={styles.innerContainer}>
+        <TouchableOpacity
+          style={styles.profileBox}
+          onPress={() => router.push("/personalProfile")}
+        >
+          {userData?.profile_picture ? (
+            <Image
+              source={{ uri: userData.profile_picture }}
+              style={styles.avatar}
+            />
+          ) : (
+            <View style={styles.avatarFallback}>
+              <CustomText style={styles.avatarText}>
+                {userData && getInitials(userData.name)}
+              </CustomText>
+            </View>
+          )}
+          <View style={styles.profileInfo}>
+            <CustomText style={styles.name}>
+              {userData && userData.name}
+            </CustomText>
+            <CustomText style={styles.email}>
+              {userData && userData.email}
             </CustomText>
           </View>
-        )}
-        <View style={styles.profileInfo}>
-          <CustomText style={styles.name}>
-            {userData && userData.name}
-          </CustomText>
-          <CustomText style={styles.email}>
-            {userData && userData.email}
-          </CustomText>
+          <Ionicons name="chevron-forward" size={24} color="#000" />
+        </TouchableOpacity>
+
+        <View style={styles.categoryContainer}>
+          <FlatList
+            data={profileSetting}
+            keyExtractor={(item) => item.key}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={styles.categoryBox}
+                onPress={() => router.push(item.hrefLink)}
+              >
+                <Ionicons name={item.leftIcon} size={24} color="#000" />
+                <CustomText style={styles.boxText}>{item.name}</CustomText>
+                <Ionicons name={item.rightIcon} size={24} color="#000" />
+              </TouchableOpacity>
+            )}
+          />
         </View>
-        <Ionicons name="chevron-forward" size={24} color="#000" />
-      </TouchableOpacity>
 
-      <TouchableOpacity style={styles.box}>
-        <Ionicons name="settings-outline" size={24} color="#000" />
-        <CustomText style={styles.boxText}>Settings</CustomText>
-        <Ionicons name="chevron-forward" size={24} color="#000" />
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={styles.box}
-        onPress={() => router.push("/helpScreen")}
-      >
-        <Ionicons name="help-circle-outline" size={24} color="#000" />
-        <CustomText style={styles.boxText}>Help and Info</CustomText>
-        <Ionicons name="chevron-forward" size={24} color="#000" />
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.box} onPress={handleSignOut}>
-        <CustomText style={styles.boxText}>Sign out</CustomText>
-        <Ionicons name="log-out-outline" size={24} color="#000" />
-      </TouchableOpacity>
+        <TouchableOpacity style={styles.box} onPress={handleSignOut}>
+          <CustomText style={styles.boxText}>Sign out</CustomText>
+          <Ionicons name="log-out-outline" size={24} color="#000" />
+        </TouchableOpacity>
+      </View>
 
       {loadingClubData ? (
-        <ActivityIndicator size="large" color="#4F46E5" />
+        <View style={styles.qrCodeContainer}>
+          <ActivityIndicator size="large" color="#4F46E5" />
+        </View>
       ) : (
         clubData && (
           <View style={styles.qrCodeContainer}>
@@ -189,11 +230,19 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff", padding: 20 },
   backButton: {
     position: "absolute",
-    top: 60,
+    top: 70,
     left: 20,
     backgroundColor: "#c7c7c7",
     borderRadius: 25,
     padding: 5,
+  },
+  headerText: {
+    fontSize: 24,
+    fontFamily: "HostGrotesk-Medium",
+    marginTop: 50,
+  },
+  innerContainer: {
+    marginTop: 20,
   },
   profileBox: {
     flexDirection: "row",
@@ -201,7 +250,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#f0f0f0",
     padding: 15,
     borderRadius: 10,
-    marginTop: 40,
     marginBottom: 30,
   },
   avatar: { width: 50, height: 50, borderRadius: 25 },
@@ -217,6 +265,17 @@ const styles = StyleSheet.create({
   profileInfo: { flex: 1, marginLeft: 15 },
   name: { fontSize: 18, fontFamily: "HostGrotesk-Medium" },
   email: { fontSize: 14, color: "#777" },
+  categoryBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f0f0f0",
+    padding: 15,
+    borderRadius: 10,
+    marginVertical: 3,
+  },
+  categoryContainer: {
+    marginVertical: 10,
+  },
   box: {
     flexDirection: "row",
     alignItems: "center",
