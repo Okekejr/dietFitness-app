@@ -107,11 +107,13 @@ export default function EditProfileScreen() {
   };
 
   const togglePreference = (key: "diet" | "workout", value: string) => {
-    const currentPreferences = preferences[key];
-    const newPreferences = currentPreferences.includes(value)
-      ? currentPreferences.filter((pref) => pref !== value)
-      : [...currentPreferences, value];
-    setPreferences((prev) => ({ ...prev, [key]: newPreferences }));
+    // Ensure only one preference is selected at a time
+    const newPreferences = [value]; // Overrides any existing preferences with the new value
+    // Update the preferences state
+    setPreferences((prev) => ({
+      ...prev,
+      [key]: newPreferences, // Replace the entire array with the new preference
+    }));
   };
 
   // Handle TextInput changes and convert input to an array
@@ -218,7 +220,7 @@ export default function EditProfileScreen() {
             <CustomText style={styles.subHeading}>
               Dietary Preferences
             </CustomText>
-            {["vegan", "vegetarian", "low-carb"].map((diet) => (
+            {["balanced", "high-protein", "low-carb"].map((diet) => (
               <View key={diet} style={styles.switchRow}>
                 <CustomText style={styles.label}>
                   {diet.charAt(0).toUpperCase() + diet.slice(1)}
@@ -255,11 +257,26 @@ export default function EditProfileScreen() {
               style={styles.picker}
             >
               <Picker.Item label="Select your activity level" value="" />
-              <Picker.Item label="Sedentary" value="sedentary" />
-              <Picker.Item label="Light" value="light" />
-              <Picker.Item label="Moderate" value="moderate" />
-              <Picker.Item label="Active" value="active" />
-              <Picker.Item label="Very Active" value="very-active" />
+              <Picker.Item
+                label="Sedentary (little or no exercise)"
+                value="sedentary"
+              />
+              <Picker.Item
+                label="Light (exercise 1-3 days/week)"
+                value="light"
+              />
+              <Picker.Item
+                label="Moderate (exercise 3-5 days/week)"
+                value="moderate"
+              />
+              <Picker.Item
+                label="Active (exercise 6-7 days/week)"
+                value="active"
+              />
+              <Picker.Item
+                label="Very Active (intense exercise daily)"
+                value="very-active"
+              />
             </Picker>
           </View>
 

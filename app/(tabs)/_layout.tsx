@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { View, StyleSheet, ActivityIndicator, Text } from "react-native";
+import { View, StyleSheet, ActivityIndicator } from "react-native";
 import { Tabs, useRouter } from "expo-router";
 import { useTheme } from "react-native-paper";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import SuperTokens from "supertokens-react-native";
-import "../../config/supertokens";
 import { getIconName, getTabTitle } from "@/utils";
 import { ParamListBase, RouteProp } from "@react-navigation/native";
 import CustomText from "@/components/ui/customText";
+import "../../config/supertokens";
 
 export default function Layout() {
   const theme = useTheme();
@@ -59,7 +59,9 @@ export default function Layout() {
         headerShown: false,
         tabBarStyle: { backgroundColor: "#fff" },
         tabBarLabel: ({ focused }) => (
-          <CustomText style={[styles.tabLabel, focused && styles.tabLabelFocused]}>
+          <CustomText
+            style={[styles.tabLabel, focused && styles.tabLabelFocused]}
+          >
             {getTabTitle(route.name)}
           </CustomText>
         ),

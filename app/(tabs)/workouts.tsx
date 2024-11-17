@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   Modal,
 } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 import { Href, useRouter } from "expo-router";
 import WorkoutCompCard from "@/components/workout/workoutCompCard";
 import { FlatList } from "react-native";
@@ -46,6 +47,10 @@ export default function WorkoutsScreen() {
     normalInputRef,
     isSearchModalVisible,
     searchResults,
+    fetchFeaturedWorkouts,
+    clearCache,
+    featWorkouts,
+    loading,
   } = useWorkoutQueries({
     userData,
   });
@@ -75,6 +80,16 @@ export default function WorkoutsScreen() {
       return;
     }
   }, [searchText]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchData = async () => {
+        await fetchFeaturedWorkouts();
+      };
+
+      fetchData();
+    }, [])
+  );
 
   // Handle search text change and filter workouts
   const handleSearch = (text: string) => {
@@ -227,7 +242,12 @@ export default function WorkoutsScreen() {
           />
         </View>
         {/* Featured Workouts */}
-        <FeaturedWorkoutsComp />
+        <FeaturedWorkoutsComp
+          loading={loading}
+          clearCache={clearCache}
+          featuredWorkouts={featWorkouts}
+          fetchFeaturedWorkouts={fetchFeaturedWorkouts}
+        />
 
         {/* Categories Section */}
         <View style={styles.header}>

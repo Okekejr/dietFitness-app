@@ -30,7 +30,7 @@ export default function HomeScreen() {
     fetchUserDataWithRetry,
     generateOrFetchWorkoutPlan,
   } = useHomeQueries({ userData, userId, refetchUserData });
-  const [selectedDay, setSelectedDay] = useState<number>();
+  const [selectedDay, setSelectedDay] = useState<number>(1);
   const { streak } = useStreak(userId);
 
   useEffect(() => {

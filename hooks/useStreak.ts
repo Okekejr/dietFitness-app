@@ -8,9 +8,9 @@ const useStreak = (userId: string) => {
   useEffect(() => {
     const updateStreak = async () => {
       try {
-        const today = new Date().toISOString().split("T")[0];
+        const today = new Date().toISOString().split("T")[0]; // Format as YYYY-MM-DD
 
-        // Fetch the cached streak and last update date
+        // Fetch cached streak and last update date
         const cachedStreak = await AsyncStorage.getItem("userStreak");
         const cachedDate = await AsyncStorage.getItem("lastUpdateDate");
 
@@ -19,7 +19,7 @@ const useStreak = (userId: string) => {
           return;
         }
 
-        // Fetch streak from the server
+        // Fetch streak from server
         const response = await fetch(
           `${API_URL}/api/user/streak?userId=${userId}`
         );
@@ -29,8 +29,8 @@ const useStreak = (userId: string) => {
 
         const { streak: serverStreak, lastActivityDate } = data;
 
-        // Update streak if needed
         if (lastActivityDate.split("T")[0] !== today) {
+          // Update streak on the server
           const updateResponse = await fetch(
             `${API_URL}/api/user/updateStreak`,
             {

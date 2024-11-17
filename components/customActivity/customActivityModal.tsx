@@ -70,40 +70,40 @@ export default function AddCustomActivity({ onClose }: AddCustomProps) {
       tag
     );
 
-    // try {
-    //   const response = await fetch(`${API_URL}/api/customActivity/add`, {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //     },
-    //     body: JSON.stringify({
-    //       userId: userData.user_id,
-    //       duration: parsedDuration, // Send parsed value
-    //       caloriesBurned: parsedCaloriesBurned, // Send parsed value
-    //       intensity,
-    //       tag,
-    //     }),
-    //   });
+    try {
+      const response = await fetch(`${API_URL}/api/customActivity/add`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: userData.user_id,
+          duration: parsedDuration, // Send parsed value
+          caloriesBurned: parsedCaloriesBurned, // Send parsed value
+          intensity,
+          tag,
+        }),
+      });
 
-    //   if (!response.ok) {
-    //     throw new Error("Failed to add custom activity.");
-    //   }
+      if (!response.ok) {
+        throw new Error("Failed to add custom activity.");
+      }
 
-    //   Alert.alert("Success", "Custom activity added!");
-    //   queryClient.invalidateQueries({
-    //     queryKey: ["userOverview", userData.user_id],
-    //   });
-    //   queryClient.invalidateQueries({
-    //     queryKey: ["getCompleted"],
-    //   });
-    //   setDuration("");
-    //   setCaloriesBurned("");
-    //   setIntensity("Low");
-    //   setTag("");
-    // } catch (error) {
-    //   console.error(error);
-    //   Alert.alert("Error", "Failed to add custom activity.");
-    // }
+      Alert.alert("Success", "Custom activity added!");
+      queryClient.invalidateQueries({
+        queryKey: ["userOverview", userData.user_id],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["getCompleted"],
+      });
+      setDuration("");
+      setCaloriesBurned("");
+      setIntensity("Low");
+      setTag("");
+    } catch (error) {
+      console.error(error);
+      Alert.alert("Error", "Failed to add custom activity.");
+    }
   };
 
   return (

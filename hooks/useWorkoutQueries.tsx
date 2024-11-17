@@ -2,11 +2,15 @@ import { API_URL } from "@/constants/apiUrl";
 import { UserDataT, WorkoutsT } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 import { useRef, useState } from "react";
-import { TextInput } from "react-native";
+import { Alert, TextInput } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface Props {
   userData: UserDataT | null;
 }
+
+const CACHE_KEY = "featuredWorkouts";
+const CACHE_EXPIRY_KEY = "featuredWorkoutsExpiry";
 
 export const useWorkoutQueries = ({ userData }: Props) => {
   const [isSearchModalVisible, setSearchModalVisible] = useState(false);
@@ -14,6 +18,8 @@ export const useWorkoutQueries = ({ userData }: Props) => {
   const [searchResults, setSearchResults] = useState<WorkoutsT[]>([]);
   const searchInputRef = useRef<TextInput>(null);
   const normalInputRef = useRef<TextInput>(null);
+  const [featWorkouts, setFeatWorkouts] = useState<WorkoutsT[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Fetch function
   const fetchCategories = async () => {
@@ -81,6 +87,56 @@ export const useWorkoutQueries = ({ userData }: Props) => {
     }
   };
 
+  const fetchFeaturedWorkouts = async () => {
+    try {
+      const now = Date.now();
+
+      // Check if cache exists and is still valid
+      const cachedWorkouts = await AsyncStorage.getItem(CACHE_KEY);
+      const cacheExpiry = await AsyncStorage.getItem(CACHE_EXPIRY_KEY);
+
+      if (cachedWorkouts && cacheExpiry && now < Number(cacheExpiry)) {
+        setFeatWorkouts(JSON.parse(cachedWorkouts));
+        console.log("Using cached workouts");
+      } else {
+        console.log("Cache expired or not found, fetching new workouts");
+
+        // Clear expired cache
+        await AsyncStorage.removeItem(CACHE_KEY);
+        await AsyncStorage.removeItem(CACHE_EXPIRY_KEY);
+
+        // Fetch new workouts from API
+        const response = await fetch(`${API_URL}/api/featuredWorkouts`);
+        const data = await response.json();
+
+        // Cache the new workouts and set a new expiry (7 days)
+        await AsyncStorage.setItem(CACHE_KEY, JSON.stringify(data));
+        await AsyncStorage.setItem(
+          CACHE_EXPIRY_KEY,
+          (now + 7 * 24 * 60 * 60 * 1000).toString()
+        );
+
+        setFeatWorkouts(data);
+      }
+    } catch (error) {
+      console.error("Error fetching featured workouts:", error);
+      Alert.alert("Error", "Unable to fetch featured workouts.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const clearCache = async () => {
+    try {
+      await AsyncStorage.removeItem(CACHE_KEY);
+      await AsyncStorage.removeItem(CACHE_EXPIRY_KEY);
+      Alert.alert("Success", "Cached workouts cleared.");
+    } catch (error) {
+      console.error("Error clearing cache:", error);
+      Alert.alert("Error", "Failed to clear cache.");
+    }
+  };
+
   const {
     data: categories,
     isLoading,
@@ -142,5 +198,10 @@ export const useWorkoutQueries = ({ userData }: Props) => {
     searchInputRef,
     normalInputRef,
     searchResults,
+    fetchFeaturedWorkouts,
+    clearCache,
+    featWorkouts,
+    loading,
+    setLoading,
   };
 };

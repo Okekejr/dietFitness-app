@@ -10,6 +10,7 @@ import {
   Modal,
 } from "react-native";
 import AchievementsTab from "@/components/achievements/achievementTab";
+import AddCustomActivity from "@/components/customActivity/customActivityModal";
 import Header from "@/components/header/header";
 import OverviewComp from "@/components/workout/overviewComp";
 import PastWorkouts from "@/components/workout/pastWorkouts";
@@ -20,7 +21,6 @@ import { CompletedWorkout, OverviewStatsT } from "@/types";
 import CustomText from "@/components/ui/customText";
 import * as Haptics from "expo-haptics";
 import { Ionicons } from "@expo/vector-icons";
-import AddCustomActivity from "@/components/customActivity/customActivityModal";
 
 const { width } = Dimensions.get("window");
 const Tabs = ["Overview", "History", "Achievements"];

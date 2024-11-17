@@ -55,6 +55,7 @@ const WorkoutDetailsScreen = () => {
           queryClient.invalidateQueries({
             queryKey: ["completedWorkouts"],
           });
+          queryClient.invalidateQueries({ queryKey: ["userOverview", userId] });
           queryClient.invalidateQueries({ queryKey: ["getCompleted"] });
           queryClient.invalidateQueries({ queryKey: ["allWorkouts"] });
           queryClient.invalidateQueries({ queryKey: ["favoritedWorkouts"] });
