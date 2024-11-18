@@ -125,8 +125,8 @@ export default function ProfileScreen() {
       hrefLink: "/helpScreen",
     },
     {
-      key: "Contact and FAQ",
-      name: "Contact and FAQ",
+      key: "Help and Info",
+      name: "Help & Info",
       leftIcon: "information-circle-outline",
       rightIcon: "chevron-forward",
       hrefLink: "/helpScreen",

@@ -24,6 +24,17 @@ const PastWorkouts: FC<PastWorkoutsProps> = ({ completedWorkouts }) => {
     );
   }
 
+  const handleRoute = (item: CompletedWorkout) => {
+    if (item.workout_id !== null) {
+      router.push({
+        pathname: `/workout/[id]`,
+        params: { id: item.workout_id },
+      });
+    } else {
+      return;
+    }
+  };
+
   // Group workouts by month and year
   const groupedWorkouts = completedWorkouts.reduce((acc, workout) => {
     const date = new Date(workout.completed_at);
@@ -40,12 +51,7 @@ const PastWorkouts: FC<PastWorkoutsProps> = ({ completedWorkouts }) => {
   const renderWorkout = ({ item }: { item: CompletedWorkout }) => (
     <TouchableOpacity
       style={styles.workoutCard}
-      onPress={() =>
-        router.push({
-          pathname: `/workout/[id]`,
-          params: { id: item.id },
-        })
-      }
+      onPress={() => handleRoute(item)}
     >
       <Image
         source={{ uri: item.image_url }}
@@ -93,7 +99,7 @@ const PastWorkouts: FC<PastWorkoutsProps> = ({ completedWorkouts }) => {
       <FlatList
         data={workouts}
         renderItem={renderWorkout}
-        keyExtractor={(item) => `${item.id}-${item.completed_at}`}
+        keyExtractor={(item) => `${item.workout_id}-${item.completed_at}`}
         ItemSeparatorComponent={() => <View style={styles.divider} />}
       />
 

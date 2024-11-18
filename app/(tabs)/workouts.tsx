@@ -165,7 +165,7 @@ export default function WorkoutsScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <Header showProfileImage headerTitle="Workouts" />
+      <Header headerTitle="Workouts" />
 
       {/* Search Modal */}
       <Modal visible={isSearchModalVisible} transparent animationType="slide">

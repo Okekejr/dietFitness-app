@@ -18,6 +18,8 @@ export default function HelpScreen() {
       </View>
 
       <View style={styles.scrollContent}>
+        <CustomText style={styles.heading}>Help & Info</CustomText>
+
         <TouchableOpacity style={styles.termsBox}>
           <CustomText style={styles.boxText}>Terms and Conditions</CustomText>
           <Ionicons name="chevron-forward" size={24} color="#000" />
@@ -47,6 +49,12 @@ const styles = StyleSheet.create({
   scrollContent: {
     alignItems: "center",
     padding: 20,
+  },
+  heading: {
+    fontSize: 22,
+    fontFamily: "HostGrotesk-Medium",
+    textAlign: "center",
+    marginBottom: 30,
   },
   termsBox: {
     flexDirection: "row",

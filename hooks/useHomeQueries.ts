@@ -24,6 +24,7 @@ export const useHomeQueries = ({
   >([]);
   const [loading, setLoading] = useState(true);
   const [currentWeekNum, setCurrentWeekNum] = useState(0);
+  const [isCompleted, setIsCompleted] = useState(false);
 
   // Retry mechanism to refetch user data until it loads
   const fetchUserDataWithRetry = async (retryCount = 3) => {
@@ -31,6 +32,33 @@ export const useHomeQueries = ({
       await refetchUserData();
       if (userData) break;
       await new Promise((resolve) => setTimeout(resolve, 500)); // Add delay between retries
+    }
+  };
+
+  const fetchWorkoutDetails = async (id: string) => {
+    try {
+      const response = await fetch(`${API_URL}/api/workouts/${id}`);
+      const data = await response.json();
+
+      // Check if workout is completed
+      const completedResponse = await fetch(
+        `${API_URL}/api/completedWorkouts?userId=${userId}`
+      );
+
+      if (completedResponse.ok) {
+        const completedData = await completedResponse.json();
+
+        // Check if the workout ID is in the completed workouts
+        const isWorkoutCompleted = completedData.some(
+          (workout: WorkoutsT) => workout.id === data.id
+        );
+        setIsCompleted(isWorkoutCompleted);
+      }
+
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching workout details:", error);
+      setLoading(false);
     }
   };
 
@@ -202,5 +230,7 @@ export const useHomeQueries = ({
     fetchUserDataWithRetry,
     generateOrFetchWorkoutPlan,
     currentWeekNum,
+    fetchWorkoutDetails,
+    isCompleted,
   };
 };

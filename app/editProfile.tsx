@@ -142,7 +142,7 @@ export default function EditProfileScreen() {
           </View>
 
           <View style={styles.formGroup}>
-            <CustomText style={styles.heading}>Preferences</CustomText>
+            <CustomText style={styles.heading}>Edit your Experience</CustomText>
 
             <CustomText style={styles.subHeading}>
               Dietary Preferences
@@ -255,7 +255,8 @@ const styles = StyleSheet.create({
   heading: {
     fontSize: 22,
     fontFamily: "HostGrotesk-Medium",
-    marginBottom: 10,
+    textAlign: "center",
+    marginBottom: 30,
   },
   subHeading: {
     fontSize: 18,

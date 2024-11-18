@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   StyleSheet,
@@ -17,11 +17,16 @@ import Header from "@/components/header/header";
 import CustomText from "@/components/ui/customText";
 import * as Haptics from "expo-haptics";
 import { useHomeQueries } from "@/hooks/useHomeQueries";
+import { calculateDaysBetweenDates } from "@/utils";
+import { Ionicons } from "@expo/vector-icons";
+
+const CARD_WIDTH = 200;
 
 export default function HomeScreen() {
   const router = useRouter();
   const { userData, refetchUserData } = useUserData();
   const [userId, setUserId] = useState("");
+  const scrollViewRef = useRef<ScrollView>(null);
   const {
     schedule,
     loading,
@@ -29,6 +34,8 @@ export default function HomeScreen() {
     currentWeekNum,
     fetchUserDataWithRetry,
     generateOrFetchWorkoutPlan,
+    fetchWorkoutDetails,
+    isCompleted,
   } = useHomeQueries({ userData, userId, refetchUserData });
   const [selectedDay, setSelectedDay] = useState<number>(1);
   const { streak } = useStreak(userId);
@@ -38,7 +45,7 @@ export default function HomeScreen() {
       setUserId(userData.user_id);
       setLoading(false);
     } else {
-      fetchUserDataWithRetry(); // Retry loading userData if undefined
+      fetchUserDataWithRetry();
     }
   }, [userData]);
 
@@ -49,6 +56,28 @@ export default function HomeScreen() {
       generateOrFetchWorkoutPlan();
     }
   }, [userId]);
+
+  useEffect(() => {
+    if (schedule.length > 0 && userData?.week_start_date) {
+      const daysSinceStart = calculateDaysBetweenDates(
+        new Date(userData.week_start_date),
+        new Date()
+      );
+
+      const currentDay = Math.min(daysSinceStart + 1, 7); // Ensure it doesn't exceed 7
+      setSelectedDay(currentDay);
+
+      // Automatically scroll to the current day's card
+      setTimeout(() => {
+        if (scrollViewRef.current) {
+          scrollViewRef.current.scrollTo({
+            x: (currentDay - 1) * CARD_WIDTH,
+            animated: true,
+          });
+        }
+      }, 100); // Delay to ensure scroll happens after render
+    }
+  }, [schedule, userData]);
 
   const handleDaySelect = (day: number) => setSelectedDay(day);
 
@@ -122,29 +151,41 @@ export default function HomeScreen() {
     );
   };
 
-  const renderWorkout = ({ item }: { item: AssignedWorkoutT }) => (
-    <TouchableOpacity
-      style={styles.workoutCard}
-      onPress={() => {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        handleWorkoutClick(item.workout.id);
-      }}
-    >
-      <View style={styles.dietContent}>
-        <CustomText style={styles.workoutName}>{item.workout.name}</CustomText>
-        <CustomText>Duration: {item.workout.duration} mins</CustomText>
-        <CustomText>Description: {item.workout.description}</CustomText>
-        <CustomText>Intensity: {item.workout.intensity}</CustomText>
-      </View>
+  const renderWorkout = ({ item }: { item: AssignedWorkoutT }) => {
+    fetchWorkoutDetails(item.workout.id.toString());
 
-      {/* "Tap for more info..." aligned to bottom right */}
-      <View style={styles.moreInfoContainer}>
-        <CustomText style={styles.moreInfoText}>
-          Tap for more info...
-        </CustomText>
-      </View>
-    </TouchableOpacity>
-  );
+    return (
+      <TouchableOpacity
+        style={styles.workoutCard}
+        onPress={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          handleWorkoutClick(item.workout.id);
+        }}
+      >
+        <View style={styles.dietContent}>
+          <CustomText style={styles.workoutName}>
+            {item.workout.name}
+          </CustomText>
+          <CustomText>Duration: {item.workout.duration} mins</CustomText>
+          <CustomText>Description: {item.workout.description}</CustomText>
+          <CustomText>Intensity: {item.workout.intensity}</CustomText>
+          {isCompleted && (
+            <View style={styles.completedContainer}>
+              <Ionicons name="checkmark-circle" size={24} color="green" />
+              <CustomText style={styles.completedText}>Completed</CustomText>
+            </View>
+          )}
+        </View>
+
+        {/* "Tap for more info..." aligned to bottom right */}
+        <View style={styles.moreInfoContainer}>
+          <CustomText style={styles.moreInfoText}>
+            Tap for more info...
+          </CustomText>
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
   const renderDiet = ({ item }: { item: AssignedDietT }) => {
     if (!item.diet) {
@@ -218,7 +259,11 @@ export default function HomeScreen() {
         </View>
 
         {/* Weekly Calendar */}
-        <ScrollView horizontal contentContainerStyle={styles.calendar}>
+        <ScrollView
+          horizontal
+          ref={scrollViewRef}
+          contentContainerStyle={styles.calendar}
+        >
           {[1, 2, 3, 4, 5, 6, 7].map(renderDayButton)}
         </ScrollView>
 
@@ -329,19 +374,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginVertical: 20,
   },
-  progressBar: {
-    flex: 1,
-    height: 10,
-    borderRadius: 5,
-    color: "red",
-  },
   calendar: {
     flexDirection: "row",
     marginVertical: 10,
     gap: 10,
   },
   calendarCard: {
-    width: 200,
+    width: CARD_WIDTH,
     height: 200,
     padding: 15,
     borderWidth: 1,
@@ -419,6 +458,16 @@ const styles = StyleSheet.create({
   },
   streakText: {
     fontSize: 18,
+    fontFamily: "HostGrotesk-Medium",
+  },
+  completedContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 8,
+  },
+  completedText: {
+    marginLeft: 8,
+    color: "green",
     fontFamily: "HostGrotesk-Medium",
   },
 });

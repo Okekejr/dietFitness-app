@@ -31,7 +31,6 @@ const FeaturedWorkoutsComp = ({
     if (userData) {
       setUserId(userData.user_id);
     }
-
     fetchFeaturedWorkouts();
     refetchUserData();
   }, []);

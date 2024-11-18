@@ -46,7 +46,7 @@ export interface CompletedWorkout {
   image_url: string;
   duration: number;
   activity_level: string;
-  id: number;
+  workout_id: number;
   tag: string;
   completed_at: string;
 }

@@ -18,7 +18,6 @@ const WorkoutCard: FC<WorkoutCardProps> = ({ workout, userId }) => {
   const [isCompleted, setIsCompleted] = useState(false);
   const [loading, setLoading] = useState(false);
   const queryClient = useQueryClient();
-
   const router = useRouter();
 
   const fetchCompletedStatus = async () => {

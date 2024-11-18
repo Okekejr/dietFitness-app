@@ -26,7 +26,7 @@ const BackButton = ({
   };
   return (
     <TouchableOpacity onPress={handlePress} style={styles.backButton}>
-      <Ionicons name={icon} size={28} color="#000" />
+      <Ionicons name={icon} size={24} color="#000" />
     </TouchableOpacity>
   );
 };

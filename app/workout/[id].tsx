@@ -9,7 +9,7 @@ import {
   Modal,
 } from "react-native";
 import { Image } from "expo-image";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { API_URL } from "@/constants/apiUrl";
 import { WorkoutsT } from "@/types/workout";
@@ -27,7 +27,6 @@ const { height } = Dimensions.get("window");
 const WorkoutDetailsScreen = () => {
   const { id } = useLocalSearchParams();
   const { userData } = useUserData();
-  const router = useRouter();
   const queryClient = useQueryClient();
   const [workout, setWorkout] = useState<WorkoutsT | null>(null);
   const [loading, setLoading] = useState(true);
@@ -75,6 +74,10 @@ const WorkoutDetailsScreen = () => {
   const closeModal = () => setModalVisible(false);
 
   const fetchWorkoutDetails = async () => {
+    if (!userData || !id) {
+      return;
+    }
+
     try {
       const response = await fetch(`${API_URL}/api/workouts/${id}`);
       const data = await response.json();
@@ -82,7 +85,7 @@ const WorkoutDetailsScreen = () => {
 
       // Check if workout is completed
       const completedResponse = await fetch(
-        `${API_URL}/api/completedWorkouts?userId=${userId}`
+        `${API_URL}/api/completedWorkouts?userId=${userData.user_id}`
       );
 
       if (completedResponse.ok) {
@@ -104,8 +107,8 @@ const WorkoutDetailsScreen = () => {
 
   useEffect(() => {
     if (id && userData) {
-      fetchWorkoutDetails();
       setUserId(userData.user_id);
+      fetchWorkoutDetails();
     }
   }, [id]);
 
@@ -203,7 +206,7 @@ const WorkoutDetailsScreen = () => {
           {text === workoutInfo.tag && `${workout.tag + " workout"}`}
           {text === workout.intensity && `${workout.intensity + " intensity"}`}
           {text === workout.calories_burned &&
-            `${workout.calories_burned + " calories burned"}`}
+            `${workout.calories_burned + " calories burn"}`}
         </CustomText>
       </View>
     );

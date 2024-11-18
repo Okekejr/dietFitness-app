@@ -89,6 +89,7 @@ export const useWorkoutQueries = ({ userData }: Props) => {
 
   const fetchFeaturedWorkouts = async () => {
     try {
+      setLoading(true);
       const now = Date.now();
 
       // Check if cache exists and is still valid
