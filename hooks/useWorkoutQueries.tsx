@@ -19,7 +19,6 @@ export const useWorkoutQueries = ({ userData }: Props) => {
   const searchInputRef = useRef<TextInput>(null);
   const normalInputRef = useRef<TextInput>(null);
   const [featWorkouts, setFeatWorkouts] = useState<WorkoutsT[]>([]);
-  const [loading, setLoading] = useState(true);
 
   // Fetch function
   const fetchCategories = async () => {
@@ -89,7 +88,6 @@ export const useWorkoutQueries = ({ userData }: Props) => {
 
   const fetchFeaturedWorkouts = async () => {
     try {
-      setLoading(true);
       const now = Date.now();
 
       // Check if cache exists and is still valid
@@ -122,8 +120,6 @@ export const useWorkoutQueries = ({ userData }: Props) => {
     } catch (error) {
       console.error("Error fetching featured workouts:", error);
       Alert.alert("Error", "Unable to fetch featured workouts.");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -202,7 +198,5 @@ export const useWorkoutQueries = ({ userData }: Props) => {
     fetchFeaturedWorkouts,
     clearCache,
     featWorkouts,
-    loading,
-    setLoading,
   };
 };

@@ -1,55 +1,52 @@
-import { AchievementCardProps } from "@/types";
-import { Ionicons } from "@expo/vector-icons";
 import React from "react";
-import { StyleSheet, Animated } from "react-native";
+import { StyleSheet, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import CustomText from "../ui/customText";
+import { AchievementCardProps } from "@/types";
 
 const AchievementCard = ({ goal, unlocked }: AchievementCardProps) => {
   return (
-    <Animated.View
-      style={[styles.card, unlocked ? styles.unlocked : styles.locked]}
-    >
+    <View style={[styles.card, unlocked ? styles.unlocked : styles.locked]}>
       <Ionicons
         name={goal.icon as keyof typeof Ionicons.glyphMap}
-        size={50}
-        color="#000"
+        size={70}
+        color={unlocked ? "#fff" : "#000"}
         style={styles.icon}
       />
-
       <CustomText style={styles.name}>{goal.name}</CustomText>
       <CustomText style={styles.description}>{goal.description}</CustomText>
-    </Animated.View>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 10,
-    padding: 20,
+    flex: 1,
+    width: 150,
+    height: 150,
     margin: 5,
+    borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
-    flex: 1,
-    minWidth: 100,
+    backgroundColor: "#D3D3D3",
   },
   unlocked: {
     backgroundColor: "#4CAF50",
   },
   locked: {
-    backgroundColor: "#D3D3D3",
+    backgroundColor: "#A9A9A9",
   },
   icon: {
     marginBottom: 10,
   },
   name: {
-    fontSize: 18,
+    fontSize: 15,
     fontFamily: "HostGrotesk-Medium",
     textAlign: "center",
-    marginBottom: 5,
   },
   description: {
-    fontSize: 14,
-    color: "#555",
+    fontSize: 11,
+    color: "#fff",
     textAlign: "center",
   },
 });

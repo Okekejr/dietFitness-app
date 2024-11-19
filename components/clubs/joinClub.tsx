@@ -46,6 +46,11 @@ const JoinClub = ({ onClose }: JoinClubProps) => {
   const handleJoinClub = async (inviteCode: string) => {
     if (!userData) return;
 
+    if (!inviteCode) {
+      Alert.alert("Input the code, or scan the QR code");
+      return;
+    }
+
     setLoading(true);
     try {
       const clubResponse = await fetch(

@@ -1,25 +1,64 @@
 import { API_URL } from "@/constants/apiUrl";
 import { OverviewStatsT } from "@/types";
+import { Ionicons } from "@expo/vector-icons";
 
-export const ACHIEVEMENTS = [
+export type AchievementsTypeT = {
+  id: string;
+  name: string;
+  description: string;
+  icon: keyof typeof Ionicons.glyphMap | string;
+  condition: (stats: OverviewStatsT) => boolean;
+}[];
+
+export interface AchievementItems {
+  item: {
+    id: string;
+    name: string;
+    description: string;
+    icon: string;
+  };
+}
+
+export const ACHIEVEMENTS: AchievementsTypeT = [
   {
     id: "beginner",
     name: "Beginner",
-    description: "Complete 1 workout",
+    description: "1 workout",
     icon: "checkmark-circle",
     condition: (stats: OverviewStatsT) => stats.totalWorkouts >= 1,
   },
   {
+    id: "moves",
+    name: "Making Moves",
+    description: "5 workouts",
+    icon: "trending-up",
+    condition: (stats: OverviewStatsT) => stats.totalWorkouts >= 5,
+  },
+  {
     id: "committed",
     name: "Committed",
-    description: "Complete 10 workouts",
+    description: "10 workouts",
+    icon: "checkmark-done",
+    condition: (stats: OverviewStatsT) => stats.totalWorkouts >= 10,
+  },
+  {
+    id: "keep going",
+    name: "Keep going",
+    description: "15 workouts",
+    icon: "checkmark-done",
+    condition: (stats: OverviewStatsT) => stats.totalWorkouts >= 15,
+  },
+  {
+    id: "almost there",
+    name: "Almost there",
+    description: "20 workouts",
     icon: "checkmark-done",
     condition: (stats: OverviewStatsT) => stats.totalWorkouts >= 10,
   },
   {
     id: "champion",
     name: "Champion",
-    description: "Complete 50 workouts",
+    description: "50 workouts",
     icon: "trophy",
     condition: (stats: OverviewStatsT) => stats.totalWorkouts >= 50,
   },
@@ -43,35 +82,42 @@ export const MILESTONES = [
   {
     id: "minutes_5000",
     name: "5000 Minutes",
-    description: "Work out for 5000 minutes",
+    description: "5000 minutes",
     icon: "timer",
     condition: (stats: OverviewStatsT) => stats.totalMinutes >= 5000,
   },
 ];
 
-// export const STREAKS = [
-//   {
-//     id: "streak_3",
-//     name: "3-Day Streak",
-//     description: "Workout 3 days in a row",
-//     icon: "calendar",
-//     condition: (stats) => stats.streak >= 3,
-//   },
-//   {
-//     id: "streak_7",
-//     name: "7-Day Streak",
-//     description: "Workout 7 days in a row",
-//     icon: "calendar-outline",
-//     condition: (stats) => stats.streak >= 7,
-//   },
-//   {
-//     id: "streak_30",
-//     name: "30-Day Streak",
-//     description: "Workout 30 days in a row",
-//     icon: "calendar-sharp",
-//     condition: (stats) => stats.streak >= 30,
-//   },
-// ];
+export const STREAKS = [
+  {
+    id: "streak_3",
+    name: "3-Day Streak",
+    description: "3 days in a row",
+    icon: "calendar",
+    condition: (stats: OverviewStatsT) => stats.streak >= 3,
+  },
+  {
+    id: "streak_5",
+    name: "5-Day Streak",
+    description: "5 days in a row",
+    icon: "calendar",
+    condition: (stats: OverviewStatsT) => stats.streak >= 5,
+  },
+  {
+    id: "streak_7",
+    name: "7-Day Streak",
+    description: "7 days in a row",
+    icon: "calendar-outline",
+    condition: (stats: OverviewStatsT) => stats.streak >= 7,
+  },
+  {
+    id: "streak_30",
+    name: "30-Day Streak",
+    description: "30 days in a row",
+    icon: "calendar-sharp",
+    condition: (stats: OverviewStatsT) => stats.streak >= 30,
+  },
+];
 
 interface trackAchievementsT {
   stats: OverviewStatsT;
@@ -82,10 +128,17 @@ export const trackAchievements = async ({
   stats,
   userId,
 }: trackAchievementsT) => {
-  const allGoals = [...ACHIEVEMENTS, ...MILESTONES];
+  const allGoals = [...ACHIEVEMENTS, ...MILESTONES, ...STREAKS];
+
+  // Fetch already unlocked achievements
+  const unlockedAchievements = await fetch(
+    `${API_URL}/api/achievements/${userId}`
+  )
+    .then((res) => res.json())
+    .catch(() => []);
 
   for (const goal of allGoals) {
-    if (goal.condition(stats)) {
+    if (goal.condition(stats) && !unlockedAchievements.includes(goal.id)) {
       try {
         await fetch(`${API_URL}/api/achievements/save`, {
           method: "POST",

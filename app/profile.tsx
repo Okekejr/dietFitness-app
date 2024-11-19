@@ -19,6 +19,7 @@ import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import CustomText from "@/components/ui/customText";
 import { FlatList } from "react-native";
+import { ScrollView } from "react-native";
 
 type ProfileConfig = {
   key: string;
@@ -135,111 +136,129 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-        <Ionicons name="chevron-back" size={24} color="#000" />
-      </TouchableOpacity>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="chevron-back" size={24} color="black" />
+          </TouchableOpacity>
+        </View>
 
-      <CustomText style={styles.headerText}>Profile</CustomText>
+        <CustomText style={styles.headerText}>Profile</CustomText>
 
-      <View style={styles.innerContainer}>
-        <TouchableOpacity
-          style={styles.profileBox}
-          onPress={() => router.push("/personalProfile")}
-        >
-          {userData?.profile_picture ? (
-            <Image
-              source={{ uri: userData.profile_picture }}
-              style={styles.avatar}
-            />
-          ) : (
-            <View style={styles.avatarFallback}>
-              <CustomText style={styles.avatarText}>
-                {userData && getInitials(userData.name)}
+        <View style={styles.innerContainer}>
+          <TouchableOpacity
+            style={styles.profileBox}
+            onPress={() => router.push("/personalProfile")}
+          >
+            {userData?.profile_picture ? (
+              <Image
+                source={{ uri: userData.profile_picture }}
+                style={styles.avatar}
+              />
+            ) : (
+              <View style={styles.avatarFallback}>
+                <CustomText style={styles.avatarText}>
+                  {userData && getInitials(userData.name)}
+                </CustomText>
+              </View>
+            )}
+            <View style={styles.profileInfo}>
+              <CustomText style={styles.name}>
+                {userData && userData.name}
+              </CustomText>
+              <CustomText style={styles.email}>
+                {userData && userData.email}
               </CustomText>
             </View>
-          )}
-          <View style={styles.profileInfo}>
-            <CustomText style={styles.name}>
-              {userData && userData.name}
-            </CustomText>
-            <CustomText style={styles.email}>
-              {userData && userData.email}
-            </CustomText>
-          </View>
-          <Ionicons name="chevron-forward" size={24} color="#000" />
-        </TouchableOpacity>
+            <Ionicons name="chevron-forward" size={24} color="#000" />
+          </TouchableOpacity>
 
-        <View style={styles.categoryContainer}>
-          <FlatList
-            data={profileSetting}
-            keyExtractor={(item) => item.key}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={styles.categoryBox}
-                onPress={() => router.push(item.hrefLink)}
-              >
-                <Ionicons name={item.leftIcon} size={24} color="#000" />
-                <CustomText style={styles.boxText}>{item.name}</CustomText>
-                <Ionicons name={item.rightIcon} size={24} color="#000" />
-              </TouchableOpacity>
-            )}
-          />
-        </View>
-
-        <TouchableOpacity style={styles.box} onPress={handleSignOut}>
-          <CustomText style={styles.boxText}>Sign out</CustomText>
-          <Ionicons name="log-out-outline" size={24} color="#000" />
-        </TouchableOpacity>
-      </View>
-
-      {loadingClubData ? (
-        <View style={styles.qrCodeContainer}>
-          <ActivityIndicator size="large" color="#4F46E5" />
-        </View>
-      ) : (
-        clubData && (
-          <View style={styles.qrCodeContainer}>
-            <CustomText
-              style={{
-                fontFamily: "HostGrotesk-Medium",
-                fontSize: 20,
-                marginBottom: 10,
-              }}
-            >
-              Run Club
-            </CustomText>
-            <CustomText style={styles.inviteCode}>
-              Invite Code: {clubData.invite_code}
-            </CustomText>
-            <Image source={{ uri: clubData.qr_code }} style={styles.qrCode} />
-            <TouchableOpacity onPress={handleShare} style={styles.shareButton}>
-              {isSharing ? (
-                <ActivityIndicator size="small" color="#000" />
-              ) : (
-                <Ionicons name="share-outline" size={24} color="#000" />
+          <View style={styles.categoryContainer}>
+            <FlatList
+              data={profileSetting}
+              scrollEnabled={false}
+              keyExtractor={(item) => item.key}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={styles.categoryBox}
+                  onPress={() => router.push(item.hrefLink)}
+                >
+                  <Ionicons name={item.leftIcon} size={24} color="#000" />
+                  <CustomText style={styles.boxText}>{item.name}</CustomText>
+                  <Ionicons name={item.rightIcon} size={24} color="#000" />
+                </TouchableOpacity>
               )}
-            </TouchableOpacity>
+            />
           </View>
-        )
-      )}
+
+          <TouchableOpacity style={styles.box} onPress={handleSignOut}>
+            <CustomText style={styles.boxText}>Sign out</CustomText>
+            <Ionicons name="log-out-outline" size={24} color="#000" />
+          </TouchableOpacity>
+        </View>
+
+        {loadingClubData ? (
+          <View style={styles.qrCodeContainer}>
+            <ActivityIndicator size="large" color="#4F46E5" />
+          </View>
+        ) : (
+          clubData && (
+            <View style={styles.qrCodeContainer}>
+              <CustomText
+                style={{
+                  fontFamily: "HostGrotesk-Medium",
+                  fontSize: 20,
+                  marginBottom: 10,
+                }}
+              >
+                Run Club
+              </CustomText>
+              <CustomText style={styles.inviteCode}>
+                Invite Code: {clubData.invite_code}
+              </CustomText>
+              <Image source={{ uri: clubData.qr_code }} style={styles.qrCode} />
+              <TouchableOpacity
+                onPress={handleShare}
+                style={styles.shareButton}
+              >
+                {isSharing ? (
+                  <ActivityIndicator size="small" color="#000" />
+                ) : (
+                  <Ionicons name="share-outline" size={24} color="#000" />
+                )}
+              </TouchableOpacity>
+            </View>
+          )
+        )}
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff", padding: 20 },
+  container: { flex: 1, backgroundColor: "#fff" },
+  scrollContent: {
+    padding: 20,
+  },
   backButton: {
-    position: "absolute",
-    top: 70,
-    left: 20,
+    alignSelf: "flex-start",
     backgroundColor: "#c7c7c7",
     borderRadius: 25,
     padding: 5,
   },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+    marginBottom: 10,
+  },
   headerText: {
     fontSize: 24,
     fontFamily: "HostGrotesk-Medium",
-    marginTop: 50,
+    marginTop: 10,
   },
   innerContainer: {
     marginTop: 20,

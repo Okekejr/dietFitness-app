@@ -16,9 +16,9 @@ const PastWorkouts: FC<PastWorkoutsProps> = ({ completedWorkouts }) => {
 
   if (completedWorkouts.length === 0) {
     return (
-      <View>
+      <View style={styles.center}>
         <CustomText style={styles.description}>
-          You havent completed any workouts yet.
+          You haven't completed any workouts yet.
         </CustomText>
       </View>
     );
@@ -114,11 +114,6 @@ const PastWorkouts: FC<PastWorkoutsProps> = ({ completedWorkouts }) => {
       renderItem={({ item }) => renderMonthSection(item)}
       keyExtractor={(item) => item[0]}
       contentContainerStyle={styles.container}
-      ListEmptyComponent={
-        <CustomText style={styles.emptyMessage}>
-          No workouts completed yet.
-        </CustomText>
-      }
     />
   );
 };
@@ -187,6 +182,11 @@ const styles = StyleSheet.create({
     marginTop: 50,
     fontSize: 16,
     color: "#888",
+  },
+  center: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
   innerInfo: {
     display: "flex",

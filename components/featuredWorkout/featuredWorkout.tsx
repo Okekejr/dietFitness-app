@@ -12,14 +12,12 @@ import { useUserData } from "@/context/userDataContext";
 import CustomText from "../ui/customText";
 
 interface FeaturedWorkoutProps {
-  loading: boolean;
   featuredWorkouts: WorkoutsT[];
   clearCache: () => Promise<void>;
   fetchFeaturedWorkouts: () => Promise<void>;
 }
 
 const FeaturedWorkoutsComp = ({
-  loading,
   fetchFeaturedWorkouts,
   featuredWorkouts,
   clearCache,
@@ -34,10 +32,6 @@ const FeaturedWorkoutsComp = ({
     fetchFeaturedWorkouts();
     refetchUserData();
   }, []);
-
-  if (loading) {
-    return <ActivityIndicator size="large" color="#4F46E5" />;
-  }
 
   return (
     <View style={styles.container}>

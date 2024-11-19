@@ -1,7 +1,6 @@
 import React from "react";
 import { ScrollView, StyleSheet } from "react-native";
 import ClubDetailsCard from "./clubs/clubDetailsCard";
-import LeaderBoardCard from "./clubs/leaderboardCard";
 import ActivityFeedCard from "./clubs/activityFeedCard";
 import ClubCards from "./clubs/clubCards";
 import { ClubData } from "@/types";
@@ -30,12 +29,12 @@ const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
     );
   }
 
-  if (selectedCard === "Leaderboard") {
-    return <LeaderBoardCard onBack={() => setSelectedCard(null)} />;
-  }
+  // if (selectedCard === "Leaderboard") {
+  //   return <LeaderBoardCard onBack={() => setSelectedCard(null)} />;
+  // }
 
   if (selectedCard === "Activity Feed") {
-    return <ActivityFeedCard onBack={() => setSelectedCard(null)} />;
+    return <ActivityFeedCard clubId={club.id} onBack={() => setSelectedCard(null)} />;
   }
 
   if (selectedCard === "Routes Feed") {
@@ -58,12 +57,12 @@ const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
         icon="infinite-outline"
         onPress={() => setSelectedCard("Routes Feed")}
       />
-      <ClubCards
+      {/* <ClubCards
         title="Leaderboard"
         description="See top performers"
         icon="trophy-outline"
         onPress={() => setSelectedCard("Leaderboard")}
-      />
+      /> */}
       <ClubCards
         title="Activity Feed"
         description="Recent activities"

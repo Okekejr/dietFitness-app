@@ -46,16 +46,26 @@ const RouteUpdatesCard = ({ onBack, clubId }: RouteUpdatesCardT) => {
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollViewContainer}>
-        {sortedRoutes?.map((route, index) => (
-          <RouteCard
-            key={index}
-            startPoint={route.startPoint}
-            endPoint={route.endPoint}
-            estimatedTime={route.estimatedTime}
-            estimatedDistance={route.estimatedDistance}
-            dateCreated={route.dateCreated}
-          />
-        ))}
+        {sortedRoutes && sortedRoutes?.length > 0 ? (
+          sortedRoutes?.map((route, index) => (
+            <RouteCard
+              key={index}
+              startPoint={route.startPoint}
+              endPoint={route.endPoint}
+              estimatedTime={route.estimatedTime}
+              estimatedDistance={route.estimatedDistance}
+              dateCreated={route.dateCreated}
+            />
+          ))
+        ) : (
+          <>
+            <View style={styles.centeredContainer}>
+              <CustomText style={styles.emptyText}>
+                No routes have been created yet...
+              </CustomText>
+            </View>
+          </>
+        )}
       </ScrollView>
     </View>
   );
@@ -90,6 +100,16 @@ const styles = StyleSheet.create({
   scrollViewContainer: {
     alignItems: "flex-start",
     paddingLeft: 5,
+  },
+  centeredContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  emptyText: {
+    color: "#000",
+    fontSize: 16,
+    marginBottom: 8,
   },
 });
 

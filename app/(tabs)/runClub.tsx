@@ -100,7 +100,6 @@ const ClubScreen = () => {
         formData.append("location", location);
         formData.append("maxMembers", maxMembers?.toString() || "");
 
-        // If the user selected a logo, convert it to Blob and append it to FormData
         if (logoFile) {
           const blob = await uriToBlob(logoFile.uri);
           formData.append("clubLogo", blob, `logo-${Date.now()}.jpg`);
@@ -145,10 +144,13 @@ const ClubScreen = () => {
     });
 
   const handleCreateClub = () => {
-    if (!name || !description || !maxMembers || !location) {
+    if (!name || !description || !location || !maxMembers) {
       alert("Please fill in all fields");
       return;
     }
+
+    console.log(name, description, location, maxMembers);
+
     setLoading(true);
     createClubMutation.mutate();
   };

@@ -8,11 +8,17 @@ const useStreak = (userId: string) => {
   useEffect(() => {
     const updateStreak = async () => {
       try {
+        if (!userId) return;
+
         const today = new Date().toISOString().split("T")[0]; // Format as YYYY-MM-DD
 
+        // Use user-specific keys for AsyncStorage
+        const streakKey = `userStreak_${userId}`;
+        const dateKey = `lastUpdateDate_${userId}`;
+
         // Fetch cached streak and last update date
-        const cachedStreak = await AsyncStorage.getItem("userStreak");
-        const cachedDate = await AsyncStorage.getItem("lastUpdateDate");
+        const cachedStreak = await AsyncStorage.getItem(streakKey);
+        const cachedDate = await AsyncStorage.getItem(dateKey);
 
         if (cachedDate === today && cachedStreak) {
           setStreak(Number(cachedStreak));
@@ -44,20 +50,23 @@ const useStreak = (userId: string) => {
           if (!updateResponse.ok) throw new Error(updatedData.error);
 
           setStreak(updatedData.streak);
-          await AsyncStorage.setItem(
-            "userStreak",
-            updatedData.streak.toString()
-          );
-          await AsyncStorage.setItem("lastUpdateDate", today);
+
+          // Cache the updated streak and date
+          await AsyncStorage.setItem(streakKey, updatedData.streak.toString());
+          await AsyncStorage.setItem(dateKey, today);
         } else {
           setStreak(serverStreak);
+
+          // Cache the fetched streak and date
+          await AsyncStorage.setItem(streakKey, serverStreak.toString());
+          await AsyncStorage.setItem(dateKey, today);
         }
       } catch (error) {
         console.error("Error updating streak:", error);
       }
     };
 
-    if (userId) updateStreak();
+    updateStreak();
   }, [userId]);
 
   return { streak };

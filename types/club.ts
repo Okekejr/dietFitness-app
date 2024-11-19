@@ -36,3 +36,11 @@ export interface StartPointOrEndPoint {
   latitude: number;
   longitude: number;
 }
+export interface ActivityLogsT {
+  id: number;
+  user_id: string;
+  activity_type: string;
+  reference_id: string;
+  custom_text: string;
+  timestamp: string;
+}

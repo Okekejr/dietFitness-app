@@ -50,7 +50,6 @@ export default function WorkoutsScreen() {
     fetchFeaturedWorkouts,
     clearCache,
     featWorkouts,
-    loading,
   } = useWorkoutQueries({
     userData,
   });
@@ -84,7 +83,7 @@ export default function WorkoutsScreen() {
   useFocusEffect(
     React.useCallback(() => {
       const fetchData = async () => {
-        await fetchFeaturedWorkouts();
+        fetchFeaturedWorkouts();
       };
 
       fetchData();
@@ -243,7 +242,6 @@ export default function WorkoutsScreen() {
         </View>
         {/* Featured Workouts */}
         <FeaturedWorkoutsComp
-          loading={loading}
           clearCache={clearCache}
           featuredWorkouts={featWorkouts}
           fetchFeaturedWorkouts={fetchFeaturedWorkouts}

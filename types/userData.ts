@@ -35,4 +35,5 @@ export interface OverviewStatsT {
   totalMinutes: number;
   bestDay: string;
   workoutBreakdown: WorkoutBreakdownT[];
+  streak: number;
 }

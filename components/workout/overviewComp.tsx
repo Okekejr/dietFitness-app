@@ -31,16 +31,18 @@ export default function OverviewComp({
   if (isError) {
     return (
       <View style={styles.errorContainer}>
-        <CustomText style={styles.errorText}>Failed to load overview data.</CustomText>
+        <CustomText style={styles.errorText}>
+          Failed to load overview data.
+        </CustomText>
       </View>
     );
   }
 
   if (stats.totalWorkouts === 0) {
     return (
-      <View>
+      <View style={styles.center}>
         <CustomText style={styles.description}>
-          You havent completed any workouts yet.
+          You haven't completed any workouts yet.
         </CustomText>
       </View>
     );
@@ -151,6 +153,11 @@ const styles = StyleSheet.create({
   errorText: {
     color: "red",
     fontSize: 18,
+  },
+  center: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
   description: {
     fontSize: 14,
