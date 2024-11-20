@@ -69,7 +69,8 @@
     "react-native-web-webview": "^1.0.2",
     "react-native-webview": "13.8.6",
     "react-native-youtube-iframe": "^2.3.0",
-    "supertokens-react-native": "^5.1.2"
+    "supertokens-react-native": "^5.1.2",
+    "@react-native-community/datetimepicker": "8.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

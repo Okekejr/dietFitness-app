@@ -29,6 +29,9 @@ export interface RouteData {
   endPoint: StartPointOrEndPoint;
   estimatedTime: string;
   estimatedDistance: string;
+  formattedRunDate?: string; // e.g. '23rd November, 2024'
+  formattedRunTime?: string; // e.g. '3:00 PM'
+  formattedDateTime?: string; // e.g. '23rd November, 2024 at 3:00 PM'
   dateCreated: string;
 }
 

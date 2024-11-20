@@ -1,11 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Linking,
-  StyleSheet,
-} from "react-native";
+import { View, TouchableOpacity, Linking, StyleSheet } from "react-native";
 import { parseISO, format, formatDistanceToNow } from "date-fns";
 import { RouteData } from "@/types";
 import CustomText from "../ui/customText";

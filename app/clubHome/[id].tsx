@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   View,
   StyleSheet,
@@ -8,7 +8,7 @@ import {
   Image,
 } from "react-native";
 import { BlurView } from "expo-blur";
-import MapView, { Marker, Polyline } from "react-native-maps";
+import MapView, { Marker, Polyline, Region } from "react-native-maps";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -18,6 +18,7 @@ import { getInitials } from "@/utils";
 import { useUserData } from "@/context/userDataContext";
 import { useClubQueries } from "@/hooks/useClubQueries";
 import CustomText from "@/components/ui/customText";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
 const ClubHomeScreen = () => {
   const { id } = useLocalSearchParams();
@@ -25,6 +26,7 @@ const ClubHomeScreen = () => {
   const router = useRouter();
   const bottomSheetRef = useRef<BottomSheet>(null);
   const snapPoints = useMemo(() => ["10%", "52%"], []);
+  const [latestRegion, setLatestRegion] = useState<Region | null>(null);
   const {
     loadingLocation,
     clubLoading,
@@ -49,10 +51,67 @@ const ClubHomeScreen = () => {
     selectedCard,
     setSelectedCard,
     latestRoute,
+    reverseGeocode,
+    startAddress,
+    setStartAddress,
+    endAddress,
+    setEndAddress,
+    latestPolylineCoords,
+    latestDistance,
+    latestEstimatedTime,
+    fetchLatestRoutePolyline,
+    runDate,
+    runTime,
+    showPicker,
+    onDateChange,
+    onTimeChange,
+    togglePicker,
   } = useClubQueries({
     id,
     userData,
   });
+
+  useEffect(() => {
+    const fetchAddresses = async () => {
+      if (!latestRoute) return;
+
+      const { startPoint, endPoint } = latestRoute;
+
+      if (startPoint && endPoint) {
+        // Fetch and set the addresses for start and end points
+        const startAddress = await reverseGeocode(startPoint);
+        const endAddress = await reverseGeocode(endPoint);
+
+        setStartAddress(startAddress);
+        setEndAddress(endAddress);
+      }
+
+      // Fetch the polyline for the latest route
+      if (startPoint && endPoint) {
+        await fetchLatestRoutePolyline(startPoint, endPoint);
+      }
+
+      // Calculate the region to pan to the latest route
+      if (startPoint && endPoint) {
+        const centerLat = (startPoint.latitude + endPoint.latitude) / 2;
+        const centerLng = (startPoint.longitude + endPoint.longitude) / 2;
+
+        const latDelta =
+          Math.abs(startPoint.latitude - endPoint.latitude) * 1.5;
+        const lngDelta =
+          Math.abs(startPoint.longitude - endPoint.longitude) * 1.5;
+
+        setLatestRegion({
+          latitude: centerLat,
+          longitude: centerLng,
+          latitudeDelta: latDelta || 0.01,
+          longitudeDelta: lngDelta || 0.01,
+        });
+      }
+    };
+
+    fetchAddresses();
+  }, [latestRoute]);
 
   if (loadingLocation || clubLoading) {
     return <ActivityIndicator size="large" color="#4F46E5" />;
@@ -122,6 +181,7 @@ const ClubHomeScreen = () => {
         <BlurView tint="dark" style={styles.routeContainer}>
           {!savedRoute && (
             <>
+              <CustomText style={styles.title}>Creating Route:</CustomText>
               {route.pointA && locationNames.pointA && (
                 <CustomText>Start Point: {locationNames.pointA}</CustomText>
               )}
@@ -133,7 +193,41 @@ const ClubHomeScreen = () => {
                 <CustomText>Estimated Time: {estimatedTime}</CustomText>
               )}
 
+              {/* Single Button for Date & Time Picker with Toggle */}
               {estimatedTime && (
+                <TouchableOpacity
+                  style={styles.datePickerButton}
+                  onPress={togglePicker} // Toggle picker on button press
+                >
+                  <CustomText style={styles.datePickerText}>
+                    {runDate && runTime
+                      ? `Run Date: ${runDate.toLocaleDateString()} | Time: ${runTime.toLocaleTimeString()}`
+                      : "Select Run Date & Time"}
+                  </CustomText>
+                </TouchableOpacity>
+              )}
+
+              {/* Modal-like layout for both Date and Time Pickers */}
+              {showPicker && (
+                <View style={styles.pickerContainer}>
+                  <DateTimePicker
+                    value={runDate || new Date()}
+                    mode="date"
+                    display="default"
+                    onChange={onDateChange}
+                    style={styles.picker}
+                  />
+                  <DateTimePicker
+                    value={runTime || new Date()}
+                    mode="time"
+                    display="default"
+                    onChange={onTimeChange}
+                    style={styles.picker}
+                  />
+                </View>
+              )}
+
+              {estimatedTime && runDate && runTime && (
                 <TouchableOpacity style={styles.saveButton} onPress={saveRoute}>
                   <CustomText style={styles.saveButtonText}>
                     Save Route
@@ -145,31 +239,125 @@ const ClubHomeScreen = () => {
         </BlurView>
       )}
 
+      {route.pointA === null &&
+        latestRoute?.startPoint.latitude &&
+        startAddress && (
+          <BlurView tint="dark" style={styles.routeContainer}>
+            <>
+              <CustomText style={styles.title}>
+                Latest Routes you created:
+              </CustomText>
+              {startAddress && (
+                <CustomText>
+                  Start Point: {startAddress || "Loading..."}
+                </CustomText>
+              )}
+              {endAddress && (
+                <CustomText>End Point: {endAddress || "Loading..."}</CustomText>
+              )}
+              {latestRoute.estimatedDistance && (
+                <CustomText>Distance: {latestDistance}</CustomText>
+              )}
+              {latestRoute.estimatedTime && (
+                <CustomText>Estimated Time: {latestEstimatedTime}</CustomText>
+              )}
+              {latestRoute?.formattedDateTime && (
+                <CustomText>
+                  Run Date: {latestRoute.formattedDateTime}
+                </CustomText>
+              )}
+
+              {isLeader?.isLeader && (
+                <CustomText
+                  style={{
+                    color: "#4F46E5",
+                    fontSize: 14,
+                    fontFamily: "HostGrotesk-Medium",
+                  }}
+                >
+                  Click on the map to create new routes
+                </CustomText>
+              )}
+            </>
+          </BlurView>
+        )}
+
       {/* Map Background */}
-      <View style={styles.mapContainer}>
-        <MapView
-          style={StyleSheet.absoluteFillObject}
-          region={region}
-          onRegionChangeComplete={(newRegion) => setRegion(newRegion)}
-          onPress={isLeader?.isLeader ? handleMapPress : () => null}
-          showsUserLocation={true} // Display user's location on the map
-          zoomEnabled={true}
-          zoomControlEnabled={true}
-          followsUserLocation={follow}
-        >
-          {route.pointA && (
-            <Marker coordinate={route.pointA} pinColor="green" />
-          )}
-          {route.pointB && <Marker coordinate={route.pointB} pinColor="red" />}
-          {polylineCoords.length > 0 && (
-            <Polyline
-              coordinates={polylineCoords}
-              strokeColor="#4F46E5"
-              strokeWidth={3}
-            />
-          )}
-        </MapView>
-      </View>
+      {isLeader?.isLeader && (
+        <View style={styles.mapContainer}>
+          <MapView
+            style={StyleSheet.absoluteFillObject}
+            region={latestRegion ? latestRegion : region}
+            onRegionChangeComplete={(newRegion) => setRegion(newRegion)}
+            onPress={isLeader?.isLeader ? handleMapPress : () => null}
+            showsUserLocation={true} // Display user's location on the map
+            zoomEnabled={true}
+            zoomControlEnabled={true}
+            followsUserLocation={follow}
+          >
+            {route.pointA ? (
+              <Marker coordinate={route.pointA} pinColor="green" />
+            ) : (
+              latestRoute?.startPoint && (
+                <Marker coordinate={latestRoute.startPoint} pinColor="green" />
+              )
+            )}
+            {route.pointB ? (
+              <Marker coordinate={route.pointB} pinColor="red" />
+            ) : (
+              latestRoute?.endPoint && (
+                <Marker coordinate={latestRoute.endPoint} pinColor="red" />
+              )
+            )}
+            {polylineCoords.length > 0 ? (
+              <Polyline
+                coordinates={polylineCoords}
+                strokeColor="#4F46E5"
+                strokeWidth={3}
+              />
+            ) : (
+              latestRoute?.startPoint &&
+              latestRoute.endPoint && (
+                <Polyline
+                  coordinates={latestPolylineCoords}
+                  strokeColor="#4F46E5"
+                  strokeWidth={3}
+                />
+              )
+            )}
+          </MapView>
+        </View>
+      )}
+
+      {!isLeader?.isLeader && latestRegion && (
+        <View style={styles.mapContainer}>
+          <MapView
+            style={StyleSheet.absoluteFillObject}
+            region={follow ? undefined : latestRegion} // Center the map on the calculated region
+            onRegionChangeComplete={(newRegion) => setLatestRegion(newRegion)}
+            onPress={() => null}
+            showsUserLocation={true} // Display user's location on the map
+            zoomEnabled={true}
+            zoomControlEnabled={true}
+            followsUserLocation={follow}
+          >
+            {latestRoute?.startPoint && (
+              <Marker coordinate={latestRoute.startPoint} pinColor="green" />
+            )}
+            {latestRoute?.endPoint && (
+              <Marker coordinate={latestRoute.endPoint} pinColor="red" />
+            )}
+
+            {latestRoute?.startPoint && latestRoute.endPoint && (
+              <Polyline
+                coordinates={latestPolylineCoords}
+                strokeColor="#4F46E5"
+                strokeWidth={3}
+              />
+            )}
+          </MapView>
+        </View>
+      )}
 
       {/* Bottom Sheet */}
       <BottomSheet
@@ -198,7 +386,7 @@ const ClubHomeScreen = () => {
               isLeader={isLeader?.isLeader}
             />
           ) : (
-            "...loading"
+            <CustomText>...loading</CustomText>
           )}
         </BottomSheetView>
       </BottomSheet>
@@ -257,7 +445,7 @@ const styles = StyleSheet.create({
     gap: 5,
     padding: 10,
     maxWidth: 300,
-    maxHeight: 300,
+    maxHeight: 500,
     top: 200,
     left: 20,
     overflow: "hidden",
@@ -361,6 +549,11 @@ const styles = StyleSheet.create({
     color: "red",
   },
   header: { marginBottom: 10 },
+  title: {
+    fontSize: 18,
+    fontFamily: "HostGrotesk-Medium",
+    color: "#000",
+  },
   sectionTitle: {
     fontSize: 22,
     fontFamily: "HostGrotesk-Medium",
@@ -371,6 +564,29 @@ const styles = StyleSheet.create({
     marginTop: 10,
     backgroundColor: "#f0f0f0",
     borderRadius: 10,
+  },
+  datePickerButton: {
+    backgroundColor: "#4F46E5",
+    padding: 10,
+    borderRadius: 5,
+  },
+  timePickerButton: {
+    backgroundColor: "#4F46E5",
+    padding: 10,
+    borderRadius: 5,
+  },
+  datePickerText: {
+    color: "#FFF",
+    fontSize: 16,
+  },
+  pickerContainer: {
+    flexDirection: "row", // Side-by-side layout for date and time pickers
+    justifyContent: "space-between",
+    paddingVertical: 10,
+  },
+  picker: {
+    flex: 1, // Each picker takes up half the available space
+    marginHorizontal: 5,
   },
   saveButton: {
     marginTop: 10,

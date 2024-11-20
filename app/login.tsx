@@ -94,10 +94,10 @@ export default function LoginScreen() {
         const userData = await response.json();
         console.log("User exists:", userData.name);
         refetchUserData();
-        router.replace("/"); // User found
+        router.replace({ pathname: "/" }); // User found
       } else if (response.status === 404) {
         console.log("User not found.");
-        router.replace("/personalInfo");
+        router.replace({ pathname: "/personalInfo" });
       } else {
         console.error("Failed to fetch user:", response.statusText);
         return false;

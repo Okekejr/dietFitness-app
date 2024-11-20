@@ -42,6 +42,37 @@ export const useClubQueries = ({ id, userData }: QueryType) => {
     latitudeDelta: 0.05,
     longitudeDelta: 0.05,
   });
+  const [startAddress, setStartAddress] = useState<string>("");
+  const [endAddress, setEndAddress] = useState<string>("");
+  const [latestPolylineCoords, setLatestPolylineCoords] = useState<
+    Coordinate[]
+  >([]);
+  const [latestDistance, setLatestDistance] = useState<string | null>(null);
+  const [latestEstimatedTime, setLatestEstimatedTime] = useState<string | null>(
+    null
+  );
+  const [runDate, setRunDate] = useState<Date | undefined>();
+  const [runTime, setRunTime] = useState<Date | undefined>();
+  const [showPicker, setShowPicker] = useState(false);
+
+  const onDateChange = (event: any, selectedDate?: Date) => {
+    setShowPicker(false); // Close the picker once the date is selected
+    if (selectedDate) {
+      setRunDate(selectedDate);
+    }
+  };
+
+  const onTimeChange = (event: any, selectedTime?: Date) => {
+    setShowPicker(false); // Close the picker once the time is selected
+    if (selectedTime) {
+      setRunTime(selectedTime);
+    }
+  };
+
+  // Toggle the visibility of the date and time picker
+  const togglePicker = () => {
+    setShowPicker(!showPicker); // Toggle the showPicker state
+  };
 
   // Fetch Club Data
   const { data: club, isLoading: clubLoading } = useQuery({
@@ -142,26 +173,50 @@ export const useClubQueries = ({ id, userData }: QueryType) => {
     }
   };
 
-  const reverseGeocode = async (coordinate: Coordinate, point: "A" | "B") => {
+  const fetchLatestRoutePolyline = async (
+    startPoint: Coordinate,
+    endPoint: Coordinate
+  ) => {
+    try {
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/directions/json?origin=${startPoint.latitude},${startPoint.longitude}&destination=${endPoint.latitude},${endPoint.longitude}&mode=walking&key=${process.env.GOOGLE_DIRECTIONS_API_KEY}`
+      );
+      const data = await response.json();
+
+      if (data.routes.length > 0) {
+        const route = data.routes[0];
+        const points = decodePolyline(route.overview_polyline.points);
+        setLatestPolylineCoords(points);
+        setLatestDistance(route.legs[0].distance.text); // e.g., "2.5 km"
+        setLatestEstimatedTime(route.legs[0].duration.text); // e.g., "30 mins"
+      } else {
+        Alert.alert("No route found", "Unable to fetch the latest route.");
+      }
+    } catch (error) {
+      console.error("Error fetching latest route directions:", error);
+      Alert.alert("Error", "Failed to fetch the latest route.");
+    }
+  };
+
+  async function reverseGeocode(coordinate: Coordinate): Promise<string> {
     try {
       const response = await fetch(
         `https://api.opencagedata.com/geocode/v1/json?q=${coordinate.latitude}+${coordinate.longitude}&key=${process.env.GEOCODING_API_KEY}`
       );
       const data = await response.json();
-      const locationName = data.results[0]?.formatted || "Unknown Location";
-
-      setLocationNames((prev) => ({
-        ...prev,
-        [point === "A" ? "pointA" : "pointB"]: locationName,
-      }));
+      return data.results[0]?.formatted || "Unknown Location";
     } catch (error) {
       console.error("Reverse Geocoding Error:", error);
+      return "Unknown Location";
     }
-  };
+  }
 
   const saveRoute = async () => {
-    if (!route.pointA || !route.pointB || !distance) {
-      Alert.alert("Incomplete Data", "Please set both points A and B.");
+    if (!route.pointA || !route.pointB || !distance || !runDate || !runTime) {
+      Alert.alert(
+        "Incomplete Data",
+        "Please set all route details, including date and time."
+      );
       return;
     }
 
@@ -175,6 +230,8 @@ export const useClubQueries = ({ id, userData }: QueryType) => {
           pointB: route.pointB,
           distance,
           estimatedTime,
+          runDate: runDate.toISOString(), // Send ISO format for date
+          runTime: runTime.toISOString(), // Send ISO format for time
         }),
       });
 
@@ -202,11 +259,21 @@ export const useClubQueries = ({ id, userData }: QueryType) => {
     const { latitude, longitude } = event.nativeEvent.coordinate;
     setRoute((prev) => {
       if (!prev.pointA) {
-        reverseGeocode({ latitude, longitude }, "A");
+        reverseGeocode({ latitude, longitude }).then((locationName) => {
+          setLocationNames((prevNames) => ({
+            ...prevNames,
+            pointA: locationName,
+          }));
+        });
         return { ...prev, pointA: { latitude, longitude } };
       } else if (!prev.pointB) {
         const pointB = { latitude, longitude };
-        reverseGeocode(pointB, "B");
+        reverseGeocode(pointB).then((locationName) => {
+          setLocationNames((prevNames) => ({
+            ...prevNames,
+            pointB: locationName,
+          }));
+        });
         fetchDirections(prev.pointA!, pointB);
         return { ...prev, pointB };
       }
@@ -239,7 +306,7 @@ export const useClubQueries = ({ id, userData }: QueryType) => {
     },
   });
 
-  const latestRoute = routesData && routesData[routesData?.length - 1];
+  const latestRoute = routesData && routesData[0];
 
   return {
     loadingLocation,
@@ -266,5 +333,21 @@ export const useClubQueries = ({ id, userData }: QueryType) => {
     setSelectedCard,
     setSavedRoutes,
     latestRoute,
+    reverseGeocode,
+    startAddress,
+    setStartAddress,
+    endAddress,
+    setEndAddress,
+    latestPolylineCoords,
+    latestDistance,
+    latestEstimatedTime,
+    fetchLatestRoutePolyline,
+    runDate,
+    runTime,
+    showPicker,
+    onDateChange,
+    onTimeChange,
+    setShowPicker,
+    togglePicker,
   };
 };
