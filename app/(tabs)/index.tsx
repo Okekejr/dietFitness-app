@@ -169,6 +169,7 @@ export default function HomeScreen() {
           <CustomText>Duration: {item.workout.duration} mins</CustomText>
           <CustomText>Description: {item.workout.description}</CustomText>
           <CustomText>Intensity: {item.workout.intensity}</CustomText>
+          <CustomText>Calories: - {item.workout.calories_burned} kcal</CustomText>
           {isCompleted && (
             <View style={styles.completedContainer}>
               <Ionicons name="checkmark-circle" size={24} color="green" />

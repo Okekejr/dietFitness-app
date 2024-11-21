@@ -80,10 +80,75 @@ export const useHomeQueries = ({
       setCurrentWeekNum(userData.current_workout_week);
 
       if (hasMonthPassed(userData.week_start_date)) {
-        // Make API request here since a month has passed
-        console.log(
-          "A month has passed since the last plan, make the request."
+        console.log("A month has passed since the last plan, regenerating...");
+        // Regenerate workout and diet plan
+        const regenerateResponse = await fetch(
+          `${API_URL}/api/users/userData/regeneratePlan`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include", // Ensure session/cookies are sent
+          }
         );
+
+        if (!regenerateResponse.ok) {
+          const errorData = await regenerateResponse.json();
+          console.error("Error regenerating plan:", errorData);
+          setLoading(false);
+          return;
+        }
+
+        const { workouts, meals } = await regenerateResponse.json();
+
+        // Update userData with the new plans
+        userData.workout_plan = workouts;
+        userData.diet_plan = meals;
+        userData.week_start_date = today.toISOString(); // Reset the month start date
+        userData.current_workout_week = 1; // Reset to week 1
+
+        // Fetch past used workouts
+        const pastUsedWorkoutsResponse = await fetch(
+          `${API_URL}/api/user/getPastUsedWorkouts?userId=${userId}`
+        );
+
+        if (!pastUsedWorkoutsResponse.ok) {
+          const errorData = await pastUsedWorkoutsResponse.json();
+          console.error("Error fetching past data:", errorData);
+          return [];
+        }
+
+        const pastUsedWorkouts = await pastUsedWorkoutsResponse.json();
+
+        // Distribute the workouts and diets across the week
+        const workoutsPerWeek = workoutDays(userData.activity_level);
+        const { assignedWorkouts, assignedDiets } =
+          distributeWorkoutsAndDietsAcrossWeek({
+            workoutPlan: userData.workout_plan,
+            dietPlan: userData.diet_plan,
+            workoutsPerWeek,
+            currentWeek: userData.current_workout_week,
+            pastUsedWorkouts,
+          });
+
+        // Generate the new weekly schedule
+        const weeklySchedule = Array.from({ length: 7 }, (_, i) => ({
+          day: i + 1,
+          workouts: assignedWorkouts.filter((w) => w.day === i + 1),
+          diets: assignedDiets.filter((d) => d.day === i + 1),
+        }));
+
+        // Save the new schedule
+        await saveSchedule(
+          userId,
+          weeklySchedule,
+          userData.current_workout_week,
+          today
+        );
+
+        // Set the fetched or newly generated schedule
+        setSchedule(weeklySchedule);
       } else {
         console.log("A month hasn't passed yet.");
       }
