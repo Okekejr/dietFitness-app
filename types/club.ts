@@ -47,3 +47,12 @@ export interface ActivityLogsT {
   custom_text: string;
   timestamp: string;
 }
+
+export interface ClubMembersT {
+  club_member_id: number;
+  is_leader: boolean;
+  joined_at: string;
+  name: string;
+  profile_picture: string;
+  user_id: string;
+}

@@ -147,7 +147,31 @@ const ClubHomeScreen = () => {
         </BlurView>
       )}
 
-      <BlurView tint="dark" style={styles.homeContainer}>
+      {!isLeader?.isLeader && (
+        <BlurView tint="dark" style={styles.logoContainer}>
+          <View style={styles.profileContainer}>
+            {club?.logo ? (
+              <Image
+                source={{ uri: club.logo, cache: "force-cache" }}
+                style={styles.profileImage}
+              />
+            ) : (
+              <View style={styles.profileFallback}>
+                <CustomText style={styles.initials}>
+                  {club?.name ? getInitials(club.name) : "?"}
+                </CustomText>
+              </View>
+            )}
+          </View>
+        </BlurView>
+      )}
+
+      <BlurView
+        tint="dark"
+        style={
+          isLeader?.isLeader ? styles.homeContainer : styles.memberHomeContainer
+        }
+      >
         <TouchableOpacity
           onPress={() => router.push("/")}
           style={styles.bookmarkButton}
@@ -156,7 +180,12 @@ const ClubHomeScreen = () => {
         </TouchableOpacity>
       </BlurView>
 
-      <BlurView tint="dark" style={styles.navContainer}>
+      <BlurView
+        tint="dark"
+        style={
+          isLeader?.isLeader ? styles.navContainer : styles.memberNavContainer
+        }
+      >
         <TouchableOpacity onPress={toggleFollow} style={styles.bookmarkButton}>
           <Ionicons
             name={follow ? "navigate-circle" : "navigate-circle-outline"}
@@ -242,7 +271,14 @@ const ClubHomeScreen = () => {
       {route.pointA === null &&
         latestRoute?.startPoint.latitude &&
         startAddress && (
-          <BlurView tint="dark" style={styles.routeContainer}>
+          <BlurView
+            tint="dark"
+            style={
+              isLeader?.isLeader
+                ? styles.routeContainer
+                : styles.memberRouteContainer
+            }
+          >
             <>
               <CustomText style={styles.title}>
                 Latest Routes you created:
@@ -437,7 +473,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     top: 300,
     right: 20,
-    zIndex: 10,
+    zIndex: 5,
   },
   routeContainer: {
     position: "absolute",
@@ -449,7 +485,19 @@ const styles = StyleSheet.create({
     top: 200,
     left: 20,
     overflow: "hidden",
-    zIndex: 10,
+    zIndex: 5,
+  },
+  memberRouteContainer: {
+    position: "absolute",
+    borderRadius: 25,
+    gap: 5,
+    padding: 10,
+    maxWidth: 300,
+    maxHeight: 500,
+    top: 100,
+    left: 20,
+    overflow: "hidden",
+    zIndex: 5,
   },
   navContainer: {
     position: "absolute",
@@ -457,7 +505,31 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     top: 250,
     right: 20,
-    zIndex: 10,
+    zIndex: 5,
+  },
+  memberNavContainer: {
+    position: "absolute",
+    borderRadius: 25,
+    overflow: "hidden",
+    top: 200,
+    right: 20,
+    zIndex: 5,
+  },
+  logoContainer: {
+    position: "absolute",
+    borderRadius: 25,
+    overflow: "hidden",
+    top: 100,
+    right: 20,
+    zIndex: 5,
+  },
+  memberHomeContainer: {
+    position: "absolute",
+    borderRadius: 25,
+    overflow: "hidden",
+    top: 150,
+    right: 20,
+    zIndex: 5,
   },
   homeContainer: {
     position: "absolute",
@@ -465,7 +537,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     top: 200,
     right: 20,
-    zIndex: 10,
+    zIndex: 5,
   },
   searchContainer: {
     position: "absolute",
@@ -483,7 +555,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     paddingHorizontal: 10,
     paddingVertical: 10,
-    zIndex: 10,
+    zIndex: 5,
   },
   searchInput: {
     flex: 1,

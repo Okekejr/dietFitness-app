@@ -5,6 +5,7 @@ import ActivityFeedCard from "./clubs/activityFeedCard";
 import ClubCards from "./clubs/clubCards";
 import { ClubData } from "@/types";
 import RouteUpdatesCard from "./clubs/routesUpdatesCard";
+import ManageGroupCard from "./clubs/manageGroup";
 
 interface BottomSheetContentProps {
   selectedCard: string | null;
@@ -34,12 +35,20 @@ const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
   // }
 
   if (selectedCard === "Activity Feed") {
-    return <ActivityFeedCard clubId={club.id} onBack={() => setSelectedCard(null)} />;
+    return (
+      <ActivityFeedCard clubId={club.id} onBack={() => setSelectedCard(null)} />
+    );
   }
 
   if (selectedCard === "Routes Feed") {
     return (
       <RouteUpdatesCard clubId={club.id} onBack={() => setSelectedCard(null)} />
+    );
+  }
+
+  if (selectedCard === "Manage Group") {
+    return (
+      <ManageGroupCard clubId={club.id} isLeader={isLeader} onBack={() => setSelectedCard(null)} />
     );
   }
 
@@ -51,6 +60,14 @@ const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
         icon="information-circle-outline"
         onPress={() => setSelectedCard("Club Details")}
       />
+
+      <ClubCards
+        title={isLeader ? "Manage Group" : "View Members"}
+        description="View users in the group"
+        icon="cog-outline"
+        onPress={() => setSelectedCard("Manage Group")}
+      />
+
       <ClubCards
         title="Routes"
         description="Recent routes"
