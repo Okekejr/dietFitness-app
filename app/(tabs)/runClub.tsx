@@ -250,23 +250,4 @@ const styles = StyleSheet.create({
   },
 });
 
-const pickerSelectStyles = {
-  inputIOS: {
-    fontSize: 16,
-    padding: 10,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 10,
-    backgroundColor: "#fff",
-  },
-  inputAndroid: {
-    fontSize: 16,
-    padding: 10,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 10,
-    backgroundColor: "#fff",
-  },
-};
-
 export default ClubScreen;

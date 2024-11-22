@@ -2,10 +2,12 @@ import React, { useEffect, useState } from "react";
 import {
   View,
   Alert,
+  Dimensions,
   StyleSheet,
   TouchableOpacity,
   Image,
   ActivityIndicator,
+  Modal,
 } from "react-native";
 import { Href, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -29,12 +31,18 @@ type ProfileConfig = {
   hrefLink: Href<string>;
 }[];
 
+const { width } = Dimensions.get("window");
+
 export default function ProfileScreen() {
   const router = useRouter();
   const { userData, refetchUserData } = useUserData();
   const [clubData, setClubData] = useState<ClubData | null>(null);
   const [isSharing, setIsSharing] = useState(false);
   const [loadingClubData, setLoadingClubData] = useState(true);
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const openModal = () => setModalVisible(true);
+  const closeModal = () => setModalVisible(false);
 
   useEffect(() => {
     refetchUserData();
@@ -132,6 +140,20 @@ export default function ProfileScreen() {
       rightIcon: "chevron-forward",
       hrefLink: "/helpScreen",
     },
+    {
+      key: "Notifications",
+      name: "Notifications",
+      leftIcon: "notifications-outline",
+      rightIcon: "chevron-forward",
+      hrefLink: "/notificationSettings",
+    },
+    {
+      key: "Subscription & Billing",
+      name: "Subscription & Billing",
+      leftIcon: "card-outline",
+      rightIcon: "chevron-forward",
+      hrefLink: "/subscription",
+    },
   ];
 
   return (
@@ -194,45 +216,75 @@ export default function ProfileScreen() {
             />
           </View>
 
+          <TouchableOpacity style={styles.box} onPress={openModal}>
+            <Ionicons name="qr-code-outline" size={24} color="#000" />
+            <CustomText style={styles.boxText}>Run Club</CustomText>
+            <Ionicons name="chevron-forward" size={24} color="#000" />
+          </TouchableOpacity>
+
           <TouchableOpacity style={styles.box} onPress={handleSignOut}>
             <CustomText style={styles.boxText}>Sign out</CustomText>
             <Ionicons name="log-out-outline" size={24} color="#000" />
           </TouchableOpacity>
-        </View>
 
-        {loadingClubData ? (
-          <View style={styles.qrCodeContainer}>
-            <ActivityIndicator size="large" color="#4F46E5" />
-          </View>
-        ) : (
-          clubData && (
-            <View style={styles.qrCodeContainer}>
-              <CustomText
-                style={{
-                  fontFamily: "HostGrotesk-Medium",
-                  fontSize: 20,
-                  marginBottom: 10,
-                }}
+          {/* Modal Component */}
+          <Modal
+            visible={modalVisible}
+            transparent={true}
+            animationType="slide"
+            onRequestClose={closeModal}
+          >
+            <TouchableOpacity
+              style={styles.modalBackdrop}
+              activeOpacity={1} // Prevent accidental clicks through to the background
+              onPress={closeModal} // Close modal on backdrop press
+            >
+              <View
+                style={styles.modalContent}
+                onStartShouldSetResponder={() => true}
               >
-                Run Club
-              </CustomText>
-              <CustomText style={styles.inviteCode}>
-                Invite Code: {clubData.invite_code}
-              </CustomText>
-              <Image source={{ uri: clubData.qr_code }} style={styles.qrCode} />
-              <TouchableOpacity
-                onPress={handleShare}
-                style={styles.shareButton}
-              >
-                {isSharing ? (
-                  <ActivityIndicator size="small" color="#000" />
+                {loadingClubData ? (
+                  <View style={styles.qrCodeContainer}>
+                    <ActivityIndicator size="large" color="#4F46E5" />
+                  </View>
+                ) : clubData ? (
+                  <View style={styles.qrCodeContainer}>
+                    <CustomText
+                      style={{
+                        fontFamily: "HostGrotesk-Medium",
+                        fontSize: 20,
+                        marginBottom: 10,
+                      }}
+                    >
+                      Run Club
+                    </CustomText>
+                    <CustomText style={styles.inviteCode}>
+                      Invite Code: {clubData.invite_code}
+                    </CustomText>
+                    <Image
+                      source={{ uri: clubData.qr_code }}
+                      style={styles.qrCode}
+                    />
+                    <TouchableOpacity
+                      onPress={handleShare}
+                      style={styles.shareButton}
+                    >
+                      {isSharing ? (
+                        <ActivityIndicator size="small" color="#000" />
+                      ) : (
+                        <Ionicons name="share-outline" size={24} color="#000" />
+                      )}
+                    </TouchableOpacity>
+                  </View>
                 ) : (
-                  <Ionicons name="share-outline" size={24} color="#000" />
+                  <View style={styles.qrCodeContainer}>
+                    <CustomText>Create or Join a Club</CustomText>
+                  </View>
                 )}
-              </TouchableOpacity>
-            </View>
-          )
-        )}
+              </View>
+            </TouchableOpacity>
+          </Modal>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -315,5 +367,24 @@ const styles = StyleSheet.create({
     backgroundColor: "#f0f0f0",
     borderRadius: 50,
     marginBottom: 30,
+  },
+  modalBackdrop: {
+    flex: 1,
+    justifyContent: "flex-end", // Align the modal to the bottom of the screen
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    width: width, // Take up the full width
+    height: "auto", // Take up 80% of the height from the bottom
+    padding: 20,
+    backgroundColor: "white",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    alignItems: "center",
+  },
+  modalText: {
+    fontSize: 18,
+    marginBottom: 20,
   },
 });

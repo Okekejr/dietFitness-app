@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
   View,
-  TextInput,
   StyleSheet,
   Switch,
   Alert,
@@ -24,12 +23,12 @@ export default function EditProfileScreen() {
   const [activityLevel, setActivityLevel] = useState(
     userData?.activity_level || ""
   );
-  const [allergies, setAllergies] = useState<string[]>(
-    Array.isArray(userData?.allergies)
-      ? userData.allergies
-      : userData?.allergies
-      ? userData.allergies.split(",").map((item) => item.trim())
-      : [] // Default to an empty array if undefined
+  const initialState = useMemo(
+    () => ({
+      activityLevel: userData?.activity_level || "",
+      preferences: userData?.preferences || { diet: [], workout: [] },
+    }),
+    [userData]
   );
 
   const [preferences, setPreferences] = useState(
@@ -38,28 +37,13 @@ export default function EditProfileScreen() {
   const [loading, setLoading] = useState(false);
   const [isFormChanged, setIsFormChanged] = useState(false);
 
-  const initialState = useMemo(
-    () => ({
-      profilePicture: userData?.profile_picture || "",
-      activityLevel: userData?.activity_level || "",
-      allergies: Array.isArray(userData?.allergies)
-        ? userData.allergies
-        : userData?.allergies
-        ? userData.allergies.split(",").map((item) => item.trim())
-        : [],
-      preferences: userData?.preferences || { diet: [], workout: [] },
-    }),
-    [userData]
-  );
-
   // Track form changes
   useEffect(() => {
     const hasChanges =
       activityLevel !== initialState.activityLevel ||
-      JSON.stringify(allergies) !== JSON.stringify(initialState.allergies) ||
       JSON.stringify(preferences) !== JSON.stringify(initialState.preferences);
     setIsFormChanged(hasChanges);
-  }, [activityLevel, allergies, preferences, initialState]);
+  }, [activityLevel, preferences, initialState]);
 
   const togglePreference = (key: "diet" | "workout", value: string) => {
     // Ensure only one preference is selected at a time
@@ -71,27 +55,26 @@ export default function EditProfileScreen() {
     }));
   };
 
-  // Handle TextInput changes and convert input to an array
-  const handleAllergiesChange = (text: string) => {
-    setAllergies(text.split(",").map((item) => item.trim()));
-  };
-
   const handleSave = async () => {
+    if (!userData) {
+      return;
+    }
+
     try {
       setLoading(true);
 
       const response = await fetch(
-        `${API_URL}/api/users/${userData?.user_id}`,
+        `${API_URL}/api/users/userData/updatePlans`,
         {
-          method: "PUT",
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            activity_level: activityLevel,
-            allergies,
-            preferences,
+            activityLevel: activityLevel,
+            preferences: preferences,
           }),
+          credentials: "include",
         }
       );
 
@@ -102,7 +85,7 @@ export default function EditProfileScreen() {
 
       Alert.alert("Success", "Profile updated successfully!");
       refetchUserData();
-      router.back();
+      router.replace({ pathname: "/" });
     } catch (error) {
       console.error("Error:", error);
       Alert.alert("Error", "Failed to update profile.");
@@ -177,7 +160,7 @@ export default function EditProfileScreen() {
           </View>
 
           <View style={styles.formGroup}>
-            <CustomText style={styles.label}>Activity Level</CustomText>
+            <CustomText style={styles.subHeading}>Activity Level</CustomText>
             <Picker
               selectedValue={activityLevel}
               onValueChange={(value) => setActivityLevel(value)}
@@ -206,19 +189,6 @@ export default function EditProfileScreen() {
               />
             </Picker>
           </View>
-
-          <View style={styles.formGroup}>
-            <CustomText style={styles.label}>
-              Allergies (comma-separated)
-            </CustomText>
-            <TextInput
-              placeholder="e.g., peanuts, shellfish"
-              placeholderTextColor="#686D76"
-              value={allergies.join(", ")}
-              onChangeText={handleAllergiesChange}
-              style={styles.input}
-            />
-          </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -244,6 +214,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "center",
     width: "100%",
     marginBottom: 10,
   },
@@ -273,11 +244,5 @@ const styles = StyleSheet.create({
   },
   picker: {
     marginVertical: 15,
-  },
-  input: {
-    borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
-    marginTop: 15,
-    padding: 5,
   },
 });
