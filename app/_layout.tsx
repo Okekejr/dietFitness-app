@@ -8,6 +8,7 @@ import { UserProvider } from "@/context/userContext";
 import { UserDataProvider } from "@/context/userDataContext";
 import { Linking } from "react-native";
 import { ThemeProvider } from "@/context/userThemeContext";
+import CustomWrapper from "@/components/customWrapper";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -68,10 +69,12 @@ export default function RootLayout() {
       <ThemeProvider>
         <UserProvider>
           <UserDataProvider>
-            <Stack screenOptions={{ headerShown: false }}>
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen name="+not-found" />
-            </Stack>
+            <CustomWrapper>
+              <Stack screenOptions={{ headerShown: false }}>
+                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                <Stack.Screen name="+not-found" />
+              </Stack>
+            </CustomWrapper>
           </UserDataProvider>
         </UserProvider>
       </ThemeProvider>

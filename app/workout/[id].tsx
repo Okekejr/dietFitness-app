@@ -21,6 +21,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import BackButton from "@/components/ui/backButton";
 import CustomText from "@/components/ui/customText";
 import * as Haptics from "expo-haptics";
+import { useThemeColor } from "@/hooks/useThemeColor";
 
 const { height } = Dimensions.get("window");
 
@@ -28,6 +29,10 @@ const WorkoutDetailsScreen = () => {
   const { id } = useLocalSearchParams();
   const { userData } = useUserData();
   const queryClient = useQueryClient();
+  const textColor = useThemeColor({}, "text");
+  const backgroundColor = useThemeColor({}, "background");
+  const subTextColor = useThemeColor({}, "subText");
+  const iconTextColor = useThemeColor({}, "icon");
   const [workout, setWorkout] = useState<WorkoutsT | null>(null);
   const [loading, setLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
@@ -198,9 +203,9 @@ const WorkoutDetailsScreen = () => {
         <Ionicons
           name={getWorkoutPageIcons(workoutInfo)}
           size={24}
-          color="black"
+          color={textColor}
         />
-        <CustomText style={styles.infoText}>
+        <CustomText style={[styles.infoText, { color: subTextColor }]}>
           {text === workoutInfo.duration &&
             `${workout.duration + " mins, " + workout.activity_level}`}
           {text === workoutInfo.tag && `${workout.tag + " workout"}`}
@@ -213,7 +218,9 @@ const WorkoutDetailsScreen = () => {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView
+      style={[styles.container, { backgroundColor: backgroundColor }]}
+    >
       {/* Workout Image with Back Button and Favorite Icon */}
       <View style={styles.imageContainer}>
         <Image
@@ -240,7 +247,9 @@ const WorkoutDetailsScreen = () => {
       </View>
 
       <View style={styles.detailsContainer}>
-        <CustomText style={styles.workoutName}>{workout.name}</CustomText>
+        <CustomText style={[styles.workoutName, { color: textColor }]}>
+          {workout.name}
+        </CustomText>
         {workoutIconsTexts({ duration: workout.duration }, workout.duration)}
         {workoutIconsTexts({ tag: workout.tag }, workout.tag)}
         {workoutIconsTexts({ intensity: workout.intensity }, workout.intensity)}
@@ -256,7 +265,7 @@ const WorkoutDetailsScreen = () => {
           </View>
         )}
 
-        <CustomText style={styles.description}>
+        <CustomText style={[styles.description, { color: iconTextColor }]}>
           {workout.description}
         </CustomText>
 
@@ -301,7 +310,6 @@ const WorkoutDetailsScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
   },
   loadingContainer: {
     flex: 1,
@@ -351,18 +359,15 @@ const styles = StyleSheet.create({
   workoutName: {
     fontSize: 24,
     fontFamily: "HostGrotesk-Medium",
-    color: "#333",
     marginBottom: 20,
   },
   infoText: {
     fontSize: 16,
-    color: "#686D76",
   },
   description: {
     fontSize: 15,
     lineHeight: 20,
     marginVertical: 20,
-    color: "#444",
   },
   video: {
     width: 320,

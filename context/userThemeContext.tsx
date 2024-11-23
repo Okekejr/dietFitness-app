@@ -1,14 +1,16 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
-import { useColorScheme } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { createContext, useContext, useEffect, useState } from "react";
+import { useColorScheme } from "react-native";
 
 interface ThemeContextType {
   theme: "light" | "dark";
+  colorMode: "light" | "dark" | "system"; // Expose raw colorMode
   setColorMode: (mode: "light" | "dark" | "system") => Promise<void>;
 }
 
 const ThemeContext = createContext<ThemeContextType>({
   theme: "light",
+  colorMode: "system",
   setColorMode: async () => {},
 });
 
@@ -19,7 +21,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   );
   const [theme, setTheme] = useState<"light" | "dark">(systemTheme ?? "light");
 
-  // Load colorMode from AsyncStorage on mount
   useEffect(() => {
     const loadColorMode = async () => {
       const savedMode = await AsyncStorage.getItem("colorMode");
@@ -28,7 +29,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     loadColorMode();
   }, []);
 
-  // Update the theme based on colorMode
   useEffect(() => {
     if (colorMode === "system") {
       setTheme(systemTheme ?? "light");
@@ -43,7 +43,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <ThemeContext.Provider value={{ theme, setColorMode: handleSetColorMode }}>
+    <ThemeContext.Provider
+      value={{ theme, colorMode, setColorMode: handleSetColorMode }}
+    >
       {children}
     </ThemeContext.Provider>
   );

@@ -22,8 +22,8 @@ import CustomText from "@/components/ui/customText";
 import { FlatList } from "react-native";
 import { ScrollView } from "react-native";
 import { RunClubQrCode } from "@/components/profile/runClubQrCode";
-import { ColorSwitcher } from "@/components/profile/colorSwitcher";
 import { useThemeColor } from "@/hooks/useThemeColor";
+import ColorSwitcher from "@/components/profile/colorSwitcher";
 
 type ProfileConfig = {
   key: string;
@@ -358,7 +358,6 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    alignItems: "center",
   },
   modalText: {
     fontSize: 18,

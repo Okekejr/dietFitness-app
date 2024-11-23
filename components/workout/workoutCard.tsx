@@ -151,7 +151,7 @@ const WorkoutCard: FC<WorkoutCardProps> = ({ workout, userId }) => {
         <Ionicons
           name={isFavorite ? "bookmark" : "bookmark-outline"}
           size={20}
-          color={loading ? "#31363F" : "black"}
+          color={loading ? "#31363F" : textColor}
         />
       </TouchableOpacity>
     </TouchableOpacity>

@@ -1,45 +1,132 @@
-import { useTheme } from "@/context/userThemeContext";
-import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { useState } from "react";
+import { StyleSheet, TouchableOpacity, View, Text } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import CustomText from "../ui/customText";
+import { useTheme } from "@/context/userThemeContext";
 
-export const ColorSwitcher = () => {
+type ColorModeT = "light" | "dark" | "system";
+
+const colorModes: ColorModeT[] = ["light", "dark", "system"];
+
+const ColorSwitcher = () => {
   const { theme, setColorMode } = useTheme();
+  const [isPickerVisible, setIsPickerVisible] = useState(false);
+  const [colorMode, setColorModeState] = useState<ColorModeT>(theme); // default color mode
+
+  const handlePickerToggle = () => {
+    setIsPickerVisible((prev) => !prev);
+  };
+
+  const handleModeSelect = (mode: ColorModeT) => {
+    setColorMode(mode); // Set the new color mode to the theme
+    setColorModeState(mode);
+    setIsPickerVisible(false); // Close the picker after selection
+  };
 
   return (
     <View style={styles.container}>
-      <CustomText style={styles.currentTheme}>
-        Current Theme: {theme}
-      </CustomText>
-      <TouchableOpacity
-        onPress={() => setColorMode("light")}
-        style={styles.button}
-      >
-        <CustomText style={styles.text}>Light Mode</CustomText>
-      </TouchableOpacity>
-      <TouchableOpacity
-        onPress={() => setColorMode("dark")}
-        style={styles.button}
-      >
-        <CustomText style={styles.text}>Dark Mode</CustomText>
-      </TouchableOpacity>
-      <TouchableOpacity
-        onPress={() => setColorMode("system")}
-        style={styles.button}
-      >
-        <CustomText style={styles.text}>System Mode</CustomText>
-      </TouchableOpacity>
+      <View style={styles.categoryBox}>
+        <Ionicons
+          name={theme === "dark" ? "moon-outline" : "sunny-outline"}
+          size={24}
+          color="#fff"
+        />
+        <CustomText style={styles.colorSchemeText}>Color Scheme</CustomText>
+        <TouchableOpacity
+          onPress={handlePickerToggle}
+          style={styles.pickerButton}
+        >
+          <CustomText style={styles.pickerText}>
+            {colorMode &&
+              colorMode.charAt(0).toUpperCase() + colorMode.slice(1)}
+          </CustomText>
+          <Ionicons
+            name={isPickerVisible ? "chevron-up" : "chevron-down"}
+            size={18}
+            color="#fff"
+          />
+        </TouchableOpacity>
+      </View>
+
+      {isPickerVisible && (
+        <View style={styles.pickerList}>
+          {colorModes.map((mode) => (
+            <TouchableOpacity
+              key={mode}
+              onPress={() => handleModeSelect(mode)}
+              style={styles.pickerItem}
+            >
+              {theme === mode ? (
+                <Ionicons
+                  style={{ marginHorizontal: 5 }}
+                  name="checkmark-sharp"
+                  size={15}
+                  color="#fff"
+                />
+              ) : (
+                <View style={{ marginHorizontal: 5, width: 15 }}></View>
+              )}
+
+              <Text style={styles.pickerItemText}>
+                {mode.charAt(0).toUpperCase() + mode.slice(1)}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { alignItems: "center", marginTop: 40 },
-  currentTheme: { fontSize: 16, marginBottom: 10 },
-  button: {
-    padding: 10,
-    marginVertical: 5,
-    backgroundColor: "#007bff",
-    borderRadius: 5,
+  container: {
+    marginVertical: 20,
+    marginBottom: 100,
   },
-  text: { color: "white", fontSize: 16 },
+  categoryBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#333",
+    padding: 15,
+    borderRadius: 10,
+    marginVertical: 5,
+  },
+  colorSchemeText: {
+    flex: 1,
+    color: "#fff",
+    fontSize: 16,
+    marginLeft: 10,
+  },
+  pickerButton: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  pickerText: {
+    color: "#fff",
+    marginRight: 5,
+    fontSize: 16,
+  },
+  pickerList: {
+    position: "absolute",
+    top: 54,
+    right: 10,
+    backgroundColor: "#444",
+    borderRadius: 10,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    width: 200,
+    zIndex: 10,
+  },
+  pickerItem: {
+    paddingVertical: 10,
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  pickerItemText: {
+    color: "#fff",
+    fontSize: 16,
+  },
 });
+
+export default ColorSwitcher;

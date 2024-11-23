@@ -41,6 +41,7 @@ export default function SummaryScreen() {
   const [customActivityModalVisible, setCustomActivityModalVisible] =
     useState(false);
   const textColor = useThemeColor({}, "text");
+  const subText = useThemeColor({}, "subText");
   const backgroundColor = useThemeColor({}, "background");
 
   useEffect(() => {
@@ -101,7 +102,7 @@ export default function SummaryScreen() {
       </Header>
 
       {/* Tabs */}
-      <View style={styles.tabsContainer}>
+      <View style={[styles.tabsContainer, { borderBottomColor: subText }]}>
         {Tabs.map((tab, index) => (
           <TouchableOpacity
             key={index}
@@ -156,6 +157,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   tabsContainer: {
+    borderBottomWidth: 0.2,
+    borderBottomColor: "#ddd",
     flexDirection: "row",
     marginTop: 10,
   },

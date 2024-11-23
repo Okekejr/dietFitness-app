@@ -10,12 +10,16 @@ import { Dimensions } from "react-native";
 import { Image } from "expo-image";
 import { ActivityIndicator, View, StyleSheet, ScrollView } from "react-native";
 import YoutubePlayer, { YoutubeIframeRef } from "react-native-youtube-iframe";
-import * as Haptics from "expo-haptics";
+import { useThemeColor } from "@/hooks/useThemeColor";
 
 const { height } = Dimensions.get("window");
 
 const MealDetailScreen = () => {
   const { id } = useLocalSearchParams();
+  const textColor = useThemeColor({}, "text");
+  const backgroundColor = useThemeColor({}, "background");
+  const subTextColor = useThemeColor({}, "subText");
+  const iconTextColor = useThemeColor({}, "icon");
 
   const { data: meal, isLoading: mealLoading } = useQuery({
     queryKey: ["meal", id],
@@ -47,7 +51,9 @@ const MealDetailScreen = () => {
   }
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView
+      style={[styles.container, { backgroundColor: backgroundColor }]}
+    >
       {/* Diet Image with Back Button  */}
       <View style={styles.imageContainer}>
         <Image
@@ -62,31 +68,49 @@ const MealDetailScreen = () => {
       </View>
 
       <View style={styles.detailsContainer}>
-        <CustomText style={styles.title}>{meal.name}</CustomText>
-        <CustomText style={styles.goal}>Goal: {meal.goal}</CustomText>
-        <CustomText style={styles.calories}>
+        <CustomText style={[styles.title, { color: textColor }]}>
+          {meal.name}
+        </CustomText>
+        <CustomText style={[styles.goal, , { color: textColor }]}>
+          Goal: {meal.goal}
+        </CustomText>
+        <CustomText style={[styles.calories, , { color: textColor }]}>
           Calories: {meal.calories} kcal
         </CustomText>
-        <CustomText style={styles.mealType}>Type: {meal.meal_type}</CustomText>
-        <CustomText style={styles.mealTime}>Time: {meal.meal_time}</CustomText>
-        <CustomText style={styles.description}>{meal.description}</CustomText>
+        <CustomText style={[styles.mealType, , { color: textColor }]}>
+          Type: {meal.meal_type}
+        </CustomText>
+        <CustomText style={[styles.mealTime, , { color: textColor }]}>
+          Time: {meal.meal_time}
+        </CustomText>
+        <CustomText style={[styles.description, { color: textColor }]}>
+          {meal.description}
+        </CustomText>
       </View>
 
       <View style={styles.section}>
-        <CustomText style={styles.sectionTitle}>Ingredients</CustomText>
+        <CustomText style={[styles.sectionTitle, , { color: textColor }]}>
+          Ingredients
+        </CustomText>
         {meal.ingredients?.map((ingredient, index) => (
-          <CustomText key={index} style={styles.ingredient}>
+          <CustomText
+            key={index}
+            style={[styles.ingredient, { color: subTextColor }]}
+          >
             • {ingredient}
           </CustomText>
         ))}
       </View>
 
       <View style={styles.section}>
-        <CustomText style={styles.sectionTitle}>
+        <CustomText style={[styles.sectionTitle, { color: textColor }]}>
           Dietary Restrictions
         </CustomText>
         {meal.dietary_restrictions?.map((restriction, index) => (
-          <CustomText key={index} style={styles.restriction}>
+          <CustomText
+            key={index}
+            style={[styles.restriction, { color: subTextColor }]}
+          >
             • {restriction}
           </CustomText>
         ))}
@@ -94,7 +118,9 @@ const MealDetailScreen = () => {
 
       {/* Recipe Video */}
       <View style={styles.section}>
-        <CustomText style={styles.sectionTitle}>Recipe Video</CustomText>
+        <CustomText style={[styles.sectionTitle, { color: textColor }]}>
+          Recipe Video
+        </CustomText>
         {videoId != "" && (
           <YoutubePlayer ref={video} height={300} videoId={videoId} />
         )}
@@ -106,7 +132,6 @@ const MealDetailScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
   },
   loadingContainer: {
     flex: 1,
@@ -138,7 +163,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontFamily: "HostGrotesk-Medium",
-    color: "#333",
     marginBottom: 20,
   },
   goal: {
@@ -160,7 +184,6 @@ const styles = StyleSheet.create({
   description: {
     fontSize: 15,
     lineHeight: 20,
-    color: "#666",
     marginTop: 16,
   },
   section: {
