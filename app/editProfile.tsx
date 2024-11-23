@@ -94,6 +94,21 @@ export default function EditProfileScreen() {
     }
   };
 
+  const handleSubmit = () => {
+    // Show confirmation alert before proceeding with submit
+    Alert.alert(
+      "Confirm",
+      `Saving will create a new schedule,     Are you sure?`,
+      [
+        { text: "Cancel", style: "cancel" }, // Cancel action
+        {
+          text: "Proceed",
+          onPress: () => handleSave(),
+        },
+      ]
+    );
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
@@ -110,7 +125,7 @@ export default function EditProfileScreen() {
             </TouchableOpacity>
 
             <TouchableOpacity
-              onPress={handleSave}
+              onPress={handleSubmit}
               disabled={!isFormChanged || loading}
             >
               <CustomText

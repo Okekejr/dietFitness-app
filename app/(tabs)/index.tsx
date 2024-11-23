@@ -19,11 +19,14 @@ import * as Haptics from "expo-haptics";
 import { useHomeQueries } from "@/hooks/useHomeQueries";
 import { calculateDaysBetweenDates } from "@/utils";
 import { Ionicons } from "@expo/vector-icons";
+import { useThemeColor } from "@/hooks/useThemeColor";
 
 const CARD_WIDTH = 200;
 
 export default function HomeScreen() {
   const router = useRouter();
+  const textColor = useThemeColor({}, "text");
+  const backgroundColor = useThemeColor({}, "background");
   const { userData, refetchUserData } = useUserData();
   const [userId, setUserId] = useState("");
   const scrollViewRef = useRef<ScrollView>(null);
@@ -169,7 +172,9 @@ export default function HomeScreen() {
           <CustomText>Duration: {item.workout.duration} mins</CustomText>
           <CustomText>Description: {item.workout.description}</CustomText>
           <CustomText>Intensity: {item.workout.intensity}</CustomText>
-          <CustomText>Calories: - {item.workout.calories_burned} kcal</CustomText>
+          <CustomText>
+            Calories: - {item.workout.calories_burned} kcal
+          </CustomText>
           {isCompleted && (
             <View style={styles.completedContainer}>
               <Ionicons name="checkmark-circle" size={24} color="green" />
@@ -227,7 +232,9 @@ export default function HomeScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: backgroundColor }]}
+    >
       <Header showProfileImage>
         <TouchableOpacity
           onPress={() =>
@@ -247,14 +254,14 @@ export default function HomeScreen() {
         {/* Streak Progress Bar */}
         <View style={styles.streakContainer}>
           {streak > 0 && (
-            <CustomText style={styles.streakText}>
+            <CustomText style={[styles.streakText, { color: textColor }]}>
               🔥 {streak} day streak
             </CustomText>
           )}
         </View>
 
         <View>
-          <CustomText style={styles.streakText}>
+          <CustomText style={[styles.streakText, { color: textColor }]}>
             Week {currentWeekNum}
           </CustomText>
         </View>
@@ -270,7 +277,9 @@ export default function HomeScreen() {
 
         {/* Workouts for Selected Day */}
         <View style={{ marginBottom: 24, marginTop: 12 }}>
-          <CustomText style={styles.sectionTitle}>Your Workouts</CustomText>
+          <CustomText style={[styles.sectionTitle, { color: textColor }]}>
+            Your Workouts
+          </CustomText>
           {itemsForDay && itemsForDay.workouts.length > 0 ? (
             <FlatList
               scrollEnabled={false}
@@ -279,12 +288,16 @@ export default function HomeScreen() {
               keyExtractor={(item) => item.workout.id.toString()}
             />
           ) : (
-            <CustomText>No workouts scheduled for this day.</CustomText>
+            <CustomText style={{ color: textColor }}>
+              No workouts scheduled for this day.
+            </CustomText>
           )}
         </View>
 
         {/* Diets for Selected Day */}
-        <CustomText style={styles.sectionTitle}>Your Meals</CustomText>
+        <CustomText style={[styles.sectionTitle, { color: textColor }]}>
+          Your Meals
+        </CustomText>
         {itemsForDay && itemsForDay.diets && itemsForDay.diets.length > 0 ? (
           <FlatList
             scrollEnabled={false}
@@ -295,7 +308,9 @@ export default function HomeScreen() {
             }
           />
         ) : (
-          <CustomText>No meals scheduled for this day.</CustomText>
+          <CustomText style={{ color: textColor }}>
+            No meals scheduled for this day.
+          </CustomText>
         )}
       </ScrollView>
     </SafeAreaView>
@@ -306,7 +321,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingVertical: 20,
-    backgroundColor: "#fff",
   },
   innerContainer: {
     paddingHorizontal: 20,

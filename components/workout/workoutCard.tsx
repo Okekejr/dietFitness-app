@@ -7,6 +7,7 @@ import { WorkoutsT } from "@/types/workout";
 import { useRouter } from "expo-router";
 import { useQueryClient } from "@tanstack/react-query";
 import CustomText from "../ui/customText";
+import { useThemeColor } from "@/hooks/useThemeColor";
 
 interface WorkoutCardProps {
   workout: WorkoutsT;
@@ -19,6 +20,8 @@ const WorkoutCard: FC<WorkoutCardProps> = ({ workout, userId }) => {
   const [loading, setLoading] = useState(false);
   const queryClient = useQueryClient();
   const router = useRouter();
+  const textColor = useThemeColor({}, "text");
+  const subTextColor = useThemeColor({}, "subText");
 
   const fetchCompletedStatus = async () => {
     if (userId) {
@@ -120,16 +123,22 @@ const WorkoutCard: FC<WorkoutCardProps> = ({ workout, userId }) => {
         placeholder={require("../../assets/img/avatar-placeholder.png")}
       />
       <View style={styles.workoutInfo}>
-        <CustomText style={styles.workoutName}>{workout.name}</CustomText>
+        <CustomText style={[styles.workoutName, { color: textColor }]}>
+          {workout.name}
+        </CustomText>
         <View style={styles.innerInfo}>
-          <CustomText style={styles.infoText}>{workout.tag} •</CustomText>
-          <CustomText style={styles.infoText}>
+          <CustomText style={{ color: subTextColor }}>
+            {workout.tag} •
+          </CustomText>
+          <CustomText style={{ color: subTextColor }}>
             {workout.duration} mins •
           </CustomText>
-          <CustomText style={styles.infoText}>
+          <CustomText style={{ color: subTextColor }}>
             {workout.activity_level} •
           </CustomText>
-          <CustomText style={styles.infoText}>{workout.intensity}</CustomText>
+          <CustomText style={{ color: subTextColor }}>
+            {workout.intensity}
+          </CustomText>
         </View>
 
         {isCompleted && (
@@ -170,9 +179,7 @@ const styles = StyleSheet.create({
     fontFamily: "HostGrotesk-Medium",
     marginBottom: 4,
   },
-  infoText: {
-    color: "#686D76",
-  },
+
   completedContainer: {
     flexDirection: "row",
     alignItems: "center",

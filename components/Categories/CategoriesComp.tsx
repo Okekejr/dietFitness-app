@@ -45,7 +45,7 @@ const CategoriesComp: FC<CategoriesCompProps> = ({ category }) => {
 const styles = StyleSheet.create({
   card: {
     marginBottom: 10,
-    borderRadius: 3,
+    borderRadius: 5,
     overflow: "hidden",
     elevation: 3,
     backgroundColor: "#fff",

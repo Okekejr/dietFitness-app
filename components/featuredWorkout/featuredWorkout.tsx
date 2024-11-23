@@ -1,15 +1,10 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  StyleSheet,
-  ActivityIndicator,
-  FlatList,
-  Button,
-} from "react-native";
+import { View, StyleSheet, FlatList } from "react-native";
 import { WorkoutsT } from "@/types";
 import WorkoutCard from "../workout/workoutCard";
 import { useUserData } from "@/context/userDataContext";
 import CustomText from "../ui/customText";
+import { useThemeColor } from "@/hooks/useThemeColor";
 
 interface FeaturedWorkoutProps {
   featuredWorkouts: WorkoutsT[];
@@ -24,6 +19,7 @@ const FeaturedWorkoutsComp = ({
 }: FeaturedWorkoutProps) => {
   const { userData, refetchUserData } = useUserData();
   const [userId, setUserId] = useState<string>("");
+  const textColor = useThemeColor({}, "text");
 
   useEffect(() => {
     if (userData) {
@@ -35,7 +31,9 @@ const FeaturedWorkoutsComp = ({
 
   return (
     <View style={styles.container}>
-      <CustomText style={styles.header}>Featured</CustomText>
+      <CustomText style={[styles.header, { color: textColor }]}>
+        Featured
+      </CustomText>
       {/* <Button title="Clear Cache" onPress={clearCache} /> */}
 
       <FlatList

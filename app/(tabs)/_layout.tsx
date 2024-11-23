@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, StyleSheet, ActivityIndicator } from "react-native";
+import { View, StyleSheet, ActivityIndicator, Dimensions } from "react-native";
 import { Tabs, useRouter } from "expo-router";
 import { useTheme } from "react-native-paper";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -8,11 +8,15 @@ import { getIconName, getTabTitle } from "@/utils";
 import { ParamListBase, RouteProp } from "@react-navigation/native";
 import CustomText from "@/components/ui/customText";
 import "../../config/supertokens";
+import { useThemeColor } from "@/hooks/useThemeColor";
+
+const { width: screenWidth } = Dimensions.get("window");
 
 export default function Layout() {
   const theme = useTheme();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const router = useRouter();
+  const tabBgColor = useThemeColor({}, "tabs");
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -50,28 +54,25 @@ export default function Layout() {
 
   return (
     <Tabs
-      initialRouteName="home"
+      initialRouteName="index"
       screenOptions={({
         route,
       }: {
         route: RouteProp<ParamListBase, string>;
       }) => ({
         headerShown: false,
-        tabBarStyle: { backgroundColor: "#fff" },
-        tabBarLabel: ({ focused }) => (
-          <CustomText
-            style={[styles.tabLabel, focused && styles.tabLabelFocused]}
-          >
-            {getTabTitle(route.name)}
-          </CustomText>
-        ),
+        tabBarStyle: [styles.tabBarContainer, { backgroundColor: tabBgColor }],
+        tabBarLabel: () => null,
         tabBarIcon: ({ focused, size }) => (
-          <View style={styles.iconContainer}>
+          <View style={[styles.tabContainer]}>
             <Ionicons
               name={getIconName(route.name, focused)}
               size={size}
-              color={focused ? "#080b18" : ""}
+              color="#fff"
             />
+            <CustomText style={[styles.tabLabel, focused && { color: "#fff" }]}>
+              {getTabTitle(route.name)}
+            </CustomText>
           </View>
         ),
       })}
@@ -85,8 +86,25 @@ export default function Layout() {
 }
 
 const styles = StyleSheet.create({
-  iconContainer: {
-    paddingTop: 8,
+  tabBarContainer: {
+    position: "absolute", // Make the tab bar float
+    bottom: 20,
+    left: "5%",
+    width: screenWidth * 0.9,
+    paddingTop: 0,
+    marginTop: 0,
+    height: 75, // Set the height
+    borderRadius: 75 / 2, // Half of height to make it fully rounded
+    paddingHorizontal: 20, // Add padding inside the pill
+    borderTopWidth: 0,
+    borderTopColor: "none",
+    zIndex: 10,
+  },
+  tabContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 26,
+    paddingTop: 0,
   },
   loadingContainer: {
     flex: 1,
@@ -96,8 +114,5 @@ const styles = StyleSheet.create({
   tabLabel: {
     fontSize: 10,
     color: "#A0A0A0",
-  },
-  tabLabelFocused: {
-    color: "#080b18",
   },
 });

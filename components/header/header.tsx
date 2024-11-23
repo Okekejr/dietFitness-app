@@ -5,6 +5,7 @@ import { useUserData } from "@/context/userDataContext";
 import { getInitials } from "@/utils";
 import CustomText from "../ui/customText";
 import * as Haptics from "expo-haptics";
+import { useThemeColor } from "@/hooks/useThemeColor";
 
 interface HeaderProps {
   children?: React.ReactNode;
@@ -20,6 +21,7 @@ const Header: React.FC<HeaderProps> = ({
   const router = useRouter();
   const { userData, refetchUserData } = useUserData();
   const [userId, setUserId] = useState("");
+  const textColor = useThemeColor({}, "text");
 
   useEffect(() => {
     if (userData) {
@@ -63,7 +65,9 @@ const Header: React.FC<HeaderProps> = ({
         <View style={styles.childrenContainer}>{children}</View>
       </View>
       {headerTitle && (
-        <CustomText style={styles.headerTitle}>{headerTitle}</CustomText>
+        <CustomText style={[styles.headerTitle, { color: textColor }]}>
+          {headerTitle}
+        </CustomText>
       )}
     </View>
   );

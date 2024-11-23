@@ -10,7 +10,7 @@ import {
   Modal,
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
-import { Href, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import WorkoutCompCard from "@/components/workout/workoutCompCard";
 import { FlatList } from "react-native";
 import { CategoryT } from "@/types";
@@ -21,10 +21,14 @@ import CategoriesComp from "@/components/categories/categoriesComp";
 import { Ionicons } from "@expo/vector-icons";
 import CustomText from "@/components/ui/customText";
 import { useWorkoutQueries } from "@/hooks/useWorkoutQueries";
+import { workoutCardsConfigT } from "@/utils";
+import { useThemeColor } from "@/hooks/useThemeColor";
 
 export default function WorkoutsScreen() {
   const { userData } = useUserData();
   const router = useRouter();
+  const textColor = useThemeColor({}, "text");
+  const backgroundColor = useThemeColor({}, "background");
 
   const {
     categories,
@@ -138,7 +142,7 @@ export default function WorkoutsScreen() {
     );
   }
 
-  const workoutCardsConfig = [
+  const workoutCardsConfig: workoutCardsConfigT = [
     {
       key: "favoriteWorkouts",
       data: favorited,
@@ -163,7 +167,9 @@ export default function WorkoutsScreen() {
   ];
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView
+      style={[styles.safeArea, { backgroundColor: backgroundColor }]}
+    >
       <Header headerTitle="Workouts" />
 
       {/* Search Modal */}
@@ -249,14 +255,18 @@ export default function WorkoutsScreen() {
 
         {/* Categories Section */}
         <View style={styles.header}>
-          <CustomText style={styles.heading}>Browse by Category</CustomText>
+          <CustomText style={[styles.heading, { color: textColor }]}>
+            Browse by Category
+          </CustomText>
         </View>
         {categories.map((category: CategoryT) => (
           <CategoriesComp key={category.id} category={category} />
         ))}
 
         <View style={styles.header}>
-          <CustomText style={styles.heading}>Your Workouts</CustomText>
+          <CustomText style={[styles.heading, { color: textColor }]}>
+            Your Workouts
+          </CustomText>
         </View>
 
         <FlatList
@@ -269,7 +279,7 @@ export default function WorkoutsScreen() {
               data={item.data} // Use fetched workout data here
               cardName={item.cardName}
               bgImgLink={item.bgImgLink}
-              cardLink={item.cardLink as Href<string>}
+              cardLink={item.cardLink}
             />
           )}
           contentContainerStyle={styles.cardsRow}
@@ -282,14 +292,13 @@ export default function WorkoutsScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#fff",
   },
   header: {
     marginVertical: 20,
   },
   scrollViewContent: {
     paddingHorizontal: 25,
-    paddingBottom: 20,
+    paddingBottom: 75,
   },
   modalOverlay: {
     flex: 1,
@@ -299,7 +308,7 @@ const styles = StyleSheet.create({
   modalContent: {
     backgroundColor: "#fff",
     marginHorizontal: 20,
-    marginTop: 170,
+    marginTop: 140,
     borderRadius: 10,
     padding: 15,
     maxHeight: "60%",

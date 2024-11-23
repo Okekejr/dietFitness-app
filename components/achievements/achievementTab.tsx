@@ -13,8 +13,11 @@ import {
   trackAchievements,
 } from "@/utils";
 import CustomText from "../ui/customText";
+import { useThemeColor } from "@/hooks/useThemeColor";
 
 const AchievementsTab = () => {
+  const textColor = useThemeColor({}, "text");
+  const backgroundColor = useThemeColor({}, "background");
   const { userData } = useUserData();
   const userId = userData?.user_id ?? "";
 
@@ -55,7 +58,9 @@ const AchievementsTab = () => {
 
   const renderGrid = (data: AchievementsTypeT, title: string) => (
     <View style={{ gap: 5 }}>
-      <CustomText style={styles.header}>{title}</CustomText>
+      <CustomText style={[styles.header, { color: textColor }]}>
+        {title}
+      </CustomText>
       <FlatList
         data={data}
         scrollEnabled={false}
@@ -69,19 +74,11 @@ const AchievementsTab = () => {
 
   return (
     <View style={styles.container}>
-      {stats?.totalWorkouts === 0 ? (
-        <View style={styles.center}>
-          <CustomText style={styles.description}>
-            You haven't completed any workouts yet.
-          </CustomText>
-        </View>
-      ) : (
-        <View style={styles.achievementsContainer}>
-          {renderGrid(ACHIEVEMENTS, "Achievements")}
-          {renderGrid(MILESTONES, "Milestones")}
-          {renderGrid(STREAKS, "Streaks")}
-        </View>
-      )}
+      <View style={styles.achievementsContainer}>
+        {renderGrid(ACHIEVEMENTS, "Achievements")}
+        {renderGrid(MILESTONES, "Milestones")}
+        {renderGrid(STREAKS, "Streaks")}
+      </View>
     </View>
   );
 };

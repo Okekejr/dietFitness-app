@@ -6,7 +6,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   Image,
-  ActivityIndicator,
   Modal,
 } from "react-native";
 import { Href, useRouter } from "expo-router";
@@ -22,26 +21,36 @@ import * as Sharing from "expo-sharing";
 import CustomText from "@/components/ui/customText";
 import { FlatList } from "react-native";
 import { ScrollView } from "react-native";
+import { RunClubQrCode } from "@/components/profile/runClubQrCode";
+import { ColorSwitcher } from "@/components/profile/colorSwitcher";
+import { useThemeColor } from "@/hooks/useThemeColor";
 
 type ProfileConfig = {
   key: string;
   name: string;
   leftIcon: keyof typeof Ionicons.glyphMap;
   rightIcon: keyof typeof Ionicons.glyphMap;
-  hrefLink: Href<string>;
+  hrefLink?: Href<string>;
+  content?: string;
 }[];
 
 const { width } = Dimensions.get("window");
 
 export default function ProfileScreen() {
   const router = useRouter();
+  const backgroundColor = useThemeColor({}, "background");
+  const textColor = useThemeColor({}, "text");
   const { userData, refetchUserData } = useUserData();
   const [clubData, setClubData] = useState<ClubData | null>(null);
   const [isSharing, setIsSharing] = useState(false);
   const [loadingClubData, setLoadingClubData] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
+  const [modalContent, setModalContent] = useState("");
 
-  const openModal = () => setModalVisible(true);
+  const openModal = (content?: string) => {
+    setModalVisible(true);
+    content && setModalContent(content);
+  };
   const closeModal = () => setModalVisible(false);
 
   useEffect(() => {
@@ -127,20 +136,6 @@ export default function ProfileScreen() {
       hrefLink: "/editProfile",
     },
     {
-      key: "Settings",
-      name: "Settings",
-      leftIcon: "settings-outline",
-      rightIcon: "chevron-forward",
-      hrefLink: "/helpScreen",
-    },
-    {
-      key: "Help and Info",
-      name: "Help & Info",
-      leftIcon: "information-circle-outline",
-      rightIcon: "chevron-forward",
-      hrefLink: "/helpScreen",
-    },
-    {
       key: "Notifications",
       name: "Notifications",
       leftIcon: "notifications-outline",
@@ -154,10 +149,24 @@ export default function ProfileScreen() {
       rightIcon: "chevron-forward",
       hrefLink: "/subscription",
     },
+    {
+      key: "Help and Info",
+      name: "Help & Info",
+      leftIcon: "information-circle-outline",
+      rightIcon: "chevron-forward",
+      hrefLink: "/helpScreen",
+    },
+    {
+      key: "Settings",
+      name: "Settings",
+      leftIcon: "settings-outline",
+      rightIcon: "chevron-forward",
+      content: "settings",
+    },
   ];
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor }]}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
           <TouchableOpacity
@@ -168,7 +177,9 @@ export default function ProfileScreen() {
           </TouchableOpacity>
         </View>
 
-        <CustomText style={styles.headerText}>Profile</CustomText>
+        <CustomText style={[styles.headerText, { color: textColor }]}>
+          Profile
+        </CustomText>
 
         <View style={styles.innerContainer}>
           <TouchableOpacity
@@ -206,7 +217,10 @@ export default function ProfileScreen() {
               renderItem={({ item }) => (
                 <TouchableOpacity
                   style={styles.categoryBox}
-                  onPress={() => router.push(item.hrefLink)}
+                  onPress={() => {
+                    item.hrefLink && router.push(item.hrefLink);
+                    item.content && openModal(item.content);
+                  }}
                 >
                   <Ionicons name={item.leftIcon} size={24} color="#000" />
                   <CustomText style={styles.boxText}>{item.name}</CustomText>
@@ -216,7 +230,10 @@ export default function ProfileScreen() {
             />
           </View>
 
-          <TouchableOpacity style={styles.box} onPress={openModal}>
+          <TouchableOpacity
+            style={styles.box}
+            onPress={() => openModal("runClub")}
+          >
             <Ionicons name="qr-code-outline" size={24} color="#000" />
             <CustomText style={styles.boxText}>Run Club</CustomText>
             <Ionicons name="chevron-forward" size={24} color="#000" />
@@ -243,44 +260,16 @@ export default function ProfileScreen() {
                 style={styles.modalContent}
                 onStartShouldSetResponder={() => true}
               >
-                {loadingClubData ? (
-                  <View style={styles.qrCodeContainer}>
-                    <ActivityIndicator size="large" color="#4F46E5" />
-                  </View>
-                ) : clubData ? (
-                  <View style={styles.qrCodeContainer}>
-                    <CustomText
-                      style={{
-                        fontFamily: "HostGrotesk-Medium",
-                        fontSize: 20,
-                        marginBottom: 10,
-                      }}
-                    >
-                      Run Club
-                    </CustomText>
-                    <CustomText style={styles.inviteCode}>
-                      Invite Code: {clubData.invite_code}
-                    </CustomText>
-                    <Image
-                      source={{ uri: clubData.qr_code }}
-                      style={styles.qrCode}
-                    />
-                    <TouchableOpacity
-                      onPress={handleShare}
-                      style={styles.shareButton}
-                    >
-                      {isSharing ? (
-                        <ActivityIndicator size="small" color="#000" />
-                      ) : (
-                        <Ionicons name="share-outline" size={24} color="#000" />
-                      )}
-                    </TouchableOpacity>
-                  </View>
-                ) : (
-                  <View style={styles.qrCodeContainer}>
-                    <CustomText>Create or Join a Club</CustomText>
-                  </View>
+                {modalContent === "runClub" && (
+                  <RunClubQrCode
+                    loadingClubData={loadingClubData}
+                    clubData={clubData}
+                    handleShare={handleShare}
+                    isSharing={isSharing}
+                  />
                 )}
+
+                {modalContent === "settings" && <ColorSwitcher />}
               </View>
             </TouchableOpacity>
           </Modal>
@@ -291,7 +280,7 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
+  container: { flex: 1 },
   scrollContent: {
     padding: 20,
   },
@@ -356,18 +345,6 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   boxText: { flex: 1, marginLeft: 10, fontSize: 16 },
-  qrCodeContainer: {
-    alignItems: "center",
-    marginTop: 40,
-  },
-  inviteCode: { fontSize: 18, marginBottom: 10 },
-  qrCode: { width: 200, height: 200, marginBottom: 20 },
-  shareButton: {
-    padding: 10,
-    backgroundColor: "#f0f0f0",
-    borderRadius: 50,
-    marginBottom: 30,
-  },
   modalBackdrop: {
     flex: 1,
     justifyContent: "flex-end", // Align the modal to the bottom of the screen

@@ -21,6 +21,7 @@ import { CompletedWorkout, OverviewStatsT } from "@/types";
 import CustomText from "@/components/ui/customText";
 import * as Haptics from "expo-haptics";
 import { Ionicons } from "@expo/vector-icons";
+import { useThemeColor } from "@/hooks/useThemeColor";
 
 const { width } = Dimensions.get("window");
 const Tabs = ["Overview", "History", "Achievements"];
@@ -39,6 +40,8 @@ export default function SummaryScreen() {
   const [userId, setUserId] = useState<string>("");
   const [customActivityModalVisible, setCustomActivityModalVisible] =
     useState(false);
+  const textColor = useThemeColor({}, "text");
+  const backgroundColor = useThemeColor({}, "background");
 
   useEffect(() => {
     if (userData) {
@@ -88,10 +91,12 @@ export default function SummaryScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: backgroundColor }]}
+    >
       <Header showProfileImage headerTitle="Summary">
         <TouchableOpacity onPress={() => handleAddCustomActivity()}>
-          <Ionicons name="add" size={24} color="#000" />
+          <Ionicons name="add" size={24} color={textColor} />
         </TouchableOpacity>
       </Header>
 
@@ -149,12 +154,9 @@ export default function SummaryScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
   },
   tabsContainer: {
     flexDirection: "row",
-    borderBottomWidth: 1,
-    borderBottomColor: "#ddd",
     marginTop: 10,
   },
   tab: {
@@ -181,5 +183,6 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 20,
+    paddingBottom: 70,
   },
 });

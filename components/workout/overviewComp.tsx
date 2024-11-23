@@ -10,6 +10,7 @@ import CircularProgress from "react-native-circular-progress-indicator";
 import { PieChart } from "react-native-chart-kit";
 import { getTagColor } from "@/utils";
 import CustomText from "../ui/customText";
+import { useThemeColor } from "@/hooks/useThemeColor";
 
 interface OverviewCompT {
   stats: OverviewStatsT;
@@ -24,6 +25,8 @@ export default function OverviewComp({
   isError,
   isLoading,
 }: OverviewCompT) {
+  const textColor = useThemeColor({}, "text");
+
   if (isLoading) {
     return <ActivityIndicator size="large" color="#4F46E5" />;
   }
@@ -89,7 +92,9 @@ export default function OverviewComp({
       </View>
 
       <View style={styles.chartContainer}>
-        <CustomText style={styles.chartTitle}>Workouts Breakdown</CustomText>
+        <CustomText style={[styles.chartTitle, { color: textColor }]}>
+          Workouts Breakdown
+        </CustomText>
         <PieChart
           data={stats.workoutBreakdown.map((item) => ({
             name: item.name,

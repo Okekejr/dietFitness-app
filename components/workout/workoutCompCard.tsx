@@ -9,6 +9,7 @@ import {
 import { Href, useRouter } from "expo-router";
 import { WorkoutsT } from "@/types/workout";
 import CustomText from "../ui/customText";
+import { useThemeColor } from "@/hooks/useThemeColor";
 
 interface WorkoutCompCardProps {
   data: WorkoutsT[] | undefined;
@@ -25,6 +26,8 @@ const WorkoutCompCard: FC<WorkoutCompCardProps> = ({
 }) => {
   const router = useRouter();
   const numWorkouts = data ? data.length : 0;
+  const textColor = useThemeColor({}, "text");
+  const subTextColor = useThemeColor({}, "subText");
 
   return (
     <TouchableOpacity
@@ -33,8 +36,10 @@ const WorkoutCompCard: FC<WorkoutCompCardProps> = ({
     >
       <Image source={bgImgLink} style={styles.imageStyle} />
       <View style={styles.textContainer}>
-        <CustomText style={styles.cardName}>{cardName}</CustomText>
-        <CustomText style={styles.workoutCount}>
+        <CustomText style={[styles.cardName, { color: textColor }]}>
+          {cardName}
+        </CustomText>
+        <CustomText style={[styles.workoutCount, { color: subTextColor }]}>
           {numWorkouts} {numWorkouts === 1 ? "workout" : "workouts"}
         </CustomText>
       </View>
@@ -64,7 +69,6 @@ const styles = StyleSheet.create({
   },
   workoutCount: {
     fontSize: 12,
-    color: "#444",
   },
 });
 
