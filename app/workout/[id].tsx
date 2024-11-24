@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
+  Animated,
   View,
   StyleSheet,
   TouchableOpacity,
@@ -7,14 +8,14 @@ import {
   Dimensions,
   ScrollView,
   Modal,
+  Alert,
 } from "react-native";
 import { Image } from "expo-image";
 import { useLocalSearchParams } from "expo-router";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { API_URL } from "@/constants/apiUrl";
 import { WorkoutsT } from "@/types/workout";
-import YoutubePlayer, { YoutubeIframeRef } from "react-native-youtube-iframe";
-import { getWorkoutPageIcons, getYouTubeVideoId, workoutInfoT } from "@/utils";
+import { getWorkoutPageIcons, workoutInfoT } from "@/utils";
 import LottieView from "lottie-react-native";
 import { useUserData } from "@/context/userDataContext";
 import { useQueryClient } from "@tanstack/react-query";
@@ -22,13 +23,19 @@ import BackButton from "@/components/ui/backButton";
 import CustomText from "@/components/ui/customText";
 import * as Haptics from "expo-haptics";
 import { useThemeColor } from "@/hooks/useThemeColor";
+import { ResizeMode, Video, AVPlaybackStatus } from "expo-av";
 
-const { height } = Dimensions.get("window");
+const { height, width } = Dimensions.get("window");
+
+const videoSource = {
+  uri: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+};
 
 const WorkoutDetailsScreen = () => {
   const { id } = useLocalSearchParams();
   const { userData } = useUserData();
   const queryClient = useQueryClient();
+  const slideAnim = useRef(new Animated.Value(height)).current;
   const textColor = useThemeColor({}, "text");
   const backgroundColor = useThemeColor({}, "background");
   const subTextColor = useThemeColor({}, "subText");
@@ -38,9 +45,42 @@ const WorkoutDetailsScreen = () => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
   const [userId, setUserId] = useState<string>("");
-  const videoId = getYouTubeVideoId(workout ? workout?.video_url : "");
-  const video = useRef<YoutubeIframeRef>(null);
+  const [videoVisible, setVideoVisible] = useState(false);
+  const videoRef = useRef<Video | null>(null);
+  const [is60SecondsCalled, setIs60SecondsCalled] = useState(false);
   const [isModalVisible, setModalVisible] = useState(false);
+
+  const handleEnterFullscreen = async () => {
+    try {
+      setVideoVisible(true);
+
+      // Wait for the video to be fully loaded and start fullscreen
+      if (videoRef.current) {
+        await videoRef.current.presentFullscreenPlayer();
+      }
+    } catch (error) {
+      Alert.alert("Fullscreen Error");
+    }
+  };
+
+  // Handle video playback status updates
+  const handlePlaybackStatusUpdate = (status: AVPlaybackStatus) => {
+    if ("positionMillis" in status && status.positionMillis !== undefined) {
+      const position = status.positionMillis;
+
+      if ("durationMillis" in status && status.durationMillis !== undefined) {
+        const duration = status.durationMillis;
+
+        // Check if we're within 60 seconds of the video ending
+        if (position >= duration - 60000 && !is60SecondsCalled) {
+          console.log("60 seconds remaining");
+
+          // Set the flag to prevent repeated calls
+          setIs60SecondsCalled(true);
+        }
+      }
+    }
+  };
 
   const handleCompleteWorkout = async () => {
     if (workout && userId) {
@@ -67,12 +107,6 @@ const WorkoutDetailsScreen = () => {
       } catch (error) {
         console.error("Error marking workout as completed", error);
       }
-    }
-  };
-
-  const handleStateChange = (state: string) => {
-    if (state === "ended") {
-      handleCompleteWorkout();
     }
   };
 
@@ -109,6 +143,15 @@ const WorkoutDetailsScreen = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    // Slide up animation
+    Animated.timing(slideAnim, {
+      toValue: height / 2.4, // Final position
+      duration: 1000,
+      useNativeDriver: false, // Use false for layout-related animations
+    }).start();
+  }, [slideAnim]);
 
   useEffect(() => {
     if (id && userData) {
@@ -269,12 +312,34 @@ const WorkoutDetailsScreen = () => {
           {workout.description}
         </CustomText>
 
-        {videoId != "" && (
-          <YoutubePlayer
-            ref={video}
-            height={300}
-            videoId={videoId}
-            onChangeState={handleStateChange}
+        <Animated.View style={[styles.videoHoverButton, { top: slideAnim }]}>
+          <TouchableOpacity
+            onPress={handleEnterFullscreen}
+            style={[styles.startVideoHover, { backgroundColor: textColor }]}
+          >
+            <CustomText style={[styles.videoText, { color: backgroundColor }]}>
+              Start Workout
+            </CustomText>
+          </TouchableOpacity>
+          <View
+            style={[styles.dotHover, { backgroundColor: textColor }]}
+          ></View>
+          <TouchableOpacity
+            style={[styles.musicHover, { backgroundColor: textColor }]}
+          >
+            <CustomText style={[{ color: backgroundColor }]}>Music</CustomText>
+          </TouchableOpacity>
+        </Animated.View>
+
+        {videoVisible && (
+          <Video
+            ref={videoRef}
+            source={videoSource}
+            useNativeControls={true}
+            resizeMode={ResizeMode.CONTAIN}
+            isLooping
+            shouldPlay
+            onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
           />
         )}
 
@@ -311,6 +376,43 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  videoHoverButton: {
+    position: "absolute", // Make the tab bar float
+    width: width * 1,
+    paddingTop: 0,
+    marginTop: 0,
+    height: 65, // Set the height
+    borderRadius: 65 / 2, // Half of height to make it fully rounded
+    paddingHorizontal: 20, // Add padding inside the pill
+    borderTopWidth: 0,
+    borderTopColor: "none",
+    backgroundColor: "transparent",
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    zIndex: 10,
+  },
+  startVideoHover: {
+    alignItems: "center",
+    justifyContent: "center",
+    width: "75%",
+    height: 65, // Set the height
+    borderRadius: 65 / 2,
+  },
+  dotHover: {
+    width: "1.6%",
+    height: "10%",
+    marginVertical: "auto",
+    borderRadius: 100,
+  },
+  musicHover: {
+    alignItems: "center",
+    justifyContent: "center",
+    width: "20%",
+    height: 65, // Set the height
+    borderRadius: 100,
+    borderTopLeftRadius: 20,
+  },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
@@ -319,7 +421,7 @@ const styles = StyleSheet.create({
   imageContainer: {
     position: "relative",
     width: "100%",
-    height: height / 2.5,
+    height: height / 2.1,
   },
   image: {
     width: "100%",
@@ -364,9 +466,13 @@ const styles = StyleSheet.create({
   infoText: {
     fontSize: 16,
   },
+  videoText: {
+    fontSize: 16,
+    fontFamily: "HostGrotesk-Medium",
+  },
   description: {
     fontSize: 15,
-    lineHeight: 20,
+    lineHeight: 25,
     marginVertical: 20,
   },
   video: {

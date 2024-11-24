@@ -2,24 +2,36 @@ import BackButton from "@/components/ui/backButton";
 import CustomText from "@/components/ui/customText";
 import { API_URL } from "@/constants/apiUrl";
 import { DietPlanEntity } from "@/types";
-import { getYouTubeVideoId } from "@/utils";
 import { useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams } from "expo-router";
-import { useRef } from "react";
-import { Dimensions } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { Alert, Dimensions, TouchableOpacity } from "react-native";
 import { Image } from "expo-image";
-import { ActivityIndicator, View, StyleSheet, ScrollView } from "react-native";
-import YoutubePlayer, { YoutubeIframeRef } from "react-native-youtube-iframe";
+import {
+  ActivityIndicator,
+  View,
+  StyleSheet,
+  ScrollView,
+  Animated,
+} from "react-native";
 import { useThemeColor } from "@/hooks/useThemeColor";
+import { ResizeMode, Video } from "expo-av";
 
-const { height } = Dimensions.get("window");
+const { height, width } = Dimensions.get("window");
+
+const videoSource = {
+  uri: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+};
 
 const MealDetailScreen = () => {
   const { id } = useLocalSearchParams();
+  const slideAnim = useRef(new Animated.Value(height)).current;
   const textColor = useThemeColor({}, "text");
   const backgroundColor = useThemeColor({}, "background");
   const subTextColor = useThemeColor({}, "subText");
   const iconTextColor = useThemeColor({}, "icon");
+  const [videoVisible, setVideoVisible] = useState(false);
+  const videoRef = useRef<Video | null>(null);
 
   const { data: meal, isLoading: mealLoading } = useQuery({
     queryKey: ["meal", id],
@@ -31,8 +43,23 @@ const MealDetailScreen = () => {
     enabled: !!id,
   });
 
-  const videoId = getYouTubeVideoId(meal ? meal.recipe_url : "");
-  const video = useRef<YoutubeIframeRef>(null);
+  useEffect(() => {
+    // Slide up animation
+    Animated.timing(slideAnim, {
+      toValue: height / 1.12, // Final position
+      duration: 1000,
+      useNativeDriver: false, // Use false for layout-related animations
+    }).start();
+  }, [slideAnim]);
+
+  const handleEnterFullscreen = async () => {
+    setVideoVisible(true);
+
+    // Wait for the video to be fully loaded and start fullscreen
+    if (videoRef.current) {
+      await videoRef.current.presentFullscreenPlayer();
+    }
+  };
 
   if (mealLoading) {
     return (
@@ -116,15 +143,27 @@ const MealDetailScreen = () => {
         ))}
       </View>
 
-      {/* Recipe Video */}
-      <View style={styles.section}>
-        <CustomText style={[styles.sectionTitle, { color: textColor }]}>
-          Recipe Video
-        </CustomText>
-        {videoId != "" && (
-          <YoutubePlayer ref={video} height={300} videoId={videoId} />
-        )}
-      </View>
+      <Animated.View style={[styles.videoHoverButton, { top: slideAnim }]}>
+        <TouchableOpacity
+          onPress={handleEnterFullscreen}
+          style={[styles.startVideoHover, { backgroundColor: textColor }]}
+        >
+          <CustomText style={[styles.videoText, { color: backgroundColor }]}>
+            Watch Tutorial
+          </CustomText>
+        </TouchableOpacity>
+      </Animated.View>
+
+      {videoVisible && (
+        <Video
+          ref={videoRef}
+          source={videoSource}
+          useNativeControls={true}
+          resizeMode={ResizeMode.CONTAIN}
+          isLooping
+          shouldPlay
+        />
+      )}
     </ScrollView>
   );
 };
@@ -132,6 +171,33 @@ const MealDetailScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  videoHoverButton: {
+    position: "absolute", // Make the tab bar float
+    width: width * 1,
+    paddingTop: 0,
+    marginTop: 0,
+    height: 65, // Set the height
+    borderRadius: 65 / 2, // Half of height to make it fully rounded
+    paddingHorizontal: 20, // Add padding inside the pill
+    borderTopWidth: 0,
+    borderTopColor: "none",
+    backgroundColor: "transparent",
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "center",
+    zIndex: 10,
+  },
+  startVideoHover: {
+    alignItems: "center",
+    justifyContent: "center",
+    width: "75%",
+    height: 65, // Set the height
+    borderRadius: 65 / 2,
+  },
+  videoText: {
+    fontSize: 16,
+    fontFamily: "HostGrotesk-Medium",
   },
   loadingContainer: {
     flex: 1,
@@ -183,7 +249,7 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 15,
-    lineHeight: 20,
+    lineHeight: 25,
     marginTop: 16,
   },
   section: {
