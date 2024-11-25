@@ -233,7 +233,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     margin: 16,
-    marginBottom: 16,
+    marginBottom: 20,
   },
   filterButton: {
     flexDirection: "row",

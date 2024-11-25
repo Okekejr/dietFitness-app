@@ -1,4 +1,5 @@
 import CustomText from "@/components/ui/customText";
+import { useThemeColor } from "@/hooks/useThemeColor";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -15,13 +16,13 @@ const { height, width } = Dimensions.get("window");
 
 export default function HelpScreen() {
   const router = useRouter();
-  const [modalVisible, setModalVisible] = useState(false);
-
-  const openModal = () => setModalVisible(true);
-  const closeModal = () => setModalVisible(false);
+  const backgroundColor = useThemeColor({}, "background");
+  const textColor = useThemeColor({}, "text");
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: backgroundColor }]}
+    >
       <View style={styles.topBar}>
         <TouchableOpacity
           style={styles.backButton}
@@ -32,7 +33,9 @@ export default function HelpScreen() {
       </View>
 
       <View style={styles.scrollContent}>
-        <CustomText style={styles.heading}>Help & Info</CustomText>
+        <CustomText style={[styles.heading, { color: textColor }]}>
+          Help & Info
+        </CustomText>
 
         <TouchableOpacity style={styles.termsBox}>
           <CustomText style={styles.boxText}>Terms and Conditions</CustomText>
@@ -44,35 +47,12 @@ export default function HelpScreen() {
           <Ionicons name="chevron-forward" size={24} color="#000" />
         </TouchableOpacity>
       </View>
-
-      <TouchableOpacity onPress={openModal} style={styles.openModalButton}>
-        <CustomText style={styles.openModalButtonText}>Open Modal</CustomText>
-      </TouchableOpacity>
-
-      {/* Modal Component */}
-      <Modal
-        visible={modalVisible}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={closeModal}
-      >
-        <View style={styles.modalBackdrop}>
-          <View style={styles.modalContent}>
-            <CustomText style={styles.modalText}>
-              This is a simple modal
-            </CustomText>
-            <TouchableOpacity onPress={closeModal} style={styles.closeButton}>
-              <CustomText style={styles.closeButtonText}>Close</CustomText>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
+  container: { flex: 1 },
   topBar: {
     alignItems: "flex-start",
     marginLeft: 20,

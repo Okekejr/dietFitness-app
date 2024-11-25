@@ -69,13 +69,7 @@ const Header: React.FC<HeaderProps> = ({
                 )}
               </View>
               <View style={{ display: "flex", flexDirection: "column" }}>
-                <View
-                  style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    gap: 5,
-                  }}
-                >
+                <View style={[styles.contentContainer, { gap: 2 }]}>
                   <CustomText
                     style={{
                       color: textColor,
@@ -84,14 +78,10 @@ const Header: React.FC<HeaderProps> = ({
                   >
                     Hello
                   </CustomText>
-                  <Ionicons name={nameOfIcon} size={18} color={textColor} />
+                  <Ionicons name={nameOfIcon} size={17} color={textColor} />
                 </View>
                 <CustomText
-                  style={{
-                    color: textColor,
-                    fontSize: 16,
-                    fontFamily: "HostGrotesk-Medium",
-                  }}
+                  style={[styles.initials, { color: textColor, fontSize: 16 }]}
                 >
                   {userData?.name ? getFirstName(userData?.name) : ""}
                 </CustomText>
