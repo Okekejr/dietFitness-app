@@ -17,6 +17,7 @@ import { Ionicons } from "@expo/vector-icons";
 import FilterModal from "@/components/modal/filterModal";
 import { useUserData } from "@/context/userDataContext";
 import CustomText from "@/components/ui/customText";
+import { useThemeColor } from "@/hooks/useThemeColor";
 
 async function fetchWorkouts(): Promise<WorkoutsT[]> {
   const response = await fetch(`${API_URL}/api/workouts`);
@@ -27,6 +28,8 @@ async function fetchWorkouts(): Promise<WorkoutsT[]> {
 export default function AllWorkoutsScreen() {
   const router = useRouter();
   const { userData } = useUserData();
+  const textColor = useThemeColor({}, "text");
+  const backgroundColor = useThemeColor({}, "background");
   const {
     data: workouts = [],
     isLoading,
@@ -86,7 +89,9 @@ export default function AllWorkoutsScreen() {
 
   if (isLoading) {
     return (
-      <View style={styles.centeredContainer}>
+      <View
+        style={[styles.centeredContainer, { backgroundColor: backgroundColor }]}
+      >
         <ActivityIndicator size="large" />
       </View>
     );
@@ -94,8 +99,10 @@ export default function AllWorkoutsScreen() {
 
   if (isError) {
     return (
-      <View style={styles.centeredContainer}>
-        <CustomText style={styles.errorText}>
+      <View
+        style={[styles.centeredContainer, { backgroundColor: backgroundColor }]}
+      >
+        <CustomText style={[styles.errorText, { color: textColor }]}>
           Error fetching workouts
         </CustomText>
         <Button title="Retry" onPress={() => refetch()} />
@@ -104,7 +111,9 @@ export default function AllWorkoutsScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: backgroundColor }]}
+    >
       <View style={styles.topBar}>
         <TouchableOpacity
           style={styles.backButton}
@@ -116,15 +125,19 @@ export default function AllWorkoutsScreen() {
 
       {/* Number of Workouts and Filter Button */}
       <View style={styles.headerRow}>
-        <CustomText style={styles.workoutCount}>
+        <CustomText style={[styles.workoutCount, { color: textColor }]}>
           {filteredWorkouts.length} workouts
         </CustomText>
         <TouchableOpacity
-          style={styles.filterButton}
+          style={[styles.filterButton, { backgroundColor: textColor }]}
           onPress={() => setFilterModalVisible(true)}
         >
-          <CustomText style={styles.filterButtonText}>Filters</CustomText>
-          <Ionicons name="filter-outline" size={18} color="#fff" />
+          <CustomText
+            style={[styles.filterButtonText, { color: backgroundColor }]}
+          >
+            Filters
+          </CustomText>
+          <Ionicons name="filter-outline" size={18} color={backgroundColor} />
         </TouchableOpacity>
       </View>
 
@@ -154,7 +167,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 20,
-    backgroundColor: "#fff",
   },
   cardAlign: {
     paddingHorizontal: 16,
@@ -184,7 +196,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   filterButtonText: {
-    color: "#fff",
     marginRight: 5,
   },
   topBar: {

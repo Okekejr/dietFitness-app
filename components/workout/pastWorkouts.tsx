@@ -144,10 +144,9 @@ const styles = StyleSheet.create({
   workoutCard: {
     flexDirection: "row",
     alignItems: "center",
-    borderRadius: 10,
+    borderRadius: 15,
     overflow: "hidden",
     backgroundColor: "#f8f8f8",
-    marginBottom: 10,
   },
   workoutImage: {
     width: 100,

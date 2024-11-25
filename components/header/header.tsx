@@ -2,10 +2,11 @@ import React, { useEffect, useState } from "react";
 import { View, Image, StyleSheet, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import { useUserData } from "@/context/userDataContext";
-import { getInitials } from "@/utils";
+import { getFirstName, getInitials, getTimeOfDay } from "@/utils";
 import CustomText from "../ui/customText";
 import * as Haptics from "expo-haptics";
 import { useThemeColor } from "@/hooks/useThemeColor";
+import { Ionicons } from "@expo/vector-icons";
 
 interface HeaderProps {
   children?: React.ReactNode;
@@ -22,6 +23,7 @@ const Header: React.FC<HeaderProps> = ({
   const { userData, refetchUserData } = useUserData();
   const [userId, setUserId] = useState("");
   const textColor = useThemeColor({}, "text");
+  const nameOfIcon = getTimeOfDay();
 
   useEffect(() => {
     if (userData) {
@@ -38,29 +40,65 @@ const Header: React.FC<HeaderProps> = ({
   return (
     <View style={styles.outerContainer}>
       <View style={styles.headerContainer}>
-        {showProfileImage && (
-          <TouchableOpacity
-            style={styles.profileContainer}
-            onPress={() => {
-              Haptics.selectionAsync();
-              router.push("/profile");
-              refetchUserData();
-            }}
-          >
-            {userData?.profile_picture ? (
-              <Image
-                source={{ uri: userData.profile_picture, cache: "force-cache" }}
-                style={styles.profileImage}
-              />
-            ) : (
-              <View style={styles.profileFallback}>
-                <CustomText style={styles.initials}>
-                  {userData?.name ? getInitials(userData.name) : "?"}
+        <TouchableOpacity
+          onPress={() => {
+            Haptics.selectionAsync();
+            router.push("/profile");
+            refetchUserData();
+          }}
+        >
+          {showProfileImage && (
+            <View style={styles.contentContainer}>
+              <View
+                style={[styles.profileContainer, { borderColor: textColor }]}
+              >
+                {userData?.profile_picture ? (
+                  <Image
+                    source={{
+                      uri: userData.profile_picture,
+                      cache: "force-cache",
+                    }}
+                    style={styles.profileImage}
+                  />
+                ) : (
+                  <View style={styles.profileFallback}>
+                    <CustomText style={styles.initials}>
+                      {userData?.name ? getInitials(userData.name) : "?"}
+                    </CustomText>
+                  </View>
+                )}
+              </View>
+              <View style={{ display: "flex", flexDirection: "column" }}>
+                <View
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    gap: 5,
+                  }}
+                >
+                  <CustomText
+                    style={{
+                      color: textColor,
+                      fontSize: 14,
+                    }}
+                  >
+                    Hello
+                  </CustomText>
+                  <Ionicons name={nameOfIcon} size={18} color={textColor} />
+                </View>
+                <CustomText
+                  style={{
+                    color: textColor,
+                    fontSize: 16,
+                    fontFamily: "HostGrotesk-Medium",
+                  }}
+                >
+                  {userData?.name ? getFirstName(userData?.name) : ""}
                 </CustomText>
               </View>
-            )}
-          </TouchableOpacity>
-        )}
+            </View>
+          )}
+        </TouchableOpacity>
 
         <View style={styles.childrenContainer}>{children}</View>
       </View>
@@ -92,10 +130,17 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },
+  contentContainer: {
+    display: "flex",
+    flexDirection: "row",
+    gap: 8,
+    alignItems: "center",
+  },
   profileContainer: {
     width: 40,
     height: 40,
     borderRadius: 25,
+    borderWidth: 1,
     overflow: "hidden",
   },
   profileImage: {

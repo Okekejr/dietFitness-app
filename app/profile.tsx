@@ -78,15 +78,23 @@ export default function ProfileScreen() {
   };
 
   const handleSignOut = async () => {
-    try {
-      await SuperTokens.signOut();
-      Alert.alert("Signed Out", "You have been signed out successfully.");
+    Alert.alert("Confirm", `You are signing out, Are you sure?`, [
+      { text: "Cancel", style: "cancel" }, // Cancel action
+      {
+        text: "Sign Out",
+        onPress: async () => {
+          try {
+            await SuperTokens.signOut();
+            Alert.alert("Signed Out", "You have been signed out successfully.");
 
-      // Redirect to the login page
-      router.replace("/login");
-    } catch (error) {
-      Alert.alert("Sign Out Failed", (error as Error).message);
-    }
+            // Redirect to the login page
+            router.replace("/login");
+          } catch (error) {
+            Alert.alert("Sign Out Failed", (error as Error).message);
+          }
+        },
+      },
+    ]);
   };
 
   // Share QR code logic

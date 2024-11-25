@@ -115,6 +115,7 @@ export default function SummaryScreen() {
             <CustomText
               style={[
                 styles.tabText,
+                { color: textColor },
                 activeTab === index && styles.activeTabText,
               ]}
             >
@@ -169,7 +170,6 @@ const styles = StyleSheet.create({
   },
   tabText: {
     fontSize: 16,
-    color: "#aaa",
   },
   activeTabText: {
     fontFamily: "HostGrotesk-Medium",

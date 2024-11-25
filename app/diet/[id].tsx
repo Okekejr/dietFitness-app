@@ -5,7 +5,7 @@ import { DietPlanEntity } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { Alert, Dimensions, TouchableOpacity } from "react-native";
+import { Dimensions, TouchableOpacity } from "react-native";
 import { Image } from "expo-image";
 import {
   ActivityIndicator,
@@ -29,7 +29,6 @@ const MealDetailScreen = () => {
   const textColor = useThemeColor({}, "text");
   const backgroundColor = useThemeColor({}, "background");
   const subTextColor = useThemeColor({}, "subText");
-  const iconTextColor = useThemeColor({}, "icon");
   const [videoVisible, setVideoVisible] = useState(false);
   const videoRef = useRef<Video | null>(null);
 
@@ -72,7 +71,9 @@ const MealDetailScreen = () => {
   if (!meal) {
     return (
       <View style={styles.container}>
-        <CustomText style={styles.errorText}>Meal not found</CustomText>
+        <CustomText style={[styles.errorText, { color: textColor }]}>
+          Meal not found
+        </CustomText>
       </View>
     );
   }

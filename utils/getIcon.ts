@@ -1,4 +1,3 @@
-import { UserDataT } from "@/types";
 import { WorkoutsT } from "@/types/workout";
 import { Ionicons } from "@expo/vector-icons";
 

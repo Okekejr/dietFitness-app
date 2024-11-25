@@ -17,10 +17,13 @@ import FilterModal from "@/components/modal/filterModal";
 import WorkoutCard from "@/components/workout/workoutCard";
 import { Ionicons } from "@expo/vector-icons";
 import CustomText from "@/components/ui/customText";
+import { useThemeColor } from "@/hooks/useThemeColor";
 
 export default function FavoriteWorkoutsScreen() {
   const router = useRouter();
   const { userData } = useUserData();
+  const textColor = useThemeColor({}, "text");
+  const backgroundColor = useThemeColor({}, "background");
 
   const fetchFavoritedWorkouts = async (): Promise<WorkoutsT[]> => {
     if (userData) {
@@ -104,7 +107,9 @@ export default function FavoriteWorkoutsScreen() {
 
   if (isFavoritedLoading) {
     return (
-      <View style={styles.centeredContainer}>
+      <View
+        style={[styles.centeredContainer, { backgroundColor: backgroundColor }]}
+      >
         <ActivityIndicator size="large" />
       </View>
     );
@@ -112,8 +117,10 @@ export default function FavoriteWorkoutsScreen() {
 
   if (isFavoritedError) {
     return (
-      <View style={styles.centeredContainer}>
-        <CustomText style={styles.errorText}>
+      <View
+        style={[styles.centeredContainer, { backgroundColor: backgroundColor }]}
+      >
+        <CustomText style={[styles.errorText, { color: textColor }]}>
           Error fetching workouts
         </CustomText>
         <Button title="Retry" onPress={() => refetchFavoritedWorkouts()} />
@@ -123,7 +130,9 @@ export default function FavoriteWorkoutsScreen() {
 
   if (favorited.length === 0) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: backgroundColor }]}
+      >
         <View style={styles.topBar}>
           <TouchableOpacity
             style={styles.closeButton}
@@ -133,14 +142,14 @@ export default function FavoriteWorkoutsScreen() {
           </TouchableOpacity>
         </View>
         <View style={styles.centeredContainer}>
-          <CustomText style={styles.emptyText}>
+          <CustomText style={[styles.emptyText, { color: textColor }]}>
             You havent saved any workouts yet
           </CustomText>
           <TouchableOpacity
             style={styles.loginButton}
             onPress={() => router.back()}
           >
-            <CustomText style={styles.loginButtonText}>
+            <CustomText style={[styles.loginButtonText, { color: textColor }]}>
               Explore Workouts
             </CustomText>
           </TouchableOpacity>
@@ -150,7 +159,9 @@ export default function FavoriteWorkoutsScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: backgroundColor }]}
+    >
       <View style={styles.topBar}>
         <TouchableOpacity
           style={styles.backButton}
@@ -162,15 +173,19 @@ export default function FavoriteWorkoutsScreen() {
 
       {/* Number of Workouts and Filter Button */}
       <View style={styles.headerRow}>
-        <CustomText style={styles.workoutCount}>
+        <CustomText style={[styles.workoutCount, { color: textColor }]}>
           {filteredWorkouts.length} workouts
         </CustomText>
         <TouchableOpacity
-          style={styles.filterButton}
+          style={[styles.filterButton, { backgroundColor: textColor }]}
           onPress={() => setFilterModalVisible(true)}
         >
-          <CustomText style={styles.filterButtonText}>Filters</CustomText>
-          <Ionicons name="filter-outline" size={18} color="#fff" />
+          <CustomText
+            style={[styles.filterButtonText, { color: backgroundColor }]}
+          >
+            Filters
+          </CustomText>
+          <Ionicons name="filter-outline" size={18} color={backgroundColor} />
         </TouchableOpacity>
       </View>
 
@@ -200,7 +215,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 20,
-    backgroundColor: "#fff",
   },
   cardAlign: {
     paddingHorizontal: 16,
@@ -230,7 +244,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   filterButtonText: {
-    color: "#fff",
     marginRight: 5,
   },
   topBar: {

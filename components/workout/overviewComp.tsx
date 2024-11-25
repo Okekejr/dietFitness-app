@@ -26,6 +26,7 @@ export default function OverviewComp({
   isLoading,
 }: OverviewCompT) {
   const textColor = useThemeColor({}, "text");
+  const backgroundColor = useThemeColor({}, "background");
 
   if (isLoading) {
     return <ActivityIndicator size="large" color="#4F46E5" />;
@@ -33,8 +34,10 @@ export default function OverviewComp({
 
   if (isError) {
     return (
-      <View style={styles.errorContainer}>
-        <CustomText style={styles.errorText}>
+      <View
+        style={[styles.errorContainer, { backgroundColor: backgroundColor }]}
+      >
+        <CustomText style={[styles.errorText, { color: textColor }]}>
           Failed to load overview data.
         </CustomText>
       </View>
@@ -43,8 +46,8 @@ export default function OverviewComp({
 
   if (stats.totalWorkouts === 0) {
     return (
-      <View style={styles.center}>
-        <CustomText style={styles.description}>
+      <View style={[styles.center, { backgroundColor: backgroundColor }]}>
+        <CustomText style={[styles.description, { color: textColor }]}>
           You haven't completed any workouts yet.
         </CustomText>
       </View>
@@ -52,7 +55,12 @@ export default function OverviewComp({
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView
+      contentContainerStyle={[
+        styles.container,
+        { backgroundColor: backgroundColor },
+      ]}
+    >
       <View style={styles.card}>
         <CustomText style={styles.cardTitle}>Total Workouts</CustomText>
         <CustomText style={styles.cardValue}>{stats.totalWorkouts}</CustomText>
@@ -100,7 +108,7 @@ export default function OverviewComp({
             name: item.name,
             population: Number(item.population),
             color: getTagColor(item.name),
-            legendFontColor: "#4F46E5",
+            legendFontColor: textColor,
           }))}
           width={width - 40}
           height={220}
@@ -123,7 +131,7 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: "#fff",
-    borderRadius: 10,
+    borderRadius: 15,
     padding: 20,
     marginBottom: 15,
     shadowColor: "#000",

@@ -17,6 +17,7 @@ import BackButton from "../ui/backButton";
 import CustomText from "../ui/customText";
 import * as Haptics from "expo-haptics";
 import { useQueryClient } from "@tanstack/react-query";
+import { useThemeColor } from "@/hooks/useThemeColor";
 
 interface AddCustomProps {
   onClose: () => void;
@@ -25,6 +26,9 @@ interface AddCustomProps {
 export default function AddCustomActivity({ onClose }: AddCustomProps) {
   const queryClient = useQueryClient();
   const { userData } = useUserData();
+  const textColor = useThemeColor({}, "text");
+  const backgroundColor = useThemeColor({}, "background");
+  const subTextColor = useThemeColor({}, "subText");
   const [duration, setDuration] = useState("");
   const [caloriesBurned, setCaloriesBurned] = useState("");
   const [intensity, setIntensity] = useState("");
@@ -111,16 +115,26 @@ export default function AddCustomActivity({ onClose }: AddCustomProps) {
       style={styles.container}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <ScrollView
+        contentContainerStyle={[
+          styles.scrollContainer,
+          { backgroundColor: backgroundColor },
+        ]}
+      >
         <BackButton func={onClose} icon="close" />
 
-        <CustomText style={styles.headerText}>Add Activity</CustomText>
+        <CustomText style={[styles.headerText, { color: textColor }]}>
+          Add Activity
+        </CustomText>
 
         <View style={styles.inputContainer}>
-          <CustomText style={styles.label}>Duration</CustomText>
+          <CustomText style={[styles.label, { color: textColor }]}>
+            Duration
+          </CustomText>
           <TextInput
             style={styles.input}
             placeholder="Duration (minutes)"
+            placeholderTextColor={subTextColor}
             value={duration}
             onChangeText={(text) => setDuration(text.replace(/[^0-9]/g, ""))} // Only allow numbers
             keyboardType="numeric"
@@ -128,10 +142,13 @@ export default function AddCustomActivity({ onClose }: AddCustomProps) {
         </View>
 
         <View style={styles.inputContainer}>
-          <CustomText style={styles.label}>Calories burned</CustomText>
+          <CustomText style={[styles.label, { color: textColor }]}>
+            Calories burned
+          </CustomText>
           <TextInput
             style={styles.input}
             placeholder="Calories Burned"
+            placeholderTextColor={subTextColor}
             value={caloriesBurned}
             onChangeText={(text) =>
               setCaloriesBurned(text.replace(/[^0-9]/g, ""))
@@ -142,10 +159,13 @@ export default function AddCustomActivity({ onClose }: AddCustomProps) {
 
         {/* Intensity Picker */}
         <TouchableOpacity style={styles.inputContainer}>
-          <CustomText style={styles.label}>Intensity</CustomText>
+          <CustomText style={[styles.label, { color: textColor }]}>
+            Intensity
+          </CustomText>
           <TextInput
             style={styles.input}
             placeholder="Select Intensity"
+            placeholderTextColor={subTextColor}
             onPress={() => setIntensityPickerVisible(true)}
             value={intensity}
             editable={false}
@@ -154,10 +174,13 @@ export default function AddCustomActivity({ onClose }: AddCustomProps) {
 
         {/* Tag Picker */}
         <TouchableOpacity style={styles.inputContainer}>
-          <CustomText style={styles.label}>Tag</CustomText>
+          <CustomText style={[styles.label, { color: textColor }]}>
+            Tag
+          </CustomText>
           <TextInput
             style={styles.input}
             placeholder="Select Tag"
+            placeholderTextColor={subTextColor}
             onPress={() => setTagPickerVisible(true)}
             value={tag}
             editable={false}
@@ -253,7 +276,7 @@ const styles = StyleSheet.create({
   scrollContainer: { flexGrow: 1, justifyContent: "center", padding: 20 },
   headerText: {
     marginBottom: 30,
-    fontSize: 20,
+    fontSize: 22,
     color: "#000",
     fontFamily: "HostGrotesk-Medium",
   },

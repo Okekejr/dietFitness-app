@@ -17,6 +17,7 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
 import { API_URL } from "@/constants/apiUrl";
+import { useThemeColor } from "@/hooks/useThemeColor";
 
 type ProfileTypes = {
   key: string;
@@ -27,6 +28,10 @@ type ProfileTypes = {
 export default function PersonalProfile() {
   const router = useRouter();
   const { userData, refetchUserData } = useUserData();
+  const backgroundColor = useThemeColor({}, "background");
+  const textColor = useThemeColor({}, "text");
+  const subTextColor = useThemeColor({}, "subText");
+  const iconColor = useThemeColor({}, "icon");
   const [profilePicture, setProfilePicture] = useState(
     userData?.profile_picture || ""
   );
@@ -132,7 +137,9 @@ export default function PersonalProfile() {
   ];
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: backgroundColor }]}
+    >
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
@@ -148,7 +155,7 @@ export default function PersonalProfile() {
           <CustomText
             style={[
               styles.saveText,
-              { color: isFormChanged ? "black" : "gray" },
+              { color: isFormChanged ? textColor : "gray" },
             ]}
           >
             Save
@@ -157,7 +164,9 @@ export default function PersonalProfile() {
       </View>
 
       <View style={styles.innerContainer}>
-        <CustomText style={styles.headerText}>Profile Information</CustomText>
+        <CustomText style={[styles.headerText, { color: textColor }]}>
+          Profile Information
+        </CustomText>
 
         <View style={styles.scrollContent}>
           <TouchableOpacity onPress={pickImage} style={styles.avatarContainer}>
@@ -174,19 +183,23 @@ export default function PersonalProfile() {
           <Button title="Upload Picture" onPress={pickImage} />
         </View>
 
-        <View style={styles.categoryContainer}>
+        <View style={[styles.categoryContainer, { borderColor: iconColor }]}>
           <FlatList
             data={profileConfig}
             keyExtractor={(item) => item.name}
             renderItem={({ item, index }) => (
               <View style={styles.categoryBox}>
-                <CustomText style={styles.boxHeader}>{item.name}</CustomText>
-                <CustomText style={styles.boxText}>
+                <CustomText style={[styles.boxHeader, { color: subTextColor }]}>
+                  {item.name}
+                </CustomText>
+                <CustomText style={[styles.boxText, { color: textColor }]}>
                   {item.data} {measurement(item.key)}
                 </CustomText>
                 {index < profileConfig.length - 1 ? (
                   <View style={styles.dividerContainer}>
-                    <View style={styles.line} />
+                    <View
+                      style={[styles.line, { backgroundColor: iconColor }]}
+                    />
                   </View>
                 ) : (
                   ""
@@ -201,7 +214,7 @@ export default function PersonalProfile() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
+  container: { flex: 1 },
   innerContainer: { padding: 20, gap: 20, marginTop: 10 },
   backButton: {
     alignSelf: "flex-start",
@@ -248,7 +261,6 @@ const styles = StyleSheet.create({
   },
   boxHeader: {
     fontSize: 16,
-    color: "#c7c7c7",
   },
   boxText: { fontSize: 20, color: "#000", fontFamily: "HostGrotesk-Medium" },
   dividerContainer: {
@@ -259,6 +271,5 @@ const styles = StyleSheet.create({
   line: {
     flex: 1,
     height: 1,
-    backgroundColor: "#E0E0E0",
   },
 });

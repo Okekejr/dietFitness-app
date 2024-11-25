@@ -19,12 +19,15 @@ import { useUserData } from "@/context/userDataContext";
 import BackButton from "@/components/ui/backButton";
 import CustomText from "@/components/ui/customText";
 import * as Haptics from "expo-haptics";
+import { useThemeColor } from "@/hooks/useThemeColor";
 
 const { height } = Dimensions.get("window");
 
 export default function CategoryScreen() {
   const { id } = useLocalSearchParams();
   const { userData } = useUserData();
+  const textColor = useThemeColor({}, "text");
+  const backgroundColor = useThemeColor({}, "background");
   const [category, setCategory] = useState<CategoryT | null>(null);
   const [workouts, setWorkouts] = useState<WorkoutsT[]>([]);
   const [userId, setUserId] = useState<string>("");
@@ -106,13 +109,15 @@ export default function CategoryScreen() {
   if (!category) {
     return (
       <View style={styles.container}>
-        <CustomText style={styles.errorText}>Category not found</CustomText>
+        <CustomText style={[styles.errorText, { color: textColor }]}>
+          Category not found
+        </CustomText>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: backgroundColor }]}>
       {/* Full-width Image Section with Overlay */}
       <View style={styles.imageContainer}>
         <Image
@@ -137,18 +142,22 @@ export default function CategoryScreen() {
 
       {/* Number of Workouts and Filter Button */}
       <View style={styles.headerRow}>
-        <CustomText style={styles.workoutCount}>
+        <CustomText style={[styles.workoutCount, { color: textColor }]}>
           {filteredWorkouts.length} workouts
         </CustomText>
         <TouchableOpacity
-          style={styles.filterButton}
+          style={[styles.filterButton, { backgroundColor: textColor }]}
           onPress={() => {
             Haptics.selectionAsync();
             setFilterModalVisible(true);
           }}
         >
-          <CustomText style={styles.filterButtonText}>Filters</CustomText>
-          <Ionicons name="filter-outline" size={18} color="#fff" />
+          <CustomText
+            style={[styles.filterButtonText, { color: backgroundColor }]}
+          >
+            Filters
+          </CustomText>
+          <Ionicons name="filter-outline" size={18} color={backgroundColor} />
         </TouchableOpacity>
       </View>
 
@@ -176,7 +185,6 @@ export default function CategoryScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
   },
   cardAlign: {
     paddingHorizontal: 16,
@@ -236,13 +244,11 @@ const styles = StyleSheet.create({
   filterButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#000",
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
   },
   filterButtonText: {
-    color: "#fff",
     marginRight: 5,
   },
   list: {

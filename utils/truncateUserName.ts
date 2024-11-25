@@ -1,3 +1,5 @@
+import { Ionicons } from "@expo/vector-icons";
+
 export const getInitials = (name: string | undefined | null) => {
   if (!name || typeof name !== "string") {
     return "";
@@ -10,4 +12,20 @@ export const getInitials = (name: string | undefined | null) => {
   }
 
   return `${nameParts[0][0]}.`.toUpperCase();
+};
+
+export const getFirstName = (name: string): string => {
+  return name.trim().split(" ")[0];
+};
+
+export const getTimeOfDay = (): keyof typeof Ionicons.glyphMap => {
+  const currentHour = new Date().getHours();
+
+  if (currentHour >= 5 && currentHour < 12) {
+    return "cloudy";
+  } else if (currentHour >= 12 && currentHour < 18) {
+    return "sunny";
+  } else {
+    return "cloudy-night";
+  }
 };

@@ -16,10 +16,15 @@ import { API_URL } from "@/constants/apiUrl";
 import { useUserData } from "@/context/userDataContext";
 import { Ionicons } from "@expo/vector-icons";
 import CustomText from "@/components/ui/customText";
+import { useThemeColor } from "@/hooks/useThemeColor";
 
 export default function EditProfileScreen() {
   const { userData, refetchUserData } = useUserData();
   const router = useRouter();
+  const backgroundColor = useThemeColor({}, "background");
+  const textColor = useThemeColor({}, "text");
+  const subTextColor = useThemeColor({}, "subText");
+  const iconColor = useThemeColor({}, "icon");
   const [activityLevel, setActivityLevel] = useState(
     userData?.activity_level || ""
   );
@@ -110,7 +115,9 @@ export default function EditProfileScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: backgroundColor }]}
+    >
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         style={{ flex: 1 }}
@@ -131,7 +138,7 @@ export default function EditProfileScreen() {
               <CustomText
                 style={[
                   styles.saveText,
-                  { color: isFormChanged ? "black" : "gray" },
+                  { color: isFormChanged ? textColor : "gray" },
                 ]}
               >
                 Save
@@ -140,14 +147,16 @@ export default function EditProfileScreen() {
           </View>
 
           <View style={styles.formGroup}>
-            <CustomText style={styles.heading}>Edit your Experience</CustomText>
+            <CustomText style={[styles.heading, { color: textColor }]}>
+              Edit your Experience
+            </CustomText>
 
-            <CustomText style={styles.subHeading}>
+            <CustomText style={[styles.subHeading, { color: textColor }]}>
               Dietary Preferences
             </CustomText>
             {["balanced", "high-protein", "low-carb"].map((diet) => (
               <View key={diet} style={styles.switchRow}>
-                <CustomText style={styles.label}>
+                <CustomText style={[styles.label, { color: subTextColor }]}>
                   {diet.charAt(0).toUpperCase() + diet.slice(1)}
                 </CustomText>
                 <Switch
@@ -157,10 +166,12 @@ export default function EditProfileScreen() {
               </View>
             ))}
 
-            <CustomText style={styles.subHeading}>Workout Goals</CustomText>
+            <CustomText style={[styles.subHeading, { color: textColor }]}>
+              Workout Goals
+            </CustomText>
             {["weight-loss", "muscle-gain", "endurance"].map((goal) => (
               <View key={goal} style={styles.switchRow}>
-                <CustomText style={styles.label}>
+                <CustomText style={[styles.label, { color: subTextColor }]}>
                   {goal
                     .split("-")
                     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
@@ -175,7 +186,9 @@ export default function EditProfileScreen() {
           </View>
 
           <View style={styles.formGroup}>
-            <CustomText style={styles.subHeading}>Activity Level</CustomText>
+            <CustomText style={[styles.subHeading, { color: textColor }]}>
+              Activity Level
+            </CustomText>
             <Picker
               selectedValue={activityLevel}
               onValueChange={(value) => setActivityLevel(value)}
@@ -213,7 +226,6 @@ export default function EditProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
   },
   scrollContent: {
     padding: 20,
@@ -255,9 +267,10 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    color: "#686D76",
   },
   picker: {
     marginVertical: 15,
+    borderRadius: 15,
+    backgroundColor: "#fff",
   },
 });

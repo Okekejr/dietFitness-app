@@ -328,7 +328,7 @@ const styles = StyleSheet.create({
     flexDirection: "column",
   },
   upgradeBtn: {
-    borderRadius: 10,
+    borderRadius: 15,
     padding: 10,
   },
   upgradeText: {
@@ -348,7 +348,7 @@ const styles = StyleSheet.create({
     padding: 15,
     gap: 8,
     marginBottom: 10,
-    borderRadius: 10,
+    borderRadius: 15,
   },
   dietName: {
     fontSize: 18,
@@ -400,7 +400,7 @@ const styles = StyleSheet.create({
     padding: 15,
     borderWidth: 1,
     borderColor: "#c7c7c7",
-    borderRadius: 10,
+    borderRadius: 15,
     backgroundColor: "#fff",
     elevation: 3,
     shadowColor: "#000",
@@ -460,7 +460,7 @@ const styles = StyleSheet.create({
     padding: 15,
     marginVertical: 5,
     backgroundColor: "#e0e0e0",
-    borderRadius: 8,
+    borderRadius: 15,
   },
   summaryContainer: {
     marginTop: 10,
