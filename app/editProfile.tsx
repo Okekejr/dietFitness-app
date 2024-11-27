@@ -24,7 +24,6 @@ export default function EditProfileScreen() {
   const backgroundColor = useThemeColor({}, "background");
   const textColor = useThemeColor({}, "text");
   const subTextColor = useThemeColor({}, "subText");
-  const iconColor = useThemeColor({}, "icon");
   const [activityLevel, setActivityLevel] = useState(
     userData?.activity_level || ""
   );

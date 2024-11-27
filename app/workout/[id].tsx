@@ -223,7 +223,9 @@ const WorkoutDetailsScreen = () => {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
+      <View
+        style={[styles.loadingContainer, { backgroundColor: backgroundColor }]}
+      >
         <ActivityIndicator size="large" />
       </View>
     );
@@ -231,8 +233,10 @@ const WorkoutDetailsScreen = () => {
 
   if (!workout) {
     return (
-      <View style={styles.container}>
-        <CustomText style={styles.errorText}>Workout not found</CustomText>
+      <View style={[styles.container, { backgroundColor: backgroundColor }]}>
+        <CustomText style={[styles.errorText, { color: textColor }]}>
+          Workout not found
+        </CustomText>
       </View>
     );
   }
