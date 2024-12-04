@@ -9,6 +9,8 @@ import {
   ScrollView,
   Modal,
   Alert,
+  Platform,
+  Button,
 } from "react-native";
 import { Image } from "expo-image";
 import { useLocalSearchParams } from "expo-router";
@@ -24,6 +26,8 @@ import CustomText from "@/components/ui/customText";
 import * as Haptics from "expo-haptics";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { ResizeMode, Video, AVPlaybackStatus } from "expo-av";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import * as Calendar from "expo-calendar";
 
 const { height, width } = Dimensions.get("window");
 
@@ -49,6 +53,117 @@ const WorkoutDetailsScreen = () => {
   const videoRef = useRef<Video | null>(null);
   const [is60SecondsCalled, setIs60SecondsCalled] = useState(false);
   const [isModalVisible, setModalVisible] = useState(false);
+  const [isSchedule, setIsSchedule] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [isPermissionGranted, setIsPermissionGranted] =
+    useState<boolean>(false);
+  const [calendarID, setCalendarID] = useState<string | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      const { status } = await Calendar.requestCalendarPermissionsAsync();
+      if (status === "granted") {
+        setIsPermissionGranted(true);
+      } else {
+        console.log("Calendar permission denied");
+      }
+    })();
+  }, []);
+
+  // Check if the calendar exists and create if not
+  const createOrGetCalendar = async () => {
+    const calendars = await Calendar.getCalendarsAsync(
+      Calendar.EntityTypes.EVENT
+    );
+
+    // Check if the calendar already exists
+    const existingCalendar = calendars.find(
+      (calendar) => calendar.title === "Diet & Fitness Calendar"
+    );
+
+    if (existingCalendar) {
+      setCalendarID(existingCalendar.id);
+      console.log("Using existing calendar:", existingCalendar.id);
+      return existingCalendar.id;
+    } else {
+      // If calendar doesn't exist, create it
+      const defaultCalendarSource: Calendar.Source =
+        Platform.OS === "ios"
+          ? await getDefaultCalendarSource()
+          : {
+              isLocalAccount: true,
+              type: "local",
+              name: "Diet & Fitness Calendar",
+            };
+
+      const newCalendarID = await Calendar.createCalendarAsync({
+        title: "Diet & Fitness Calendar",
+        color: "blue",
+        entityType: Calendar.EntityTypes.EVENT,
+        sourceId: defaultCalendarSource.id,
+        source: defaultCalendarSource,
+        name: "internalCalendarName",
+        ownerAccount: "personal",
+        accessLevel: Calendar.CalendarAccessLevel.OWNER,
+      });
+
+      setCalendarID(newCalendarID);
+      console.log("Created new calendar with ID:", newCalendarID);
+      return newCalendarID;
+    }
+  };
+
+  async function getDefaultCalendarSource() {
+    const defaultCalendar = await Calendar.getDefaultCalendarAsync();
+    return defaultCalendar.source;
+  }
+
+  // Function to add event to the calendar
+  const addEventToCalendar = async (date: Date) => {
+    if (!isPermissionGranted) {
+      return;
+    }
+
+    if (!calendarID) {
+      const createdCalendarID = await createOrGetCalendar();
+      setCalendarID(createdCalendarID);
+    }
+
+    if (calendarID && workout) {
+      // Ensure calendarID is not null before proceeding
+      try {
+        const eventData = {
+          title: `Time to Crush Your ${workout.name} workout!`,
+          startDate: date,
+          endDate: new Date(date.getTime() + 60 * 60 * 1000), // Example: event duration of 1 hour
+          alarms: [{ relativeOffset: -15 }], // Remind 15 minutes before the event
+        };
+
+        const newEventID = await Calendar.createEventAsync(
+          calendarID,
+          eventData
+        );
+        console.log(`Event created with ID: ${newEventID}`);
+        Alert.alert(
+          "Reminder Set",
+          `Your ${workout.name} workout reminder is set!`
+        );
+        setIsSchedule(false);
+      } catch (error) {
+        console.error("Error adding event to calendar:", error);
+        Alert.alert("Error", "There was an error setting your reminder.");
+      }
+    } else {
+      console.error("Calendar ID is null or undefined.");
+    }
+  };
+
+  // Date picker change handler
+  const onDateChange = (event: any, date?: Date) => {
+    if (date) {
+      setSelectedDate(date);
+    }
+  };
 
   const handleEnterFullscreen = async () => {
     try {
@@ -143,6 +258,10 @@ const WorkoutDetailsScreen = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    createOrGetCalendar();
+  }, []);
 
   useEffect(() => {
     // Slide up animation
@@ -329,9 +448,12 @@ const WorkoutDetailsScreen = () => {
             style={[styles.dotHover, { backgroundColor: textColor }]}
           ></View>
           <TouchableOpacity
+            onPress={() => setIsSchedule(true)}
             style={[styles.musicHover, { backgroundColor: textColor }]}
           >
-            <CustomText style={[{ color: backgroundColor }]}>Music</CustomText>
+            <CustomText style={[{ color: backgroundColor }]}>
+              <Ionicons name="time" size={28} color="black" />
+            </CustomText>
           </TouchableOpacity>
         </Animated.View>
 
@@ -346,6 +468,38 @@ const WorkoutDetailsScreen = () => {
             onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
           />
         )}
+
+        {/* Modal to Set Reminder */}
+        <Modal
+          visible={isSchedule}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setIsSchedule(false)}
+        >
+          <View style={styles.modalOverlay}>
+            {/* Close Button */}
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setIsSchedule(false)}
+            >
+              <Ionicons name="close" size={28} color="white" />
+            </TouchableOpacity>
+
+            {/* Date Picker */}
+            <View style={styles.datePickerContainer}>
+              <DateTimePicker
+                value={selectedDate}
+                mode="datetime"
+                display="spinner"
+                onChange={onDateChange}
+              />
+              <Button
+                title="Set Reminder"
+                onPress={() => addEventToCalendar(selectedDate)}
+              />
+            </View>
+          </View>
+        </Modal>
 
         {/* Completion Modal */}
         <Modal
@@ -542,6 +696,13 @@ const styles = StyleSheet.create({
     fontFamily: "HostGrotesk-Medium",
     marginTop: 10,
     color: "#fff",
+  },
+  datePickerContainer: {
+    backgroundColor: "white",
+    padding: 20,
+    borderRadius: 8,
+    alignItems: "center",
+    width: 300,
   },
 });
 

@@ -253,7 +253,7 @@ export default function HomeScreen() {
       <ScrollView style={styles.innerContainer}>
         {/* Streak Progress Bar */}
         <View style={styles.streakContainer}>
-          {streak > 0 && (
+          {streak !== null && (
             <CustomText style={[styles.streakText, { color: textColor }]}>
               🔥 {streak} day streak
             </CustomText>
