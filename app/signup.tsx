@@ -137,25 +137,13 @@ export default function SignupScreen() {
           <View style={styles.oauthContainer}>
             <TouchableOpacity style={styles.oauthButton}>
               <Ionicons
-                name="logo-google"
+                name="logo-apple"
                 size={20}
                 color="#fff"
                 style={styles.oauthIcon}
               />
               <CustomText style={styles.oauthButtonText}>
-                Sign up with Google
-              </CustomText>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.oauthButton}>
-              <Ionicons
-                name="logo-github"
-                size={20}
-                color="#fff"
-                style={styles.oauthIcon}
-              />
-              <CustomText style={styles.oauthButtonText}>
-                Sign up with GitHub
+                Sign up with Apple
               </CustomText>
             </TouchableOpacity>
           </View>

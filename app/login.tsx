@@ -21,20 +21,17 @@ import { API_URL } from "@/constants/apiUrl";
 import Divider from "@/components/ui/divider";
 import { useUserData } from "@/context/userDataContext";
 import CustomText from "@/components/ui/customText";
+import { useThemeColor } from "@/hooks/useThemeColor";
 
 // Open the browser session correctly (required for standalone apps)
 WebBrowser.maybeCompleteAuthSession();
 
 // Define provider types
-type OAuthProvider = "google" | "github";
+type OAuthProvider = "apple";
 
 // Define discovery documents for providers
 const discovery: Record<OAuthProvider, AuthSession.DiscoveryDocument> = {
-  google: {
-    authorizationEndpoint: "https://accounts.google.com/o/oauth2/v2/auth",
-    tokenEndpoint: "https://oauth2.googleapis.com/token",
-  },
-  github: {
+  apple: {
     authorizationEndpoint: "https://github.com/login/oauth/authorize",
     tokenEndpoint: "https://github.com/login/oauth/access_token",
   },
@@ -42,8 +39,7 @@ const discovery: Record<OAuthProvider, AuthSession.DiscoveryDocument> = {
 
 // Client IDs for OAuth providers
 const clientIds: Record<OAuthProvider, string> = {
-  google: "your-google-client-id",
-  github: "your-github-client-id",
+  apple: "your-github-client-id",
 };
 
 const redirectUri = AuthSession.makeRedirectUri({
@@ -60,6 +56,8 @@ export default function LoginScreen() {
   const [isButtonDisabled, setButtonDisabled] = useState(true);
   const [loading, setLoading] = useState(false);
   const { refetchUserData } = useUserData();
+  const textColor = useThemeColor({}, "text");
+  const backgroundColor = useThemeColor({}, "background");
 
   const router = useRouter();
 
@@ -191,38 +189,25 @@ export default function LoginScreen() {
           <View style={styles.oauthContainer}>
             <TouchableOpacity
               style={styles.oauthButton}
-              onPress={() => handleOAuthLogin("google")}
+              onPress={() => handleOAuthLogin("apple")}
             >
               <Ionicons
-                name="logo-google"
+                name="logo-apple"
                 size={20}
                 color="#fff"
                 style={styles.oauthIcon}
               />
               <CustomText style={styles.oauthButtonText}>
-                Login with Google
-              </CustomText>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.oauthButton}
-              onPress={() => handleOAuthLogin("github")}
-            >
-              <Ionicons
-                name="logo-github"
-                size={20}
-                color="#fff"
-                style={styles.oauthIcon}
-              />
-              <CustomText style={styles.oauthButtonText}>
-                Login with GitHub
+                Login with Apple
               </CustomText>
             </TouchableOpacity>
           </View>
 
           {/* Inputs with Labels */}
           <View style={styles.inputContainer}>
-            <CustomText style={styles.label}>Email</CustomText>
+            <CustomText style={styles.label}>
+              Email
+            </CustomText>
             <TextInput
               ref={emailInputRef}
               style={[styles.input, errors.email ? styles.errorInput : null]}
@@ -359,7 +344,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 5,
+    marginVertical: 5,
   },
   title: {
     fontSize: 24,
@@ -370,7 +355,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginBottom: 30,
   },
-  signupLink: { color: "blue", marginTop: 10, textAlign: "right" },
+  signupLink: { color: "blue", textAlign: "right" },
   oauthButton: {
     flexDirection: "row",
     alignItems: "center",

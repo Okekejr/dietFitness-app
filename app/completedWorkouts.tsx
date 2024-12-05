@@ -18,6 +18,7 @@ import WorkoutCard from "@/components/workout/workoutCard";
 import FilterModal from "@/components/modal/filterModal";
 import CustomText from "@/components/ui/customText";
 import { useThemeColor } from "@/hooks/useThemeColor";
+import { useFilter } from "@/hooks/useFilter";
 
 export default function CompletedWorkoutsScreen() {
   const router = useRouter();
@@ -59,14 +60,17 @@ export default function CompletedWorkoutsScreen() {
     queryFn: fetchCompletedWorkouts,
   });
 
+  const {
+    setFilteredWorkouts,
+    setFilterModalVisible,
+    activeFilterCount,
+    applyFilters,
+    filteredWorkouts,
+    filters,
+    filterModalVisible,
+  } = useFilter({ workouts: completed });
+
   const [userId, setUserId] = useState<string>("");
-  const [filteredWorkouts, setFilteredWorkouts] = useState<WorkoutsT[]>([]);
-  const [filterModalVisible, setFilterModalVisible] = useState(false);
-  const [filters, setFilters] = useState({
-    duration: [],
-    activityLevel: [],
-    intensity: [],
-  });
 
   useEffect(() => {
     setFilteredWorkouts(completed);
@@ -75,35 +79,6 @@ export default function CompletedWorkoutsScreen() {
       setUserId(userData.user_id);
     }
   }, []);
-
-  const applyFilters = (newFilters: any) => {
-    setFilters(newFilters);
-    const filtered = completed.filter((workout) => {
-      const matchesDuration = newFilters.duration.length
-        ? newFilters.duration.some((duration: string) => {
-            if (duration === "15-20 mins")
-              return workout.duration >= 15 && workout.duration <= 20;
-            if (duration === "25-30 mins")
-              return workout.duration >= 25 && workout.duration <= 30;
-            if (duration === ">30 mins") return workout.duration > 30;
-            return false;
-          })
-        : true;
-
-      const matchesActivity = newFilters.activityLevel.length
-        ? newFilters.activityLevel.includes(workout.activity_level)
-        : true;
-
-      const matchesIntensity = newFilters.intensity.length
-        ? newFilters.intensity.includes(workout.intensity)
-        : true;
-
-      return matchesDuration && matchesActivity && matchesIntensity;
-    });
-
-    setFilteredWorkouts(filtered);
-    setFilterModalVisible(false);
-  };
 
   if (isCompletedLoading) {
     return (
@@ -183,7 +158,7 @@ export default function CompletedWorkoutsScreen() {
           <CustomText
             style={[styles.filterButtonText, { color: backgroundColor }]}
           >
-            Filters
+            Filters {activeFilterCount > 0 ? `(${activeFilterCount})` : ""}
           </CustomText>
           <Ionicons name="filter-outline" size={18} color={backgroundColor} />
         </TouchableOpacity>

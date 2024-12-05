@@ -79,70 +79,85 @@ const MealDetailScreen = () => {
   }
 
   return (
-    <ScrollView
-      style={[styles.container, { backgroundColor: backgroundColor }]}
-    >
-      {/* Diet Image with Back Button  */}
-      <View style={styles.imageContainer}>
-        <Image
-          source={{ uri: meal.image_url }}
-          style={styles.image}
-          contentFit="cover"
-          cachePolicy="disk"
-          placeholder={require("../../assets/img/avatar-placeholder.png")}
-        />
-
+    <>
+      <View style={styles.fixedButtonsContainer}>
         <BackButton />
       </View>
+      <ScrollView
+        style={[styles.container, { backgroundColor: backgroundColor }]}
+        contentContainerStyle={styles.scrollContent}
+      >
+        {/* Diet Image with Back Button  */}
+        <View style={styles.imageContainer}>
+          <Image
+            source={{ uri: meal.image_url }}
+            style={styles.image}
+            contentFit="cover"
+            cachePolicy="disk"
+            placeholder={require("../../assets/img/avatar-placeholder.png")}
+          />
+        </View>
 
-      <View style={styles.detailsContainer}>
-        <CustomText style={[styles.title, { color: textColor }]}>
-          {meal.name}
-        </CustomText>
-        <CustomText style={[styles.goal, , { color: textColor }]}>
-          Goal: {meal.goal}
-        </CustomText>
-        <CustomText style={[styles.calories, , { color: textColor }]}>
-          Calories: {meal.calories} kcal
-        </CustomText>
-        <CustomText style={[styles.mealType, , { color: textColor }]}>
-          Type: {meal.meal_type}
-        </CustomText>
-        <CustomText style={[styles.mealTime, , { color: textColor }]}>
-          Time: {meal.meal_time}
-        </CustomText>
-        <CustomText style={[styles.description, { color: textColor }]}>
-          {meal.description}
-        </CustomText>
-      </View>
-
-      <View style={styles.section}>
-        <CustomText style={[styles.sectionTitle, , { color: textColor }]}>
-          Ingredients
-        </CustomText>
-        {meal.ingredients?.map((ingredient, index) => (
-          <CustomText
-            key={index}
-            style={[styles.ingredient, { color: subTextColor }]}
-          >
-            • {ingredient}
+        <View style={styles.detailsContainer}>
+          <CustomText style={[styles.title, { color: textColor }]}>
+            {meal.name}
           </CustomText>
-        ))}
-      </View>
-
-      <View style={styles.section}>
-        <CustomText style={[styles.sectionTitle, { color: textColor }]}>
-          Dietary Restrictions
-        </CustomText>
-        {meal.dietary_restrictions?.map((restriction, index) => (
-          <CustomText
-            key={index}
-            style={[styles.restriction, { color: subTextColor }]}
-          >
-            • {restriction}
+          <CustomText style={[styles.goal, , { color: textColor }]}>
+            Goal: {meal.goal}
           </CustomText>
-        ))}
-      </View>
+          <CustomText style={[styles.calories, , { color: textColor }]}>
+            Calories: {meal.calories} kcal
+          </CustomText>
+          <CustomText style={[styles.mealType, , { color: textColor }]}>
+            Type: {meal.meal_type}
+          </CustomText>
+          <CustomText style={[styles.mealTime, , { color: textColor }]}>
+            Time: {meal.meal_time}
+          </CustomText>
+          <CustomText style={[styles.description, { color: textColor }]}>
+            {meal.description}
+          </CustomText>
+        </View>
+
+        <View style={styles.section}>
+          <CustomText style={[styles.sectionTitle, , { color: textColor }]}>
+            Ingredients
+          </CustomText>
+          {meal.ingredients?.map((ingredient, index) => (
+            <CustomText
+              key={index}
+              style={[styles.ingredient, { color: subTextColor }]}
+            >
+              • {ingredient}
+            </CustomText>
+          ))}
+        </View>
+
+        <View style={styles.section}>
+          <CustomText style={[styles.sectionTitle, { color: textColor }]}>
+            Dietary Restrictions
+          </CustomText>
+          {meal.dietary_restrictions?.map((restriction, index) => (
+            <CustomText
+              key={index}
+              style={[styles.restriction, { color: subTextColor }]}
+            >
+              • {restriction}
+            </CustomText>
+          ))}
+        </View>
+
+        {videoVisible && (
+          <Video
+            ref={videoRef}
+            source={videoSource}
+            useNativeControls={true}
+            resizeMode={ResizeMode.CONTAIN}
+            isLooping
+            shouldPlay
+          />
+        )}
+      </ScrollView>
 
       <Animated.View style={[styles.videoHoverButton, { top: slideAnim }]}>
         <TouchableOpacity
@@ -154,24 +169,26 @@ const MealDetailScreen = () => {
           </CustomText>
         </TouchableOpacity>
       </Animated.View>
-
-      {videoVisible && (
-        <Video
-          ref={videoRef}
-          source={videoSource}
-          useNativeControls={true}
-          resizeMode={ResizeMode.CONTAIN}
-          isLooping
-          shouldPlay
-        />
-      )}
-    </ScrollView>
+    </>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 100, // Extra space for the animated view
+  },
+  fixedButtonsContainer: {
+    position: "absolute",
+    top: 0, // Adjust for safe area (if needed)
+    left: 0,
+    right: 0,
+    zIndex: 1000, // Ensure it stays above all other content
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
   },
   videoHoverButton: {
     position: "absolute", // Make the tab bar float

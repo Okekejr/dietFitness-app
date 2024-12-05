@@ -47,7 +47,9 @@ const FilterModal: FC<FilterModalProps> = ({
   };
 
   const handleResetFilters = () => {
-    setLocalFilters({ duration: [], activityLevel: [], intensity: [] });
+    const resetFilters = { duration: [], activityLevel: [], intensity: [] };
+    setLocalFilters(resetFilters);
+    onApplyFilters(resetFilters);
   };
 
   return (

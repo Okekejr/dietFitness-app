@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import {
   Animated,
   View,
@@ -8,26 +8,22 @@ import {
   Dimensions,
   ScrollView,
   Modal,
-  Alert,
-  Platform,
   Button,
 } from "react-native";
 import { Image } from "expo-image";
 import { useLocalSearchParams } from "expo-router";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { API_URL } from "@/constants/apiUrl";
-import { WorkoutsT } from "@/types/workout";
 import { getWorkoutPageIcons, workoutInfoT } from "@/utils";
 import LottieView from "lottie-react-native";
 import { useUserData } from "@/context/userDataContext";
-import { useQueryClient } from "@tanstack/react-query";
 import BackButton from "@/components/ui/backButton";
 import CustomText from "@/components/ui/customText";
 import * as Haptics from "expo-haptics";
 import { useThemeColor } from "@/hooks/useThemeColor";
-import { ResizeMode, Video, AVPlaybackStatus } from "expo-av";
+import { ResizeMode, Video } from "expo-av";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import * as Calendar from "expo-calendar";
+import { useWorkoutId } from "@/hooks/useWorkoutId";
 
 const { height, width } = Dimensions.get("window");
 
@@ -38,26 +34,38 @@ const videoSource = {
 const WorkoutDetailsScreen = () => {
   const { id } = useLocalSearchParams();
   const { userData } = useUserData();
-  const queryClient = useQueryClient();
+  const {
+    setIsPermissionGranted,
+    createOrGetCalendar,
+    setUserId,
+    fetchWorkoutDetails,
+    fetchFavoritesStatus,
+    handleFavorite,
+    handleEnterFullscreen,
+    setIsSchedule,
+    handlePlaybackStatusUpdate,
+    addEventToCalendar,
+    onDateChange,
+    closeModal,
+    isModalVisible,
+    selectedDate,
+    isSchedule,
+    videoVisible,
+    videoRef,
+    isFavorite,
+    isCompleted,
+    userId,
+    workout,
+    loading,
+  } = useWorkoutId({
+    id: id,
+    userData: userData,
+  });
   const slideAnim = useRef(new Animated.Value(height)).current;
   const textColor = useThemeColor({}, "text");
   const backgroundColor = useThemeColor({}, "background");
   const subTextColor = useThemeColor({}, "subText");
   const iconTextColor = useThemeColor({}, "icon");
-  const [workout, setWorkout] = useState<WorkoutsT | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [isFavorite, setIsFavorite] = useState(false);
-  const [isCompleted, setIsCompleted] = useState(false);
-  const [userId, setUserId] = useState<string>("");
-  const [videoVisible, setVideoVisible] = useState(false);
-  const videoRef = useRef<Video | null>(null);
-  const [is60SecondsCalled, setIs60SecondsCalled] = useState(false);
-  const [isModalVisible, setModalVisible] = useState(false);
-  const [isSchedule, setIsSchedule] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [isPermissionGranted, setIsPermissionGranted] =
-    useState<boolean>(false);
-  const [calendarID, setCalendarID] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -70,195 +78,6 @@ const WorkoutDetailsScreen = () => {
     })();
   }, []);
 
-  // Check if the calendar exists and create if not
-  const createOrGetCalendar = async () => {
-    const calendars = await Calendar.getCalendarsAsync(
-      Calendar.EntityTypes.EVENT
-    );
-
-    // Check if the calendar already exists
-    const existingCalendar = calendars.find(
-      (calendar) => calendar.title === "Diet & Fitness Calendar"
-    );
-
-    if (existingCalendar) {
-      setCalendarID(existingCalendar.id);
-      console.log("Using existing calendar:", existingCalendar.id);
-      return existingCalendar.id;
-    } else {
-      // If calendar doesn't exist, create it
-      const defaultCalendarSource: Calendar.Source =
-        Platform.OS === "ios"
-          ? await getDefaultCalendarSource()
-          : {
-              isLocalAccount: true,
-              type: "local",
-              name: "Diet & Fitness Calendar",
-            };
-
-      const newCalendarID = await Calendar.createCalendarAsync({
-        title: "Diet & Fitness Calendar",
-        color: "blue",
-        entityType: Calendar.EntityTypes.EVENT,
-        sourceId: defaultCalendarSource.id,
-        source: defaultCalendarSource,
-        name: "internalCalendarName",
-        ownerAccount: "personal",
-        accessLevel: Calendar.CalendarAccessLevel.OWNER,
-      });
-
-      setCalendarID(newCalendarID);
-      console.log("Created new calendar with ID:", newCalendarID);
-      return newCalendarID;
-    }
-  };
-
-  async function getDefaultCalendarSource() {
-    const defaultCalendar = await Calendar.getDefaultCalendarAsync();
-    return defaultCalendar.source;
-  }
-
-  // Function to add event to the calendar
-  const addEventToCalendar = async (date: Date) => {
-    if (!isPermissionGranted) {
-      return;
-    }
-
-    if (!calendarID) {
-      const createdCalendarID = await createOrGetCalendar();
-      setCalendarID(createdCalendarID);
-    }
-
-    if (calendarID && workout) {
-      // Ensure calendarID is not null before proceeding
-      try {
-        const eventData = {
-          title: `Time to Crush Your ${workout.name} workout!`,
-          startDate: date,
-          endDate: new Date(date.getTime() + 60 * 60 * 1000), // Example: event duration of 1 hour
-          alarms: [{ relativeOffset: -15 }], // Remind 15 minutes before the event
-        };
-
-        const newEventID = await Calendar.createEventAsync(
-          calendarID,
-          eventData
-        );
-        console.log(`Event created with ID: ${newEventID}`);
-        Alert.alert(
-          "Reminder Set",
-          `Your ${workout.name} workout reminder is set!`
-        );
-        setIsSchedule(false);
-      } catch (error) {
-        console.error("Error adding event to calendar:", error);
-        Alert.alert("Error", "There was an error setting your reminder.");
-      }
-    } else {
-      console.error("Calendar ID is null or undefined.");
-    }
-  };
-
-  // Date picker change handler
-  const onDateChange = (event: any, date?: Date) => {
-    if (date) {
-      setSelectedDate(date);
-    }
-  };
-
-  const handleEnterFullscreen = async () => {
-    try {
-      setVideoVisible(true);
-
-      // Wait for the video to be fully loaded and start fullscreen
-      if (videoRef.current) {
-        await videoRef.current.presentFullscreenPlayer();
-      }
-    } catch (error) {
-      Alert.alert("Fullscreen Error");
-    }
-  };
-
-  // Handle video playback status updates
-  const handlePlaybackStatusUpdate = (status: AVPlaybackStatus) => {
-    if ("positionMillis" in status && status.positionMillis !== undefined) {
-      const position = status.positionMillis;
-
-      if ("durationMillis" in status && status.durationMillis !== undefined) {
-        const duration = status.durationMillis;
-
-        // Check if we're within 60 seconds of the video ending
-        if (position >= duration - 60000 && !is60SecondsCalled) {
-          console.log("60 seconds remaining");
-
-          // Set the flag to prevent repeated calls
-          setIs60SecondsCalled(true);
-        }
-      }
-    }
-  };
-
-  const handleCompleteWorkout = async () => {
-    if (workout && userId) {
-      console.log(workout.id, userId);
-
-      try {
-        const request = await fetch(`${API_URL}/api/completedWorkouts`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId, workoutId: workout?.id }),
-        });
-
-        if (request.ok) {
-          setIsCompleted(true);
-          setModalVisible(true);
-          queryClient.invalidateQueries({
-            queryKey: ["completedWorkouts"],
-          });
-          queryClient.invalidateQueries({ queryKey: ["userOverview", userId] });
-          queryClient.invalidateQueries({ queryKey: ["getCompleted"] });
-          queryClient.invalidateQueries({ queryKey: ["allWorkouts"] });
-          queryClient.invalidateQueries({ queryKey: ["favoritedWorkouts"] });
-        }
-      } catch (error) {
-        console.error("Error marking workout as completed", error);
-      }
-    }
-  };
-
-  const closeModal = () => setModalVisible(false);
-
-  const fetchWorkoutDetails = async () => {
-    if (!userData || !id) {
-      return;
-    }
-
-    try {
-      const response = await fetch(`${API_URL}/api/workouts/${id}`);
-      const data = await response.json();
-      setWorkout(data);
-
-      // Check if workout is completed
-      const completedResponse = await fetch(
-        `${API_URL}/api/completedWorkouts?userId=${userData.user_id}`
-      );
-
-      if (completedResponse.ok) {
-        const completedData = await completedResponse.json();
-
-        // Check if the workout ID is in the completed workouts
-        const isWorkoutCompleted = completedData.some(
-          (workout: WorkoutsT) => workout.id === data.id
-        );
-        setIsCompleted(isWorkoutCompleted);
-      }
-
-      setLoading(false);
-    } catch (error) {
-      console.error("Error fetching workout details:", error);
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
     createOrGetCalendar();
   }, []);
@@ -266,7 +85,7 @@ const WorkoutDetailsScreen = () => {
   useEffect(() => {
     // Slide up animation
     Animated.timing(slideAnim, {
-      toValue: height / 2.4, // Final position
+      toValue: height / 1.12, // Final position
       duration: 1000,
       useNativeDriver: false, // Use false for layout-related animations
     }).start();
@@ -284,61 +103,6 @@ const WorkoutDetailsScreen = () => {
       fetchFavoritesStatus();
     }
   }, [workout]);
-
-  const fetchFavoritesStatus = async () => {
-    if (userId && workout) {
-      try {
-        const response = await fetch(
-          `${API_URL}/api/favorites?userId=${userId}`
-        );
-
-        if (response.ok) {
-          const favoritedWorkouts = await response.json();
-
-          // Check if the workout ID is in the favorited workouts
-          const isworkoutFavorited = favoritedWorkouts.some(
-            (work: WorkoutsT) => work.id === workout.id
-          );
-          setIsFavorite(isworkoutFavorited);
-        }
-      } catch (error) {
-        console.error("Failed to fetch completed status:", error);
-      }
-    }
-  };
-
-  const handleFavorite = async () => {
-    if (!workout) {
-      return;
-    }
-
-    console.log(userId, workout.id, isFavorite);
-    try {
-      const response = await fetch(`${API_URL}/api/favorites`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId,
-          workoutId: workout.id,
-          isFavorite,
-        }),
-      });
-
-      if (response.ok) {
-        setIsFavorite(!isFavorite);
-        // Invalidate relevant queries to refetch and update UI
-        queryClient.invalidateQueries({ queryKey: ["favoritedWorkouts"] });
-        queryClient.invalidateQueries({ queryKey: ["allWorkouts"] });
-      } else {
-        console.error(
-          "Failed to update favorite status:",
-          await response.text()
-        );
-      }
-    } catch (error) {
-      console.error("Error updating favorite status:", error);
-    }
-  };
 
   if (loading) {
     return (
@@ -384,18 +148,8 @@ const WorkoutDetailsScreen = () => {
   };
 
   return (
-    <ScrollView
-      style={[styles.container, { backgroundColor: backgroundColor }]}
-    >
-      {/* Workout Image with Back Button and Favorite Icon */}
-      <View style={styles.imageContainer}>
-        <Image
-          source={{ uri: workout.image_url }}
-          style={styles.image}
-          contentFit="cover"
-          cachePolicy="disk"
-          placeholder={require("../../assets/img/avatar-placeholder.png")}
-        />
+    <>
+      <View style={styles.fixedButtonsContainer}>
         <BackButton />
         <TouchableOpacity
           style={styles.favoriteButton}
@@ -411,128 +165,159 @@ const WorkoutDetailsScreen = () => {
           />
         </TouchableOpacity>
       </View>
-
-      <View style={styles.detailsContainer}>
-        <CustomText style={[styles.workoutName, { color: textColor }]}>
-          {workout.name}
-        </CustomText>
-        {workoutIconsTexts({ duration: workout.duration }, workout.duration)}
-        {workoutIconsTexts({ tag: workout.tag }, workout.tag)}
-        {workoutIconsTexts({ intensity: workout.intensity }, workout.intensity)}
-        {workoutIconsTexts(
-          { calories_burned: workout.calories_burned },
-          workout.calories_burned
-        )}
-
-        {isCompleted && (
-          <View style={styles.completedContainer}>
-            <Ionicons name="checkmark-circle" size={24} color="green" />
-            <CustomText style={styles.completedText}>Completed</CustomText>
-          </View>
-        )}
-
-        <CustomText style={[styles.description, { color: iconTextColor }]}>
-          {workout.description}
-        </CustomText>
-
-        <Animated.View style={[styles.videoHoverButton, { top: slideAnim }]}>
-          <TouchableOpacity
-            onPress={handleEnterFullscreen}
-            style={[styles.startVideoHover, { backgroundColor: textColor }]}
-          >
-            <CustomText style={[styles.videoText, { color: backgroundColor }]}>
-              Start Workout
-            </CustomText>
-          </TouchableOpacity>
-          <View
-            style={[styles.dotHover, { backgroundColor: textColor }]}
-          ></View>
-          <TouchableOpacity
-            onPress={() => setIsSchedule(true)}
-            style={[styles.musicHover, { backgroundColor: textColor }]}
-          >
-            <CustomText style={[{ color: backgroundColor }]}>
-              <Ionicons name="time" size={28} color="black" />
-            </CustomText>
-          </TouchableOpacity>
-        </Animated.View>
-
-        {videoVisible && (
-          <Video
-            ref={videoRef}
-            source={videoSource}
-            useNativeControls={true}
-            resizeMode={ResizeMode.CONTAIN}
-            isLooping
-            shouldPlay
-            onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
+      <ScrollView
+        style={[styles.container, { backgroundColor: backgroundColor }]}
+        contentContainerStyle={styles.scrollContent}
+      >
+        {/* Workout Image with Back Button and Favorite Icon */}
+        <View style={styles.imageContainer}>
+          <Image
+            source={{ uri: workout.image_url }}
+            style={styles.image}
+            contentFit="cover"
+            cachePolicy="disk"
+            placeholder={require("../../assets/img/avatar-placeholder.png")}
           />
-        )}
+        </View>
 
-        {/* Modal to Set Reminder */}
-        <Modal
-          visible={isSchedule}
-          transparent
-          animationType="fade"
-          onRequestClose={() => setIsSchedule(false)}
-        >
-          <View style={styles.modalOverlay}>
-            {/* Close Button */}
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => setIsSchedule(false)}
-            >
-              <Ionicons name="close" size={28} color="white" />
-            </TouchableOpacity>
+        <View style={styles.detailsContainer}>
+          <CustomText style={[styles.workoutName, { color: textColor }]}>
+            {workout.name}
+          </CustomText>
+          {workoutIconsTexts({ duration: workout.duration }, workout.duration)}
+          {workoutIconsTexts({ tag: workout.tag }, workout.tag)}
+          {workoutIconsTexts(
+            { intensity: workout.intensity },
+            workout.intensity
+          )}
+          {workoutIconsTexts(
+            { calories_burned: workout.calories_burned },
+            workout.calories_burned
+          )}
 
-            {/* Date Picker */}
-            <View style={styles.datePickerContainer}>
-              <DateTimePicker
-                value={selectedDate}
-                mode="datetime"
-                display="spinner"
-                onChange={onDateChange}
-              />
-              <Button
-                title="Set Reminder"
-                onPress={() => addEventToCalendar(selectedDate)}
-              />
+          {isCompleted && (
+            <View style={styles.completedContainer}>
+              <Ionicons name="checkmark-circle" size={24} color="green" />
+              <CustomText style={styles.completedText}>Completed</CustomText>
             </View>
-          </View>
-        </Modal>
+          )}
 
-        {/* Completion Modal */}
-        <Modal
-          visible={isModalVisible}
-          transparent
-          animationType="fade"
-          onRequestClose={closeModal}
-        >
-          <View style={styles.modalOverlay}>
-            {/* Close Button */}
-            <TouchableOpacity style={styles.closeButton} onPress={closeModal}>
-              <Ionicons name="close" size={28} color="white" />
-            </TouchableOpacity>
+          <CustomText style={[styles.description, { color: iconTextColor }]}>
+            {workout.description}
+          </CustomText>
 
-            {/* Lottie Animation */}
-            <LottieView
-              source={require("../../assets/try1.json")}
-              autoPlay
-              loop
-              style={styles.animation}
+          {videoVisible && (
+            <Video
+              ref={videoRef}
+              source={videoSource}
+              useNativeControls={true}
+              resizeMode={ResizeMode.CONTAIN}
+              isLooping
+              shouldPlay
+              onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
             />
+          )}
 
-            <CustomText style={styles.modalText}>Workout Complete!</CustomText>
-          </View>
-        </Modal>
-      </View>
-    </ScrollView>
+          {/* Modal to Set Reminder */}
+          <Modal
+            visible={isSchedule}
+            transparent
+            animationType="fade"
+            onRequestClose={() => setIsSchedule(false)}
+          >
+            <View style={styles.modalOverlay}>
+              {/* Close Button */}
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setIsSchedule(false)}
+              >
+                <Ionicons name="close" size={28} color="white" />
+              </TouchableOpacity>
+
+              {/* Date Picker */}
+              <View style={styles.datePickerContainer}>
+                <DateTimePicker
+                  value={selectedDate}
+                  mode="datetime"
+                  display="spinner"
+                  onChange={onDateChange}
+                />
+                <Button
+                  title="Set Reminder"
+                  onPress={() => addEventToCalendar(selectedDate)}
+                />
+              </View>
+            </View>
+          </Modal>
+
+          {/* Completion Modal */}
+          <Modal
+            visible={isModalVisible}
+            transparent
+            animationType="fade"
+            onRequestClose={closeModal}
+          >
+            <View style={styles.modalOverlay}>
+              {/* Close Button */}
+              <TouchableOpacity style={styles.closeButton} onPress={closeModal}>
+                <Ionicons name="close" size={28} color="white" />
+              </TouchableOpacity>
+
+              {/* Lottie Animation */}
+              <LottieView
+                source={require("../../assets/try1.json")}
+                autoPlay
+                loop
+                style={styles.animation}
+              />
+
+              <CustomText style={styles.modalText}>
+                Workout Complete!
+              </CustomText>
+            </View>
+          </Modal>
+        </View>
+      </ScrollView>
+
+      <Animated.View style={[styles.videoHoverButton, { top: slideAnim }]}>
+        <TouchableOpacity
+          onPress={handleEnterFullscreen}
+          style={[styles.startVideoHover, { backgroundColor: textColor }]}
+        >
+          <CustomText style={[styles.videoText, { color: backgroundColor }]}>
+            Start Workout
+          </CustomText>
+        </TouchableOpacity>
+        <View style={[styles.dotHover, { backgroundColor: textColor }]}></View>
+        <TouchableOpacity
+          onPress={() => setIsSchedule(true)}
+          style={[styles.musicHover, { backgroundColor: textColor }]}
+        >
+          <CustomText style={[{ color: backgroundColor }]}>
+            <Ionicons name="time" size={28} color="black" />
+          </CustomText>
+        </TouchableOpacity>
+      </Animated.View>
+    </>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 100, // Extra space for the animated view
+  },
+  fixedButtonsContainer: {
+    position: "absolute",
+    top: 0, // Adjust for safe area (if needed)
+    left: 0,
+    right: 0,
+    zIndex: 1000, // Ensure it stays above all other content
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
   },
   videoHoverButton: {
     position: "absolute", // Make the tab bar float

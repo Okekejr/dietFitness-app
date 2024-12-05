@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import {
   View,
   FlatList,
@@ -18,6 +18,7 @@ import FilterModal from "@/components/modal/filterModal";
 import { useUserData } from "@/context/userDataContext";
 import CustomText from "@/components/ui/customText";
 import { useThemeColor } from "@/hooks/useThemeColor";
+import { useFilter } from "@/hooks/useFilter";
 
 async function fetchWorkouts(): Promise<WorkoutsT[]> {
   const response = await fetch(`${API_URL}/api/workouts`);
@@ -41,15 +42,16 @@ export default function AllWorkoutsScreen() {
   });
 
   const [userId, setUserId] = React.useState<string>("");
-  const [filteredWorkouts, setFilteredWorkouts] = useState<WorkoutsT[]>([]);
-  const [filterModalVisible, setFilterModalVisible] = useState(false);
-  const [filters, setFilters] = useState({
-    duration: [],
-    activityLevel: [],
-    intensity: [],
-  });
+  const {
+    setFilteredWorkouts,
+    setFilterModalVisible,
+    activeFilterCount,
+    applyFilters,
+    filteredWorkouts,
+    filters,
+    filterModalVisible,
+  } = useFilter({ workouts: workouts });
 
-  // Fetch user ID from SuperTokens
   useEffect(() => {
     setFilteredWorkouts(workouts);
 
@@ -57,35 +59,6 @@ export default function AllWorkoutsScreen() {
       setUserId(userData.user_id);
     }
   }, []);
-
-  const applyFilters = (newFilters: any) => {
-    setFilters(newFilters);
-    const filtered = workouts.filter((workout) => {
-      const matchesDuration = newFilters.duration.length
-        ? newFilters.duration.some((duration: string) => {
-            if (duration === "15-20 mins")
-              return workout.duration >= 15 && workout.duration <= 20;
-            if (duration === "25-30 mins")
-              return workout.duration >= 25 && workout.duration <= 30;
-            if (duration === ">30 mins") return workout.duration > 30;
-            return false;
-          })
-        : true;
-
-      const matchesActivity = newFilters.activityLevel.length
-        ? newFilters.activityLevel.includes(workout.activity_level)
-        : true;
-
-      const matchesIntensity = newFilters.intensity.length
-        ? newFilters.intensity.includes(workout.intensity)
-        : true;
-
-      return matchesDuration && matchesActivity && matchesIntensity;
-    });
-
-    setFilteredWorkouts(filtered);
-    setFilterModalVisible(false);
-  };
 
   if (isLoading) {
     return (
@@ -135,7 +108,7 @@ export default function AllWorkoutsScreen() {
           <CustomText
             style={[styles.filterButtonText, { color: backgroundColor }]}
           >
-            Filters
+            Filters {activeFilterCount > 0 ? `(${activeFilterCount})` : ""}
           </CustomText>
           <Ionicons name="filter-outline" size={18} color={backgroundColor} />
         </TouchableOpacity>

@@ -250,7 +250,10 @@ export default function HomeScreen() {
           </LinearGradient>
         </TouchableOpacity>
       </Header>
-      <ScrollView style={styles.innerContainer}>
+      <ScrollView
+        style={styles.innerContainer}
+        contentContainerStyle={styles.scrollContent}
+      >
         {/* Streak Progress Bar */}
         <View style={styles.streakContainer}>
           {streak !== null && (
@@ -321,6 +324,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingVertical: 20,
+  },
+  scrollContent: {
+    paddingBottom: 100, // Extra space for the animated view
   },
   innerContainer: {
     paddingHorizontal: 20,

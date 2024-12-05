@@ -20,6 +20,7 @@ import BackButton from "@/components/ui/backButton";
 import CustomText from "@/components/ui/customText";
 import * as Haptics from "expo-haptics";
 import { useThemeColor } from "@/hooks/useThemeColor";
+import { useFilter } from "@/hooks/useFilter";
 
 const { height } = Dimensions.get("window");
 
@@ -31,13 +32,17 @@ export default function CategoryScreen() {
   const [category, setCategory] = useState<CategoryT | null>(null);
   const [workouts, setWorkouts] = useState<WorkoutsT[]>([]);
   const [userId, setUserId] = useState<string>("");
-  const [filteredWorkouts, setFilteredWorkouts] = useState<WorkoutsT[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filterModalVisible, setFilterModalVisible] = useState(false);
-  const [filters, setFilters] = useState({
-    duration: [],
-    activityLevel: [],
-    intensity: [],
+  const {
+    filterModalVisible,
+    filteredWorkouts,
+    filters,
+    activeFilterCount,
+    applyFilters,
+    setFilterModalVisible,
+    setFilteredWorkouts,
+  } = useFilter({
+    workouts: workouts,
   });
 
   useEffect(() => {
@@ -68,35 +73,6 @@ export default function CategoryScreen() {
       setUserId(userData.user_id);
     }
   }, [id]);
-
-  const applyFilters = (newFilters: any) => {
-    setFilters(newFilters);
-    const filtered = workouts.filter((workout) => {
-      const matchesDuration = newFilters.duration.length
-        ? newFilters.duration.some((duration: string) => {
-            if (duration === "15-20 mins")
-              return workout.duration >= 15 && workout.duration <= 20;
-            if (duration === "25-30 mins")
-              return workout.duration >= 25 && workout.duration <= 30;
-            if (duration === ">30 mins") return workout.duration > 30;
-            return false;
-          })
-        : true;
-
-      const matchesActivity = newFilters.activityLevel.length
-        ? newFilters.activityLevel.includes(workout.activity_level)
-        : true;
-
-      const matchesIntensity = newFilters.intensity.length
-        ? newFilters.intensity.includes(workout.intensity)
-        : true;
-
-      return matchesDuration && matchesActivity && matchesIntensity;
-    });
-
-    setFilteredWorkouts(filtered);
-    setFilterModalVisible(false);
-  };
 
   if (loading) {
     return (
@@ -155,7 +131,7 @@ export default function CategoryScreen() {
           <CustomText
             style={[styles.filterButtonText, { color: backgroundColor }]}
           >
-            Filters
+            Filters {activeFilterCount > 0 ? `(${activeFilterCount})` : ""}
           </CustomText>
           <Ionicons name="filter-outline" size={18} color={backgroundColor} />
         </TouchableOpacity>

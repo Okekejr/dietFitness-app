@@ -71,7 +71,7 @@ export default function OverviewComp({
         <CircularProgress
           value={stats.totalCalories}
           radius={60}
-          maxValue={5000}
+          maxValue={Math.max(stats.totalCalories * 1.1, 5000)}
           activeStrokeColor="#FF6347"
           inActiveStrokeColor="#D3D3D3"
           title={"kcal"}
@@ -85,7 +85,7 @@ export default function OverviewComp({
         <CircularProgress
           value={stats.totalMinutes}
           radius={60}
-          maxValue={1000}
+          maxValue={Math.max(stats.totalMinutes * 1.1, 1000)}
           activeStrokeColor="#4CAF50"
           inActiveStrokeColor="#D3D3D3"
           title={"mins"}
