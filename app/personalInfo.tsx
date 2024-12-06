@@ -119,13 +119,14 @@ export default function PersonalInfoScreen() {
             </CustomText>
             <TextInput
               placeholder="e.g., peanuts, shellfish"
-              value={formData.allergies.join(", ")}
-              onChangeText={(text) =>
+              value={formData.allergiesInput || ""}
+              onChangeText={(text) => {
+                updateFormData("allergiesInput", text);
                 updateFormData(
                   "allergies",
                   text.split(",").map((allergy) => allergy.trim())
-                )
-              }
+                );
+              }}
               style={styles.input}
             />
           </View>

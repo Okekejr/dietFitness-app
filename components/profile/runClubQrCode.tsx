@@ -9,6 +9,8 @@ import CustomText from "../ui/customText";
 import { Ionicons } from "@expo/vector-icons";
 import { FC } from "react";
 import { ClubData } from "@/types";
+import { useRouter } from "expo-router";
+import { useThemeColor } from "@/hooks/useThemeColor";
 
 interface RunClubQRCodeT {
   loadingClubData: boolean;
@@ -23,6 +25,9 @@ export const RunClubQrCode: FC<RunClubQRCodeT> = ({
   handleShare,
   isSharing,
 }) => {
+  const router = useRouter();
+  const textColor = useThemeColor({}, "text");
+
   return (
     <>
       {loadingClubData ? (
@@ -54,7 +59,17 @@ export const RunClubQrCode: FC<RunClubQRCodeT> = ({
         </View>
       ) : (
         <View style={styles.qrCodeContainer}>
-          <CustomText>Create or Join a Club</CustomText>
+          <CustomText style={styles.headingText}>
+            Currently not registered to any club
+          </CustomText>
+          <TouchableOpacity
+            style={styles.loginButton}
+            onPress={() => router.push("/runClub")}
+          >
+            <CustomText style={[styles.loginButtonText, { color: textColor }]}>
+              Explore Workouts
+            </CustomText>
+          </TouchableOpacity>
         </View>
       )}
     </>
@@ -66,6 +81,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 40,
   },
+  headingText: {
+    fontFamily: "HostGrotesk-Medium",
+    fontSize: 20,
+    marginBottom: 10,
+  },
   inviteCode: { fontSize: 18, marginBottom: 10 },
   qrCode: { width: 200, height: 200, marginBottom: 20 },
   shareButton: {
@@ -73,5 +93,17 @@ const styles = StyleSheet.create({
     backgroundColor: "#f0f0f0",
     borderRadius: 50,
     marginBottom: 30,
+  },
+  loginButton: {
+    backgroundColor: "#4F46E5",
+    padding: 15,
+    borderRadius: 5,
+    marginTop: 10,
+    marginBottom: 30,
+  },
+  loginButtonText: {
+    color: "#fff",
+    textAlign: "center",
+    fontSize: 16,
   },
 });

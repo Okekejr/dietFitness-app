@@ -1,1 +1,1 @@
-export const API_URL = "http://172.20.10.2:4000";
+export const API_URL = `http://${process.env.MACHINE_IP}:4000`;

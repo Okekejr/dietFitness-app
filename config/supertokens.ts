@@ -1,6 +1,6 @@
 import SuperTokens from "supertokens-react-native";
 
 SuperTokens.init({
-  apiDomain: "http://172.20.10.2:4000",
+  apiDomain: `http://${process.env.MACHINE_IP}:4000`,
   apiBasePath: "/api/auth",
 });
