@@ -5,3 +5,5 @@ export * from "./workout";
 export * from "./achievements";
 export * from "./club";
 export * from "./diet";
+export * from "./biometrics";
+export * from "./profileSettings";

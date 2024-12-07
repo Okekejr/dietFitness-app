@@ -59,7 +59,7 @@ export default function Layout() {
         route: RouteProp<ParamListBase, string>;
       }) => ({
         headerShown: false,
-        tabBarStyle: { backgroundColor: tabBgColor },
+        tabBarStyle: { backgroundColor: tabBgColor, height: 95 },
         tabBarLabel: ({ focused }) => (
           <CustomText style={[styles.tabLabel, focused && { color: "#fff" }]}>
             {getTabTitle(route.name)}
@@ -69,7 +69,7 @@ export default function Layout() {
           <View style={styles.iconContainer}>
             <Ionicons
               name={getIconName(route.name, focused)}
-              size={20}
+              size={24}
               color="#fff"
             />
           </View>
@@ -88,9 +88,11 @@ const styles = StyleSheet.create({
   tabLabel: {
     fontSize: 10,
     color: "#A0A0A0",
+    marginTop: 5,
   },
   iconContainer: {
-    paddingTop: 8,
+    marginTop: 15,
+    height: 24,
   },
   loadingContainer: {
     flex: 1,

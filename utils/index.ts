@@ -7,3 +7,4 @@ export * from "./authUtil";
 export * from "./achievements";
 export * from "./clubRoutes";
 export * from "./saveSettings";
+export * from "./profileSettings";

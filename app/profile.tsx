@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import {
   View,
-  Alert,
   Dimensions,
   StyleSheet,
   TouchableOpacity,
@@ -11,34 +10,16 @@ import {
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { getInitials } from "@/utils";
+import { getInitials, profileSetting } from "@/utils";
 import { useUserData } from "@/context/userDataContext";
-import SuperTokens from "supertokens-react-native";
-import { ClubData } from "@/types";
-import { API_URL } from "@/constants/apiUrl";
-import * as FileSystem from "expo-file-system";
-import * as Sharing from "expo-sharing";
 import CustomText from "@/components/ui/customText";
 import { FlatList } from "react-native";
 import { ScrollView } from "react-native";
 import { RunClubQrCode } from "@/components/profile/runClubQrCode";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import ColorSwitcher from "@/components/profile/colorSwitcher";
-import { useQuery } from "@tanstack/react-query";
 import { BiometricSwitcher } from "@/components/profile/biometricSwitcher";
-
-type ProfileConfig = {
-  key: string;
-  name: string;
-  leftIcon: keyof typeof Ionicons.glyphMap;
-  rightIcon: keyof typeof Ionicons.glyphMap;
-  hrefLink?: string;
-  content?: string;
-}[];
-
-export interface biometricDataT {
-  biometricEnabled: boolean | undefined;
-}
+import { useProfile } from "@/hooks/useProfile";
 
 const { width } = Dimensions.get("window");
 
@@ -47,153 +28,26 @@ export default function ProfileScreen() {
   const backgroundColor = useThemeColor({}, "background");
   const textColor = useThemeColor({}, "text");
   const { userData, refetchUserData } = useUserData();
-  const [clubData, setClubData] = useState<ClubData | null>(null);
-  const [isSharing, setIsSharing] = useState(false);
-  const [loadingClubData, setLoadingClubData] = useState(true);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [modalContent, setModalContent] = useState("");
-
-  const openModal = (content?: string) => {
-    setModalVisible(true);
-    content && setModalContent(content);
-  };
-  const closeModal = () => setModalVisible(false);
+  const {
+    openModal,
+    handleSignOut,
+    closeModal,
+    handleShare,
+    isSharing,
+    bioMetricLoading,
+    biometricData,
+    biometricError,
+    modalVisible,
+    modalContent,
+    loadingClubData,
+    clubData,
+  } = useProfile({
+    userData: userData,
+  });
 
   useEffect(() => {
     refetchUserData();
-    fetchClubData();
   }, []);
-
-  const {
-    data: biometricData,
-    isLoading: bioMetricLoading,
-    isError: biometricError,
-  } = useQuery<biometricDataT>({
-    queryKey: ["biometric", userData?.user_id],
-    queryFn: async () => {
-      const response = await fetch(
-        `${API_URL}/api/auth/biometricPreference?userId=${userData?.user_id}`
-      );
-      if (!response.ok) throw new Error("Failed to fetch club data");
-      return response.json();
-    },
-    enabled: !!userData,
-  });
-
-  const fetchClubData = async () => {
-    try {
-      const response = await fetch(
-        `${API_URL}/api/clubs/userClub/${userData?.user_id}`
-      );
-
-      if (response.ok) {
-        const data: ClubData = await response.json();
-        setClubData(data);
-      } else {
-        console.log("No club found");
-      }
-    } catch (error) {
-      console.error("Error fetching club data:", error);
-    } finally {
-      setLoadingClubData(false);
-    }
-  };
-
-  const handleSignOut = async () => {
-    Alert.alert("Confirm", `You are signing out, Are you sure?`, [
-      { text: "Cancel", style: "cancel" }, // Cancel action
-      {
-        text: "Sign Out",
-        onPress: async () => {
-          try {
-            await SuperTokens.signOut();
-            Alert.alert("Signed Out", "You have been signed out successfully.");
-
-            // Redirect to the login page
-            router.replace("/login");
-          } catch (error) {
-            Alert.alert("Sign Out Failed", (error as Error).message);
-          }
-        },
-      },
-    ]);
-  };
-
-  // Share QR code logic
-  const handleShare = async () => {
-    try {
-      if (!clubData?.qr_code) {
-        Alert.alert("Error", "No QR code available to share.");
-        return;
-      }
-
-      setIsSharing(true);
-
-      const base64Data = clubData.qr_code.replace(
-        /^data:image\/png;base64,/,
-        ""
-      );
-      const fileUri = `${FileSystem.cacheDirectory}club-qr-code.png`;
-
-      await FileSystem.writeAsStringAsync(fileUri, base64Data, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
-
-      if (!(await Sharing.isAvailableAsync())) {
-        Alert.alert("Error", "Sharing is not available on this device.");
-        return;
-      }
-
-      await Sharing.shareAsync(fileUri, {
-        mimeType: "image/png",
-        dialogTitle: "Share your Club QR Code",
-        UTI: "image/png",
-      });
-    } catch (error) {
-      console.error("Error sharing QR code:", error);
-      Alert.alert("Error", "Failed to share QR code.");
-    } finally {
-      setIsSharing(false);
-    }
-  };
-
-  const profileSetting: ProfileConfig = [
-    {
-      key: "Edit Experience",
-      name: "Edit Experience",
-      leftIcon: "pulse-outline",
-      rightIcon: "chevron-forward",
-      hrefLink: "/editProfile",
-    },
-    {
-      key: "Notifications",
-      name: "Notifications",
-      leftIcon: "notifications-outline",
-      rightIcon: "chevron-forward",
-      hrefLink: "/notificationSettings",
-    },
-    {
-      key: "Subscription & Billing",
-      name: "Subscription & Billing",
-      leftIcon: "card-outline",
-      rightIcon: "chevron-forward",
-      hrefLink: "/subscription",
-    },
-    {
-      key: "Help and Info",
-      name: "Help & Info",
-      leftIcon: "information-circle-outline",
-      rightIcon: "chevron-forward",
-      hrefLink: "/helpScreen",
-    },
-    {
-      key: "Settings",
-      name: "Settings",
-      leftIcon: "settings-outline",
-      rightIcon: "chevron-forward",
-      content: "settings",
-    },
-  ];
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor }]}>

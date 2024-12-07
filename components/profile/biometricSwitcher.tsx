@@ -13,8 +13,8 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { API_URL } from "@/constants/apiUrl";
-import { biometricDataT } from "@/app/profile";
 import { saveBiometricPreference } from "@/utils";
+import { biometricDataT } from "@/types";
 
 interface biometricT {
   userId: string | undefined;

@@ -14,7 +14,7 @@ import { useThemeColor } from "@/hooks/useThemeColor";
 
 interface RunClubQRCodeT {
   loadingClubData: boolean;
-  clubData: ClubData | null;
+  clubData: ClubData | undefined;
   handleShare: () => Promise<void>;
   isSharing: boolean;
 }

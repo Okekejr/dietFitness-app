@@ -37,8 +37,6 @@ export default function HomeScreen() {
     currentWeekNum,
     fetchUserDataWithRetry,
     generateOrFetchWorkoutPlan,
-    fetchWorkoutDetails,
-    isCompleted,
   } = useHomeQueries({ userData, userId, refetchUserData });
   const [selectedDay, setSelectedDay] = useState<number>(1);
   const { streak } = useStreak(userId);
@@ -155,8 +153,6 @@ export default function HomeScreen() {
   };
 
   const renderWorkout = ({ item }: { item: AssignedWorkoutT }) => {
-    fetchWorkoutDetails(item.workout.id.toString());
-
     return (
       <TouchableOpacity
         style={styles.workoutCard}
@@ -175,12 +171,6 @@ export default function HomeScreen() {
           <CustomText>
             Calories: - {item.workout.calories_burned} kcal
           </CustomText>
-          {isCompleted && (
-            <View style={styles.completedContainer}>
-              <Ionicons name="checkmark-circle" size={24} color="green" />
-              <CustomText style={styles.completedText}>Completed</CustomText>
-            </View>
-          )}
         </View>
 
         {/* "Tap for more info..." aligned to bottom right */}
