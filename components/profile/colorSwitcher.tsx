@@ -24,7 +24,7 @@ const ColorSwitcher = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <View>
       <View style={styles.categoryBox}>
         <Ionicons
           name={theme === "dark" ? "moon-outline" : "sunny-outline"}
@@ -79,10 +79,6 @@ const ColorSwitcher = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    marginVertical: 20,
-    marginBottom: 100,
-  },
   categoryBox: {
     flexDirection: "row",
     alignItems: "center",

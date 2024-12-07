@@ -326,7 +326,7 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
   },
   scrollContent: {
-    paddingBottom: 100, // Extra space for the animated view
+    paddingBottom: 10, // Extra space for the animated view
   },
   innerContainer: {
     paddingHorizontal: 20,

@@ -235,7 +235,12 @@ const WorkoutDetailsScreen = () => {
               </TouchableOpacity>
 
               {/* Date Picker */}
-              <View style={styles.datePickerContainer}>
+              <View
+                style={[
+                  styles.datePickerContainer,
+                  { backgroundColor: textColor },
+                ]}
+              >
                 <DateTimePicker
                   value={selectedDate}
                   mode="datetime"
@@ -294,7 +299,7 @@ const WorkoutDetailsScreen = () => {
           style={[styles.musicHover, { backgroundColor: textColor }]}
         >
           <CustomText style={[{ color: backgroundColor }]}>
-            <Ionicons name="time" size={28} color="black" />
+            <Ionicons name="time" size={28} color={backgroundColor} />
           </CustomText>
         </TouchableOpacity>
       </Animated.View>

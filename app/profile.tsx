@@ -8,7 +8,7 @@ import {
   Image,
   Modal,
 } from "react-native";
-import { Href, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { getInitials } from "@/utils";
@@ -24,15 +24,21 @@ import { ScrollView } from "react-native";
 import { RunClubQrCode } from "@/components/profile/runClubQrCode";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import ColorSwitcher from "@/components/profile/colorSwitcher";
+import { useQuery } from "@tanstack/react-query";
+import { BiometricSwitcher } from "@/components/profile/biometricSwitcher";
 
 type ProfileConfig = {
   key: string;
   name: string;
   leftIcon: keyof typeof Ionicons.glyphMap;
   rightIcon: keyof typeof Ionicons.glyphMap;
-  hrefLink?: Href<string>;
+  hrefLink?: string;
   content?: string;
 }[];
+
+export interface biometricDataT {
+  biometricEnabled: boolean | undefined;
+}
 
 const { width } = Dimensions.get("window");
 
@@ -57,6 +63,22 @@ export default function ProfileScreen() {
     refetchUserData();
     fetchClubData();
   }, []);
+
+  const {
+    data: biometricData,
+    isLoading: bioMetricLoading,
+    isError: biometricError,
+  } = useQuery<biometricDataT>({
+    queryKey: ["biometric", userData?.user_id],
+    queryFn: async () => {
+      const response = await fetch(
+        `${API_URL}/api/auth/biometricPreference?userId=${userData?.user_id}`
+      );
+      if (!response.ok) throw new Error("Failed to fetch club data");
+      return response.json();
+    },
+    enabled: !!userData,
+  });
 
   const fetchClubData = async () => {
     try {
@@ -262,7 +284,7 @@ export default function ProfileScreen() {
             <TouchableOpacity
               style={styles.modalBackdrop}
               activeOpacity={1} // Prevent accidental clicks through to the background
-              onPress={closeModal} // Close modal on backdrop press
+              onPress={closeModal}
             >
               <View
                 style={styles.modalContent}
@@ -277,7 +299,19 @@ export default function ProfileScreen() {
                   />
                 )}
 
-                {modalContent === "settings" && <ColorSwitcher />}
+                {modalContent === "settings" && (
+                  <>
+                    <View style={styles.settingContainer}>
+                      <ColorSwitcher />
+                      <BiometricSwitcher
+                        userId={userData?.user_id}
+                        biometricData={biometricData}
+                        bioMetricLoading={bioMetricLoading}
+                        biometricError={biometricError}
+                      />
+                    </View>
+                  </>
+                )}
               </View>
             </TouchableOpacity>
           </Modal>
@@ -289,6 +323,11 @@ export default function ProfileScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  settingContainer: {
+    marginTop: 20,
+    marginBottom: 100,
+    gap: 5,
+  },
   scrollContent: {
     padding: 20,
   },

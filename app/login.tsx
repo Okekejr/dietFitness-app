@@ -13,6 +13,8 @@ import {
   ActivityIndicator,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SecureStore from "expo-secure-store";
+import * as LocalAuthentication from "expo-local-authentication";
 import * as AuthSession from "expo-auth-session";
 import * as WebBrowser from "expo-web-browser";
 import { Ionicons } from "@expo/vector-icons";
@@ -21,7 +23,6 @@ import { API_URL } from "@/constants/apiUrl";
 import Divider from "@/components/ui/divider";
 import { useUserData } from "@/context/userDataContext";
 import CustomText from "@/components/ui/customText";
-import { useThemeColor } from "@/hooks/useThemeColor";
 
 // Open the browser session correctly (required for standalone apps)
 WebBrowser.maybeCompleteAuthSession();
@@ -46,18 +47,23 @@ const redirectUri = AuthSession.makeRedirectUri({
   scheme: "myapp",
 });
 
+interface loginProps {
+  email: string;
+  password: string;
+}
+
 export default function LoginScreen() {
+  const { userData } = useUserData();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isPasswordVisible, setPasswordVisible] = useState(false);
+  const [loginPassword, setLoginPassword] = useState(false);
   const emailInputRef = useRef<TextInput>(null);
   const passwordInputRef = useRef<TextInput>(null);
   const [errors, setErrors] = useState({ email: "", password: "" });
   const [isButtonDisabled, setButtonDisabled] = useState(true);
   const [loading, setLoading] = useState(false);
   const { refetchUserData } = useUserData();
-  const textColor = useThemeColor({}, "text");
-  const backgroundColor = useThemeColor({}, "background");
 
   const router = useRouter();
 
@@ -83,6 +89,44 @@ export default function LoginScreen() {
     return isValid;
   };
 
+  const handleLoginWithBiometrics = async () => {
+    try {
+      const biometricEnabled = await SecureStore.getItemAsync(
+        `biometricEnabled_${userData?.user_id}`
+      );
+
+      if (biometricEnabled === "true") {
+        const biometricAuth = await LocalAuthentication.authenticateAsync({
+          promptMessage: "Login with biometrics",
+          fallbackLabel: "Use password",
+          disableDeviceFallback: false,
+        });
+
+        if (biometricAuth.success) {
+          const storedEmail = await SecureStore.getItemAsync("biometric_email");
+          const storedPassword = await SecureStore.getItemAsync(
+            "biometric_password"
+          );
+
+          if (!storedEmail || !storedPassword) {
+            Alert.alert(
+              "Error",
+              "No biometric credentials found. Please login manually."
+            );
+            return;
+          }
+
+          await handleLogin({ email: storedEmail, password: storedPassword });
+        } else {
+          Alert.alert("Authentication Failed", "Biometric login unsuccessful.");
+        }
+      }
+    } catch (error) {
+      console.error("Biometric Login Error:", error);
+      Alert.alert("Error", "Biometric login failed.");
+    }
+  };
+
   // Helper function to check if the user exists
   const checkIfUserExists = async (userId: string) => {
     try {
@@ -106,8 +150,8 @@ export default function LoginScreen() {
     }
   };
 
-  const handleLogin = async () => {
-    if (!validateInputs()) return; // Ensure inputs are valid
+  const handleLogin = async ({ email, password }: loginProps) => {
+    if ((!validateInputs() && !email) || !password) return; // Ensure inputs are valid
 
     try {
       setLoading(true);
@@ -134,6 +178,16 @@ export default function LoginScreen() {
       console.log("User ID:", userId);
 
       if (!userId) throw new Error("User not found. Please sign up.");
+
+      // Save biometric credentials if enabled
+      const biometricEnabled = await SecureStore.getItemAsync(
+        `biometricEnabled_${userId}`
+      );
+
+      if (biometricEnabled === "true" && email && password) {
+        await SecureStore.setItemAsync("biometric_email", email);
+        await SecureStore.setItemAsync("biometric_password", password);
+      }
 
       await AsyncStorage.setItem("accessToken", userId);
       const storedToken = await AsyncStorage.getItem("accessToken");
@@ -203,85 +257,145 @@ export default function LoginScreen() {
             </TouchableOpacity>
           </View>
 
-          {/* Inputs with Labels */}
-          <View style={styles.inputContainer}>
-            <CustomText style={styles.label}>
-              Email
-            </CustomText>
-            <TextInput
-              ref={emailInputRef}
-              style={[styles.input, errors.email ? styles.errorInput : null]}
-              placeholder="Email Address"
-              placeholderTextColor="#c7c7c7"
-              value={email}
-              onChangeText={(text) => setEmail(text.trim())}
-              onSubmitEditing={() => passwordInputRef.current?.focus()}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
-            {errors.email ? (
-              <CustomText style={styles.errorText}>{errors.email}</CustomText>
-            ) : null}
-          </View>
+          {loginPassword || !userData?.name ? (
+            <>
+              {/* Inputs with Labels */}
+              <View style={styles.inputContainer}>
+                <CustomText style={styles.label}>Email</CustomText>
+                <TextInput
+                  ref={emailInputRef}
+                  style={[
+                    styles.input,
+                    errors.email ? styles.errorInput : null,
+                  ]}
+                  placeholder="Email Address"
+                  placeholderTextColor="#c7c7c7"
+                  value={email}
+                  onChangeText={(text) => setEmail(text.trim())}
+                  onSubmitEditing={() => passwordInputRef.current?.focus()}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                />
+                {errors.email ? (
+                  <CustomText style={styles.errorText}>
+                    {errors.email}
+                  </CustomText>
+                ) : null}
+              </View>
 
-          <View style={styles.inputContainer}>
-            <View style={styles.passwordstyle}>
-              <CustomText style={styles.passwordLabel}>Password</CustomText>
-              <TouchableOpacity onPress={() => router.push("/forgotPassword")}>
+              <View style={styles.inputContainer}>
+                <View style={styles.passwordstyle}>
+                  <CustomText style={styles.passwordLabel}>Password</CustomText>
+                  <TouchableOpacity
+                    onPress={() => router.push("/forgotPassword")}
+                  >
+                    <CustomText style={styles.signupLink}>
+                      Forgot password?
+                    </CustomText>
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.passwordInputContainer}>
+                  <TextInput
+                    ref={passwordInputRef}
+                    style={[
+                      styles.passwordInput,
+                      errors.password ? styles.errorInput : null,
+                    ]}
+                    placeholder="Password"
+                    placeholderTextColor="#c7c7c7"
+                    secureTextEntry={!isPasswordVisible}
+                    value={password}
+                    onChangeText={setPassword}
+                    onSubmitEditing={() =>
+                      handleLogin({
+                        email: email || "",
+                        password: password,
+                      })
+                    }
+                  />
+                  {/* Eye icon inside input */}
+                  <TouchableOpacity
+                    onPress={() => setPasswordVisible((prev) => !prev)}
+                  >
+                    <Ionicons
+                      name={isPasswordVisible ? "eye" : "eye-off"}
+                      size={24}
+                      color="gray"
+                      style={styles.eyeIcon}
+                    />
+                  </TouchableOpacity>
+                </View>
+                {errors.password ? (
+                  <CustomText style={styles.errorText}>
+                    {errors.password}
+                  </CustomText>
+                ) : null}
+              </View>
+
+              {/* Login Button */}
+              <TouchableOpacity
+                style={[
+                  styles.loginButton,
+                  isButtonDisabled && styles.disabledButton,
+                ]}
+                onPress={() =>
+                  handleLogin({
+                    email: email || "",
+                    password: password,
+                  })
+                }
+                disabled={loading}
+              >
+                {loading ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <CustomText style={styles.loginButtonText}>Log In</CustomText>
+                )}
+              </TouchableOpacity>
+            </>
+          ) : (
+            <View style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <CustomText style={styles.headerTitle}>
+                Welcome back {userData?.name}
+              </CustomText>
+
+              <TouchableOpacity
+                style={styles.loginButton}
+                onPress={() => handleLoginWithBiometrics()}
+              >
+                <View
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <CustomText
+                    style={[
+                      styles.loginButtonText,
+                      { flex: 1, paddingLeft: 30 },
+                    ]}
+                  >
+                    Log In
+                  </CustomText>
+                  <Ionicons
+                    name="finger-print-outline"
+                    size={20}
+                    color="#fff"
+                    style={{ marginRight: 10 }}
+                  />
+                </View>
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={() => setLoginPassword(true)}>
                 <CustomText style={styles.signupLink}>
-                  Forgot password?
+                  Login with password
                 </CustomText>
               </TouchableOpacity>
             </View>
-            <View style={styles.passwordInputContainer}>
-              <TextInput
-                ref={passwordInputRef}
-                style={[
-                  styles.passwordInput,
-                  errors.password ? styles.errorInput : null,
-                ]}
-                placeholder="Password"
-                placeholderTextColor="#c7c7c7"
-                secureTextEntry={!isPasswordVisible}
-                value={password}
-                onChangeText={setPassword}
-                onSubmitEditing={handleLogin}
-              />
-              {/* Eye icon inside input */}
-              <TouchableOpacity
-                onPress={() => setPasswordVisible((prev) => !prev)}
-              >
-                <Ionicons
-                  name={isPasswordVisible ? "eye" : "eye-off"}
-                  size={24}
-                  color="gray"
-                  style={styles.eyeIcon}
-                />
-              </TouchableOpacity>
-            </View>
-            {errors.password ? (
-              <CustomText style={styles.errorText}>
-                {errors.password}
-              </CustomText>
-            ) : null}
-          </View>
-
-          {/* Login Button */}
-          <TouchableOpacity
-            style={[
-              styles.loginButton,
-              isButtonDisabled && styles.disabledButton,
-            ]}
-            onPress={handleLogin}
-            disabled={loading}
-          >
-            {loading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <CustomText style={styles.loginButtonText}>Log In</CustomText>
-            )}
-          </TouchableOpacity>
+          )}
 
           <Divider text="OR" />
 
@@ -318,6 +432,11 @@ const styles = StyleSheet.create({
   headerText: {
     marginBottom: 30,
     fontSize: 20,
+    color: "#000",
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontFamily: "HostGrotesk-Medium",
     color: "#000",
   },
   passwordInput: {

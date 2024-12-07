@@ -191,7 +191,7 @@ export default function EditProfileScreen() {
             <Picker
               selectedValue={activityLevel}
               onValueChange={(value) => setActivityLevel(value)}
-              style={styles.picker}
+              style={[styles.picker, { backgroundColor: backgroundColor }]}
             >
               <Picker.Item label="Select your activity level" value="" />
               <Picker.Item

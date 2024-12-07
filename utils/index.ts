@@ -6,3 +6,4 @@ export * from "./validate";
 export * from "./authUtil";
 export * from "./achievements";
 export * from "./clubRoutes";
+export * from "./saveSettings";

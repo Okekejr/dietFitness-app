@@ -13,7 +13,7 @@ import { useThemeColor } from "@/hooks/useThemeColor";
 
 interface WorkoutCompCardProps {
   data: WorkoutsT[] | undefined;
-  cardLink: Href<string>;
+  cardLink: string;
   cardName: string;
   bgImgLink: ImageSourcePropType;
 }

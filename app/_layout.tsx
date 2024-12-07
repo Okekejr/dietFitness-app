@@ -9,6 +9,7 @@ import { UserDataProvider } from "@/context/userDataContext";
 import { Linking } from "react-native";
 import { ThemeProvider } from "@/context/userThemeContext";
 import CustomWrapper from "@/components/customWrapper";
+import { NavigationContainer } from "@react-navigation/native";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -65,19 +66,24 @@ export default function RootLayout() {
   }
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <UserProvider>
-          <UserDataProvider>
-            <CustomWrapper>
-              <Stack screenOptions={{ headerShown: false }}>
-                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                <Stack.Screen name="+not-found" />
-              </Stack>
-            </CustomWrapper>
-          </UserDataProvider>
-        </UserProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
+    <NavigationContainer>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider>
+          <UserProvider>
+            <UserDataProvider>
+              <CustomWrapper>
+                <Stack screenOptions={{ headerShown: false }}>
+                  <Stack.Screen
+                    name="(tabs)"
+                    options={{ headerShown: false }}
+                  />
+                  <Stack.Screen name="+not-found" />
+                </Stack>
+              </CustomWrapper>
+            </UserDataProvider>
+          </UserProvider>
+        </ThemeProvider>
+      </QueryClientProvider>
+    </NavigationContainer>
   );
 }

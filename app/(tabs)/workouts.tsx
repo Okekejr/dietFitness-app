@@ -298,7 +298,7 @@ const styles = StyleSheet.create({
   },
   scrollViewContent: {
     paddingHorizontal: 25,
-    paddingBottom: 75,
+    paddingBottom: 10,
   },
   modalOverlay: {
     flex: 1,
