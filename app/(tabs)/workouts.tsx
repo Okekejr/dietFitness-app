@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   StyleSheet,
@@ -23,12 +23,19 @@ import CustomText from "@/components/ui/customText";
 import { useWorkoutQueries } from "@/hooks/useWorkoutQueries";
 import { workoutCardsConfigT } from "@/utils";
 import { useThemeColor } from "@/hooks/useThemeColor";
+import {
+  CategoriesSkeleton,
+  SearchBarSkeleton,
+  WorkoutCardSkeleton,
+  WorkoutCompSkeleton,
+} from "../../components/skeletonLoader";
 
 export default function WorkoutsScreen() {
   const { userData } = useUserData();
   const router = useRouter();
   const textColor = useThemeColor({}, "text");
   const backgroundColor = useThemeColor({}, "background");
+  const [showComp, setShowComp] = useState(true);
 
   const {
     categories,
@@ -93,6 +100,14 @@ export default function WorkoutsScreen() {
       fetchData();
     }, [])
   );
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setShowComp(false);
+    }, 3000);
+
+    return () => clearTimeout(timeout);
+  }, [showComp]);
 
   // Handle search text change and filter workouts
   const handleSearch = (text: string) => {
@@ -228,62 +243,94 @@ export default function WorkoutsScreen() {
       </Modal>
 
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
-        <View style={styles.searchInputContainer}>
-          <TouchableOpacity onPress={openSearchModal}>
-            <Ionicons
-              name="search-outline"
-              size={17}
-              color="#000"
-              style={styles.eyeIcon}
-            />
-          </TouchableOpacity>
+        {showComp ? (
+          <SearchBarSkeleton />
+        ) : (
+          <View style={styles.searchInputContainer}>
+            <TouchableOpacity onPress={openSearchModal}>
+              <Ionicons
+                name="search-outline"
+                size={17}
+                color="#000"
+                style={styles.eyeIcon}
+              />
+            </TouchableOpacity>
 
-          <TextInput
-            ref={normalInputRef}
-            placeholder="Search"
-            placeholderTextColor="#777"
-            style={styles.searchInput}
-            onPress={openSearchModal}
+            <TextInput
+              ref={normalInputRef}
+              placeholder="Search"
+              placeholderTextColor="#777"
+              style={styles.searchInput}
+              onPress={openSearchModal}
+            />
+          </View>
+        )}
+
+        {showComp ? (
+          <View style={styles.featContainer}>
+            {[...Array(3)].map((_, index) => (
+              <WorkoutCardSkeleton key={index} />
+            ))}
+          </View>
+        ) : (
+          <FeaturedWorkoutsComp
+            clearCache={clearCache}
+            featuredWorkouts={featWorkouts}
+            fetchFeaturedWorkouts={fetchFeaturedWorkouts}
           />
-        </View>
-        {/* Featured Workouts */}
-        <FeaturedWorkoutsComp
-          clearCache={clearCache}
-          featuredWorkouts={featWorkouts}
-          fetchFeaturedWorkouts={fetchFeaturedWorkouts}
-        />
+        )}
 
         {/* Categories Section */}
-        <View style={styles.header}>
-          <CustomText style={[styles.heading, { color: textColor }]}>
-            Browse by Category
-          </CustomText>
-        </View>
-        {categories.map((category: CategoryT) => (
-          <CategoriesComp key={category.id} category={category} />
-        ))}
+        {showComp ? (
+          <>
+            {[...Array(3)].map((_, index) => (
+              <CategoriesSkeleton key={index} />
+            ))}
+          </>
+        ) : (
+          <>
+            <View style={styles.header}>
+              <CustomText style={[styles.heading, { color: textColor }]}>
+                Browse by Category
+              </CustomText>
+            </View>
+            {categories.map((category: CategoryT) => (
+              <CategoriesComp key={category.id} category={category} />
+            ))}
+          </>
+        )}
 
-        <View style={styles.header}>
-          <CustomText style={[styles.heading, { color: textColor }]}>
-            Your Workouts
-          </CustomText>
-        </View>
+        {showComp ? (
+          <View style={styles.cardsRow}>
+            {[...Array(3)].map((_, index) => (
+              <WorkoutCompSkeleton key={index} />
+            ))}
+          </View>
+        ) : (
+          <>
+            <View style={styles.header}>
+              <CustomText style={[styles.heading, { color: textColor }]}>
+                Your Workouts
+              </CustomText>
+            </View>
 
-        <FlatList
-          data={workoutCardsConfig}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          keyExtractor={(item) => item.key}
-          renderItem={({ item }) => (
-            <WorkoutCompCard
-              data={item.data} // Use fetched workout data here
-              cardName={item.cardName}
-              bgImgLink={item.bgImgLink}
-              cardLink={item.cardLink}
+            <FlatList
+              data={workoutCardsConfig}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              keyExtractor={(item) => item.key}
+              renderItem={({ item }) => (
+                <WorkoutCompCard
+                  data={item.data} // Use fetched workout data here
+                  cardName={item.cardName}
+                  bgImgLink={item.bgImgLink}
+                  cardLink={item.cardLink}
+                />
+              )}
+              contentContainerStyle={styles.cardsRow}
             />
-          )}
-          contentContainerStyle={styles.cardsRow}
-        />
+          </>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -296,6 +343,7 @@ const styles = StyleSheet.create({
   header: {
     marginVertical: 20,
   },
+  featContainer: { marginTop: 20 },
   scrollViewContent: {
     paddingHorizontal: 25,
     paddingBottom: 10,

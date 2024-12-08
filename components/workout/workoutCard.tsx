@@ -179,7 +179,6 @@ const styles = StyleSheet.create({
     fontFamily: "HostGrotesk-Medium",
     marginBottom: 4,
   },
-
   completedContainer: {
     flexDirection: "row",
     alignItems: "center",
