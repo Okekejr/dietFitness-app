@@ -18,8 +18,8 @@ import CustomText from "@/components/ui/customText";
 import * as Haptics from "expo-haptics";
 import { useHomeQueries } from "@/hooks/useHomeQueries";
 import { calculateDaysBetweenDates } from "@/utils";
-import { Ionicons } from "@expo/vector-icons";
 import { useThemeColor } from "@/hooks/useThemeColor";
+import { RenderDayButton, daysOfWeek } from "@/components/homeComps/daybutton";
 
 const CARD_WIDTH = 200;
 
@@ -98,60 +98,6 @@ export default function HomeScreen() {
     });
   };
 
-  const renderDayButton = (day: number) => {
-    // Find the schedule for the selected day
-    const itemsForDay = schedule.find((item) => item.day === day);
-
-    // Check if there's no workout or diet for the day
-    const isRestDay =
-      !itemsForDay ||
-      (itemsForDay.workouts.length === 0 && itemsForDay.diets.length === 0);
-
-    // Count workouts and meals
-    const workoutCount = itemsForDay ? itemsForDay.workouts.length : 0;
-    const mealCount = itemsForDay ? itemsForDay.diets.length : 0;
-
-    return (
-      <TouchableOpacity
-        key={day}
-        onPress={() => {
-          Haptics.selectionAsync();
-          handleDaySelect(day);
-        }}
-        style={[
-          styles.calendarCard,
-          selectedDay === day && styles.selectedCalendarCard,
-        ]}
-      >
-        <View style={styles.dayInfoContainer}>
-          <View
-            style={[
-              styles.borderIndicator,
-              { backgroundColor: day === selectedDay ? "green" : "#E0E0E0" },
-            ]}
-          />
-          <CustomText style={styles.dayText}>Day {day}</CustomText>
-        </View>
-
-        {/* Short Info: Display workout and meal counts */}
-        {!isRestDay && (
-          <View style={styles.summaryContainer}>
-            <CustomText style={styles.summaryText}>
-              Today:
-              {"\n"}• {workoutCount} workout{workoutCount !== 1 && "s"}
-              {"\n"}• {mealCount} meal{mealCount !== 1 && "s"}
-            </CustomText>
-          </View>
-        )}
-
-        {/* If no workout or diet for the day */}
-        {isRestDay && (
-          <CustomText style={styles.restDayText}>Rest day</CustomText>
-        )}
-      </TouchableOpacity>
-    );
-  };
-
   const renderWorkout = ({ item }: { item: AssignedWorkoutT }) => {
     return (
       <TouchableOpacity
@@ -185,7 +131,7 @@ export default function HomeScreen() {
 
   const renderDiet = ({ item }: { item: AssignedDietT }) => {
     if (!item.diet) {
-      return null; // or return a placeholder component if needed
+      return null;
     }
 
     return (
@@ -265,7 +211,15 @@ export default function HomeScreen() {
           ref={scrollViewRef}
           contentContainerStyle={styles.calendar}
         >
-          {[1, 2, 3, 4, 5, 6, 7].map(renderDayButton)}
+          {daysOfWeek.map((day) => (
+            <RenderDayButton
+              key={day}
+              day={day}
+              schedule={schedule}
+              handleDaySelect={handleDaySelect}
+              selectedDay={selectedDay}
+            />
+          ))}
         </ScrollView>
 
         {/* Workouts for Selected Day */}
@@ -331,11 +285,6 @@ const styles = StyleSheet.create({
     color: "#000",
     fontFamily: "HostGrotesk-Medium",
   },
-  dayInfoContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 10,
-  },
   dietCard: {
     display: "flex",
     flexDirection: "column",
@@ -368,11 +317,6 @@ const styles = StyleSheet.create({
     fontFamily: "HostGrotesk-Medium",
     marginVertical: 10,
   },
-  borderIndicator: {
-    width: 2,
-    height: "100%",
-    marginRight: 7,
-  },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
@@ -390,25 +334,6 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     gap: 10,
   },
-  calendarCard: {
-    width: CARD_WIDTH,
-    height: 200,
-    padding: 15,
-    borderWidth: 1,
-    borderColor: "#c7c7c7",
-    borderRadius: 15,
-    backgroundColor: "#fff",
-    elevation: 3,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 5 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    justifyContent: "space-between",
-  },
-  selectedCalendarCard: {
-    backgroundColor: "#E6F7E8",
-    borderColor: "#4CAF50",
-  },
   dayButton: {
     marginHorizontal: 5,
     padding: 10,
@@ -418,21 +343,12 @@ const styles = StyleSheet.create({
   selectedDayButton: {
     backgroundColor: "#4CAF50",
   },
-  restDayText: {
-    fontSize: 14,
-    color: "#A0A0A0",
-    fontFamily: "HostGrotesk-LightItalic",
-  },
   workoutListContainer: {
     marginVertical: 20,
   },
   heading: {
     fontSize: 22,
     fontFamily: "HostGrotesk-Medium",
-  },
-  dayText: {
-    fontSize: 16,
-    fontWeight: "bold",
   },
   workoutName: {
     fontSize: 18,
@@ -457,15 +373,6 @@ const styles = StyleSheet.create({
     marginVertical: 5,
     backgroundColor: "#e0e0e0",
     borderRadius: 15,
-  },
-  summaryContainer: {
-    marginTop: 10,
-    paddingHorizontal: 10,
-  },
-  summaryText: {
-    fontSize: 16,
-    color: "#333",
-    fontWeight: "bold",
   },
   streakText: {
     fontSize: 18,

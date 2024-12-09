@@ -6,14 +6,11 @@ export const WorkoutCardSkeleton = () => {
   return (
     <SkeletonLoading background="#d3d3d3" highlight="#e8e8e8">
       <View style={styles.workoutCard}>
-        {/* Skeleton for image */}
         <View style={styles.workoutImage} />
 
         <View style={styles.workoutInfo}>
-          {/* Skeleton for workout name */}
           <View style={styles.workoutName} />
 
-          {/* Skeleton for inner info */}
           <View style={styles.innerInfo}>
             <View style={styles.textShort} />
             <View style={styles.textShort} />

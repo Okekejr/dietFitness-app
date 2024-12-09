@@ -28,7 +28,7 @@ import {
   SearchBarSkeleton,
   WorkoutCardSkeleton,
   WorkoutCompSkeleton,
-} from "../../components/skeletonLoader";
+} from "../../components/skeletonLoader/workout";
 
 export default function WorkoutsScreen() {
   const { userData } = useUserData();
@@ -104,7 +104,7 @@ export default function WorkoutsScreen() {
   useEffect(() => {
     const timeout = setTimeout(() => {
       setShowComp(false);
-    }, 3000);
+    }, 1200);
 
     return () => clearTimeout(timeout);
   }, [showComp]);
