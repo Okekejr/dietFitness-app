@@ -20,6 +20,7 @@ import { useThemeColor } from "@/hooks/useThemeColor";
 import ColorSwitcher from "@/components/profile/colorSwitcher";
 import { BiometricSwitcher } from "@/components/profile/biometricSwitcher";
 import { useProfile } from "@/hooks/useProfile";
+import { DeleteAccount } from "@/components/profile/deleteAccount";
 
 const { width } = Dimensions.get("window");
 
@@ -28,6 +29,7 @@ export default function ProfileScreen() {
   const backgroundColor = useThemeColor({}, "background");
   const textColor = useThemeColor({}, "text");
   const { userData, refetchUserData } = useUserData();
+
   const {
     openModal,
     handleSignOut,
@@ -163,6 +165,7 @@ export default function ProfileScreen() {
                         bioMetricLoading={bioMetricLoading}
                         biometricError={biometricError}
                       />
+                      <DeleteAccount userId={userData?.user_id} />
                     </View>
                   </>
                 )}

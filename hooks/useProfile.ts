@@ -58,7 +58,6 @@ export const useProfile = ({ userData }: userProfileT) => {
         onPress: async () => {
           try {
             await SuperTokens.signOut();
-            Alert.alert("Signed Out", "You have been signed out successfully.");
 
             // Redirect to the login page
             router.replace("/login");
@@ -112,6 +111,7 @@ export const useProfile = ({ userData }: userProfileT) => {
     setModalVisible(true);
     content && setModalContent(content);
   };
+
   const closeModal = () => setModalVisible(false);
 
   return {

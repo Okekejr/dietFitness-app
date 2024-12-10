@@ -18,8 +18,12 @@ export interface UserDataT {
   profile_picture?: string;
   current_workout_week: number;
   week_start_date: string;
+  last_activity_date: Date;
   streak: number;
   diet_plan: DietPlanEntity[];
+  biometric_enabled: boolean;
+  is_deleted: boolean;
+  deleted_at: Date;
 }
 
 export interface WorkoutBreakdownT {

@@ -257,7 +257,8 @@ export default function LoginScreen() {
             </TouchableOpacity>
           </View>
 
-          {loginPassword || !userData?.name ? (
+          {loginPassword ||
+          (!userData?.biometric_enabled && userData?.is_deleted) ? (
             <>
               {/* Inputs with Labels */}
               <View style={styles.inputContainer}>

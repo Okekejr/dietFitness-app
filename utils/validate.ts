@@ -4,5 +4,17 @@ export const validateEmail = (email: string) => {
 };
 
 export const validatePassword = (password: string) => {
-  return password.length >= 6; // Example: Require at least 6 characters
+  const lengthCriteria = password.length >= 6;
+  const uppercaseCriteria = /[A-Z]/.test(password);
+  const lowercaseCriteria = /[a-z]/.test(password);
+  const numberCriteria = /[0-9]/.test(password);
+  const specialCharCriteria = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+  return (
+    lengthCriteria &&
+    uppercaseCriteria &&
+    lowercaseCriteria &&
+    numberCriteria &&
+    specialCharCriteria
+  );
 };

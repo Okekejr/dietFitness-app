@@ -74,7 +74,7 @@ export default function SignupScreen() {
     const emailError = validateEmail(email) ? "" : "Invalid email format.";
     const passwordError = validatePassword(password)
       ? ""
-      : "Password must be at least 6 characters.";
+      : "Password must be at least 6 characters long, include uppercase, lowercase, a number, and a special character.";
     const confirmError =
       password === confirmPassword ? "" : "Passwords do not match.";
 
@@ -193,11 +193,6 @@ export default function SignupScreen() {
                 />
               </TouchableOpacity>
             </View>
-            {errors.password ? (
-              <CustomText style={styles.errorText}>
-                {errors.password}
-              </CustomText>
-            ) : null}
           </View>
 
           {/* Confirm Password Input */}
@@ -225,11 +220,18 @@ export default function SignupScreen() {
                 />
               </TouchableOpacity>
             </View>
-            {errors.confirmPassword ? (
+            {errors.password ? (
               <CustomText style={styles.errorText}>
-                {errors.confirmPassword}
+                {errors.password}
               </CustomText>
-            ) : null}
+            ) : (
+              <CustomText style={styles.helperText}>
+                Password must include:
+                {"\n"}- At least 6 characters
+                {"\n"}- Uppercase and lowercase letters
+                {"\n"}- A number and a special character
+              </CustomText>
+            )}
           </View>
 
           {/* sign in Button */}
@@ -351,5 +353,10 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginTop: 10,
     backgroundColor: "#000",
+  },
+  helperText: {
+    color: "#6B7280",
+    marginTop: 5,
+    fontSize: 12,
   },
 });
