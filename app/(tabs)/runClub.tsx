@@ -70,7 +70,7 @@ const ClubScreen = () => {
   // Open Image Picker to select a club logo
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: "images",
       allowsEditing: true,
       quality: 0.8,
     });
@@ -148,8 +148,6 @@ const ClubScreen = () => {
       alert("Please fill in all fields");
       return;
     }
-
-    console.log(name, description, location, maxMembers);
 
     setLoading(true);
     createClubMutation.mutate();

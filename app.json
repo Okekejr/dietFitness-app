@@ -41,7 +41,11 @@
       "expo-font",
       "expo-secure-store",
       "expo-router",
-      "expo-video"
+      "expo-video",
+      "expo-image-picker",
+      {
+        "photosPermission": "The app accesses your photos to let you upload profile pictures."
+      }
     ]
   },
   "web": {

@@ -43,10 +43,11 @@ const ClubHomeScreen = () => {
     distance,
     region,
     estimatedTime,
-    setRegion,
     locationNames,
     saveRoute,
     handleMapPress,
+    handleRegionChangeComplete,
+    searching,
     polylineCoords,
     selectedCard,
     setSelectedCard,
@@ -323,8 +324,8 @@ const ClubHomeScreen = () => {
         <View style={styles.mapContainer}>
           <MapView
             style={StyleSheet.absoluteFillObject}
-            region={latestRegion ? latestRegion : region}
-            onRegionChangeComplete={(newRegion) => setRegion(newRegion)}
+            region={searching ? region : latestRegion || region}
+            onRegionChangeComplete={handleRegionChangeComplete}
             onPress={isLeader?.isLeader ? handleMapPress : () => null}
             showsUserLocation={true} // Display user's location on the map
             zoomEnabled={true}

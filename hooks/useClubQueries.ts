@@ -8,7 +8,7 @@ import {
   isLeader,
 } from "@/types";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { SetStateAction, useEffect, useState } from "react";
 import * as Location from "expo-location";
 import { decodePolyline } from "@/utils";
 import { Alert } from "react-native";
@@ -36,6 +36,7 @@ export const useClubQueries = ({ id, userData }: QueryType) => {
   const [distance, setDistance] = useState<number | null>(null);
   const [estimatedTime, setEstimatedTime] = useState("");
   const [savedRoute, setSavedRoutes] = useState(false);
+  const [searching, setSearching] = useState(false);
   const [region, setRegion] = useState({
     latitude: 25.686613,
     longitude: -100.316116,
@@ -125,6 +126,7 @@ export const useClubQueries = ({ id, userData }: QueryType) => {
   }, []);
 
   const handleSearchLocation = async () => {
+    setSearching(true);
     try {
       const response = await fetch(
         `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(
@@ -281,6 +283,20 @@ export const useClubQueries = ({ id, userData }: QueryType) => {
     });
   };
 
+  const handleRegionChangeComplete = (
+    newRegion: SetStateAction<{
+      latitude: number;
+      longitude: number;
+      latitudeDelta: number;
+      longitudeDelta: number;
+    }>
+  ) => {
+    // Only update if not searching
+    if (!searching) {
+      setRegion(newRegion);
+    }
+  };
+
   const resetHandler = () => {
     setRoute({ pointA: null, pointB: null });
     setPolylineCoords([]);
@@ -314,6 +330,8 @@ export const useClubQueries = ({ id, userData }: QueryType) => {
     clubLoading,
     isLeader,
     searchQuery,
+    handleRegionChangeComplete,
+    searching,
     setSearchQuery,
     handleSearchLocation,
     club,
