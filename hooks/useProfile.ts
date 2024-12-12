@@ -55,6 +55,7 @@ export const useProfile = ({ userData }: userProfileT) => {
       { text: "Cancel", style: "cancel" }, // Cancel action
       {
         text: "Sign Out",
+        style: "destructive",
         onPress: async () => {
           try {
             await SuperTokens.signOut();

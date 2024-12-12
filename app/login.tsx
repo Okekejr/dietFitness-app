@@ -258,7 +258,10 @@ export default function LoginScreen() {
           </View>
 
           {loginPassword ||
-          (!userData?.biometric_enabled && userData?.is_deleted) ? (
+          !userData ||
+          !userData?.name ||
+          !userData?.biometric_enabled ||
+          userData?.is_deleted ? (
             <>
               {/* Inputs with Labels */}
               <View style={styles.inputContainer}>

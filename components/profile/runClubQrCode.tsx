@@ -17,6 +17,7 @@ interface RunClubQRCodeT {
   clubData: ClubData | undefined;
   handleShare: () => Promise<void>;
   isSharing: boolean;
+  closeModal: () => void;
 }
 
 export const RunClubQrCode: FC<RunClubQRCodeT> = ({
@@ -24,6 +25,7 @@ export const RunClubQrCode: FC<RunClubQRCodeT> = ({
   clubData,
   handleShare,
   isSharing,
+  closeModal,
 }) => {
   const router = useRouter();
   const textColor = useThemeColor({}, "text");
@@ -64,10 +66,13 @@ export const RunClubQrCode: FC<RunClubQRCodeT> = ({
           </CustomText>
           <TouchableOpacity
             style={styles.loginButton}
-            onPress={() => router.push("/runClub")}
+            onPress={() => {
+              closeModal();
+              router.push("/runClub");
+            }}
           >
             <CustomText style={[styles.loginButtonText, { color: textColor }]}>
-              Explore Workouts
+              Create or join a Club
             </CustomText>
           </TouchableOpacity>
         </View>

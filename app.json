@@ -42,10 +42,7 @@
       "expo-secure-store",
       "expo-router",
       "expo-video",
-      "expo-image-picker",
-      {
-        "photosPermission": "The app accesses your photos to let you upload profile pictures."
-      }
+      "expo-image-picker"
     ]
   },
   "web": {

@@ -6,6 +6,7 @@ import { format } from "date-fns";
 import { CompletedWorkout } from "@/types";
 import Divider from "../ui/divider";
 import CustomText from "../ui/customText";
+import { useThemeColor } from "@/hooks/useThemeColor";
 
 interface PastWorkoutsProps {
   completedWorkouts: CompletedWorkout[];
@@ -13,11 +14,12 @@ interface PastWorkoutsProps {
 
 const PastWorkouts: FC<PastWorkoutsProps> = ({ completedWorkouts }) => {
   const router = useRouter();
+  const textColor = useThemeColor({}, "text");
 
   if (completedWorkouts.length === 0) {
     return (
       <View style={styles.center}>
-        <CustomText style={styles.description}>
+        <CustomText style={[styles.description, { color: textColor }]}>
           You haven't completed any workouts yet.
         </CustomText>
       </View>

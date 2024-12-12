@@ -152,6 +152,7 @@ export default function ProfileScreen() {
                     clubData={clubData}
                     handleShare={handleShare}
                     isSharing={isSharing}
+                    closeModal={closeModal}
                   />
                 )}
 

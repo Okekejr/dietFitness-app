@@ -8,7 +8,7 @@ const useStreak = (userId: string) => {
     if (!userId) return;
 
     try {
-      const todayDate = new Date().toISOString().split("T")[0];
+      const currentDate = new Date();
       const response = await fetch(
         `${API_URL}/api/user/streak?userId=${userId}`
       );
@@ -17,26 +17,38 @@ const useStreak = (userId: string) => {
       if (!response.ok) throw new Error(data.error);
 
       const { streak: serverStreak, lastActivityDate } = data;
+      const lastActivity = new Date(lastActivityDate);
+      const timeDifference = currentDate.getTime() - lastActivity.getTime();
 
-      // Update streak if necessary
-      const dayDifference = Math.floor(
-        (new Date(todayDate).getTime() - new Date(lastActivityDate).getTime()) /
-          (1000 * 60 * 60 * 24)
-      );
+      // Calculate the difference in full days
+      const dayDifference = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
 
-      if (dayDifference >= 1) {
-        // Update streak on the server
+      if (dayDifference >= 2) {
+        // User missed a day; reset the streak
+        const resetResponse = await fetch(`${API_URL}/api/user/resetStreak`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId }),
+        });
+        const resetData = await resetResponse.json();
+
+        if (!resetResponse.ok) throw new Error(resetData.error);
+
+        setStreak(0); // Reset streak to 0
+      } else if (dayDifference >= 1) {
+        // Update streak for a new day
         const updateResponse = await fetch(`${API_URL}/api/user/updateStreak`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId, todayDate }),
+          body: JSON.stringify({ userId }),
         });
         const updatedData = await updateResponse.json();
 
         if (!updateResponse.ok) throw new Error(updatedData.error);
 
-        setStreak(updatedData.streak);
+        setStreak(updatedData.streak); // Update streak from server
       } else {
+        // No update needed, just set the current streak
         setStreak(serverStreak);
       }
     } catch (error) {
