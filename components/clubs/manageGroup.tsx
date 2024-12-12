@@ -18,6 +18,8 @@ import {
 } from "@tanstack/react-query";
 import { API_URL } from "@/constants/apiUrl";
 import { ClubMembersT } from "@/types";
+import { useUserData } from "@/context/userDataContext";
+import { useRouter } from "expo-router";
 
 interface ManageGroupCardProps {
   onBack: () => void;
@@ -60,6 +62,8 @@ const ManageGroupCard: React.FC<ManageGroupCardProps> = ({
   isLeader,
 }) => {
   const queryClient = useQueryClient();
+  const { userData } = useUserData();
+  const router = useRouter();
 
   const {
     data: clubMembers,
@@ -80,8 +84,13 @@ const ManageGroupCard: React.FC<ManageGroupCardProps> = ({
   > = useMutation({
     mutationFn: deleteClubMember,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["clubMembers", clubId] }); // Refresh data
-      Alert.alert("Success", "User removed successfully.");
+      queryClient.invalidateQueries({
+        queryKey: ["userClub", userData?.user_id],
+      });
+      queryClient.invalidateQueries({ queryKey: ["clubMembers", clubId] });
+      router.push({
+        pathname: `/`,
+      });
     },
     onError: () => {
       Alert.alert("Error", "Failed to remove user.");
@@ -90,21 +99,27 @@ const ManageGroupCard: React.FC<ManageGroupCardProps> = ({
 
   const handleDelete = (userId: string, userName: string) => {
     // Show confirmation alert before proceeding with deletion
-    Alert.alert("Confirm", `Are you sure you want to remove ${userName}?`, [
-      { text: "Cancel", style: "cancel" }, // Cancel action
-      {
-        text: "Remove",
-        onPress: () => {
-          deleteMemberMutation.mutate({
-            clubId, // clubId passed from props
-            userId: userId, // userId of the member to be removed
-          });
+    Alert.alert(
+      "Confirm",
+      isLeader
+        ? `Are you sure you want to remove ${userName}?`
+        : `Are you sure you want to leave the group?`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: isLeader ? "Remove" : "Leave",
+          style: "destructive",
+          onPress: () => {
+            deleteMemberMutation.mutate({
+              clubId,
+              userId: userId,
+            });
+          },
         },
-      },
-    ]);
+      ]
+    );
   };
 
-  // Loading and error states
   if (isLoading) {
     return <ActivityIndicator size="large" color="#0000ff" />;
   }
@@ -158,6 +173,13 @@ const ManageGroupCard: React.FC<ManageGroupCardProps> = ({
                       size={24}
                       color="#FF0000"
                     />
+                  </TouchableOpacity>
+                )}
+                {!isLeader && !member.is_leader && (
+                  <TouchableOpacity
+                    onPress={() => handleDelete(member.user_id, member.name)}
+                  >
+                    <Ionicons name="exit-outline" size={24} color="#FF0000" />
                   </TouchableOpacity>
                 )}
               </View>

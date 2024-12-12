@@ -366,11 +366,11 @@ const ClubHomeScreen = () => {
         </View>
       )}
 
-      {!isLeader?.isLeader && latestRegion && (
+      {!isLeader?.isLeader && (
         <View style={styles.mapContainer}>
           <MapView
             style={StyleSheet.absoluteFillObject}
-            region={follow ? undefined : latestRegion} // Center the map on the calculated region
+            region={follow ? undefined : latestRegion || region} // Center the map on the calculated region
             onRegionChangeComplete={(newRegion) => setLatestRegion(newRegion)}
             onPress={() => null}
             showsUserLocation={true} // Display user's location on the map

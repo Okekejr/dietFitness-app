@@ -1,21 +1,35 @@
-import CustomText from "@/components/ui/customText";
+import React, { useState, useEffect } from "react";
+import { View, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
-import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import CustomText from "@/components/ui/customText";
 
 const WelcomeScreen = () => {
   const router = useRouter();
+  const [typedText, setTypedText] = useState("");
+
+  const fullText = "FitLife";
+
+  useEffect(() => {
+    let currentIndex = 0;
+    const intervalId = setInterval(() => {
+      if (currentIndex < fullText.length) {
+        setTypedText(fullText.slice(0, currentIndex + 1));
+        currentIndex++;
+      } else {
+        clearInterval(intervalId);
+
+        setTimeout(() => {
+          router.push("/login");
+        }, 1000);
+      }
+    }, 200);
+
+    return () => clearInterval(intervalId);
+  }, []);
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Welcome to My App</Text>
-      <Text style={styles.subtitle}>Your fitness journey starts here!</Text>
-      <TouchableOpacity
-        style={styles.loginButton}
-        onPress={() => router.replace({ pathname: "/login" })}
-      >
-        <CustomText style={styles.loginButtonText}>Get Started</CustomText>
-      </TouchableOpacity>
+      <CustomText style={styles.animatedText}>{typedText}</CustomText>
     </View>
   );
 };
@@ -25,31 +39,18 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "#000",
+    padding: 20,
   },
-  title: {
-    fontSize: 24,
+  animatedText: {
+    fontFamily: "BagelFatOne-Regular",
+    fontSize: 55,
+    color: "#4F46E5",
     fontWeight: "bold",
     marginBottom: 20,
   },
-  subtitle: {
-    fontSize: 16,
-    color: "#555",
-    textAlign: "center",
-    marginBottom: 30,
-  },
-  loginButton: {
-    backgroundColor: "#4F46E5",
-    paddingVertical: 15,
-    borderRadius: 5,
-    marginTop: 10,
-    paddingHorizontal: 20,
-  },
-  loginButtonText: {
-    color: "#fff",
-    textAlign: "center",
-    fontSize: 16,
-  },
 });
+
+// monterrey
 
 export default WelcomeScreen;

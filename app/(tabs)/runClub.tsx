@@ -13,6 +13,7 @@ import {
   useMutation,
   UseMutationResult,
   useQuery,
+  useQueryClient,
 } from "@tanstack/react-query";
 import { useUserData } from "@/context/userDataContext";
 import { CreateClub } from "@/components/clubs/createClub";
@@ -28,7 +29,6 @@ const ClubScreen = () => {
   const [location, setLocation] = useState<string>("");
   const [logoFile, setLogoFile] = useState<any>(null);
   const [maxMembers, setMaxMembers] = useState<number | null>(null);
-  const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [joinModalVisible, setJoinModalVisible] = useState(false);
   const [createdClub, setCreatedClub] = useState<ClubData | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -36,11 +36,7 @@ const ClubScreen = () => {
   const [createModalVisible, setCreateModalVisible] = useState(false);
   const router = useRouter();
 
-  const {
-    data: userClub,
-    isLoading,
-    isError,
-  } = useQuery({
+  const { data: userClub } = useQuery({
     queryKey: ["userClub", userData?.user_id],
     queryFn: async () => {
       const response = await fetch(
@@ -118,7 +114,7 @@ const ClubScreen = () => {
         try {
           if (!userData) throw new Error("Error adding member");
           // Add creator to the club_members table
-          await fetch(`${API_URL}/api/clubs/addMember`, {
+          const addMember = await fetch(`${API_URL}/api/clubs/addMember`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -128,10 +124,10 @@ const ClubScreen = () => {
             }),
           });
 
-          setCreatedClub(data);
-          setCreateModalVisible(false);
-          setModalVisible(true);
-          setLoading(false);
+          if (addMember.ok) {
+            setCreatedClub(data);
+            setLoading(false);
+          }
         } catch (error) {
           Alert.alert("Error", "Failed to add user as club member.");
           setLoading(false);
@@ -152,6 +148,8 @@ const ClubScreen = () => {
     setLoading(true);
     createClubMutation.mutate();
   };
+
+  // Monterrey
 
   const handleJoinClub = () => {
     setJoinModalVisible(true);
@@ -200,11 +198,10 @@ const ClubScreen = () => {
         description={description}
         setDescription={setDescription}
         setMaxMembers={setMaxMembers}
+        maxMembers={maxMembers}
         name={name}
         setName={setName}
         handleCreateClub={handleCreateClub}
-        modalVisible={modalVisible}
-        setModalVisible={setModalVisible}
         createdClub={createdClub}
       />
 

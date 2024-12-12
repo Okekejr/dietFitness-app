@@ -34,7 +34,7 @@ const useStreak = (userId: string) => {
 
         if (!resetResponse.ok) throw new Error(resetData.error);
 
-        setStreak(0); // Reset streak to 0
+        setStreak(1); // Reset streak to 0
       } else if (dayDifference >= 1) {
         // Update streak for a new day
         const updateResponse = await fetch(`${API_URL}/api/user/updateStreak`, {

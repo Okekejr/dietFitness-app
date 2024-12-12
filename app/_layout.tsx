@@ -24,6 +24,7 @@ export default function RootLayout() {
     "HostGrotesk-LightItalic": require("../assets/fonts/HostGrotesk-LightItalic.ttf"),
     "HostGrotesk-Medium": require("../assets/fonts/HostGrotesk-Medium.ttf"),
     "HostGrotesk-Regular": require("../assets/fonts/HostGrotesk-Regular.ttf"),
+    "BagelFatOne-Regular": require("../assets/fonts/BagelFatOne-Regular.ttf"),
   });
 
   const router = useRouter();

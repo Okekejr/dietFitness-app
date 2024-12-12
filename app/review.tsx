@@ -7,6 +7,7 @@ import {
   Alert,
   ScrollView,
   SafeAreaView,
+  Linking,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -129,6 +130,29 @@ export default function ReviewScreen() {
           </CustomText>
         </View>
 
+        {/* Disclaimer */}
+        <View style={styles.disclaimerContainer}>
+          <CustomText style={styles.disclaimerText}>
+            We'd like this information to provide more accurate results, such as{" "}
+            <CustomText style={styles.boldText}>
+              run distance, pace, and calories
+            </CustomText>
+            . For coaching plans, this information, in addition to your age,
+            helps{" "}
+            <CustomText style={styles.boldText}>
+              personalise your plan
+            </CustomText>{" "}
+            to be right for you.{" "}
+            <CustomText
+              style={styles.linkText}
+              onPress={() => Linking.openURL("https://example.com/learn-more")}
+            >
+              Learn More
+            </CustomText>
+            .
+          </CustomText>
+        </View>
+
         {/* Submit Button */}
         <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
           <CustomText style={styles.buttonText}>Submit</CustomText>
@@ -192,5 +216,26 @@ const styles = StyleSheet.create({
     color: "#fff",
     textAlign: "center",
     fontSize: 16,
+  },
+  disclaimerContainer: {
+    backgroundColor: "#f0f4f8",
+    borderLeftWidth: 4,
+    borderLeftColor: "#3b82f6",
+    padding: 10,
+    marginVertical: 10,
+    borderRadius: 6,
+  },
+  disclaimerText: {
+    fontSize: 14,
+    color: "#4b5563",
+  },
+  boldText: {
+    fontWeight: "600",
+    color: "#111827",
+  },
+  linkText: {
+    color: "#3b82f6",
+    textDecorationLine: "underline",
+    fontWeight: "500",
   },
 });
