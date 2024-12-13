@@ -1,15 +1,16 @@
 import CustomText from "@/components/ui/customText";
 import { useThemeColor } from "@/hooks/useThemeColor";
+import { HelpScreenSettings } from "@/utils";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { useState } from "react";
 import {
   SafeAreaView,
   TouchableOpacity,
   StyleSheet,
   View,
   Dimensions,
-  Modal,
+  Linking,
+  FlatList,
 } from "react-native";
 
 const { height, width } = Dimensions.get("window");
@@ -37,15 +38,26 @@ export default function HelpScreen() {
           Help & Info
         </CustomText>
 
-        <TouchableOpacity style={styles.termsBox}>
-          <CustomText style={styles.boxText}>Terms and Conditions</CustomText>
-          <Ionicons name="chevron-forward" size={24} color="#000" />
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.box}>
-          <CustomText style={styles.boxText}>Privacy Policy</CustomText>
-          <Ionicons name="chevron-forward" size={24} color="#000" />
-        </TouchableOpacity>
+        <View style={styles.categoryContainer}>
+          <FlatList
+            data={HelpScreenSettings}
+            scrollEnabled={false}
+            keyExtractor={(item) => item.key}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={styles.categoryBox}
+                onPress={() => {
+                  item.hrefLink &&
+                    Linking.openURL("https://example.com/learn-more");
+                }}
+              >
+                <Ionicons name={item.leftIcon} size={24} color="#000" />
+                <CustomText style={styles.boxText}>{item.name}</CustomText>
+                <Ionicons name={item.rightIcon} size={24} color="#000" />
+              </TouchableOpacity>
+            )}
+          />
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -64,7 +76,6 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   scrollContent: {
-    alignItems: "center",
     padding: 20,
   },
   heading: {
@@ -81,12 +92,15 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginVertical: 10,
   },
-  box: {
+  categoryBox: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#f0f0f0",
     padding: 15,
     borderRadius: 10,
+    marginVertical: 3,
+  },
+  categoryContainer: {
     marginVertical: 10,
   },
   boxText: { flex: 1, marginLeft: 10, fontSize: 16 },

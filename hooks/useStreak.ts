@@ -3,6 +3,7 @@ import { API_URL } from "@/constants/apiUrl";
 
 const useStreak = (userId: string) => {
   const [streak, setStreak] = useState<number>(0);
+  const [lastActivityDate, setLastActivityDate] = useState<string | null>(null);
 
   const fetchStreak = async () => {
     if (!userId) return;

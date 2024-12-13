@@ -37,3 +37,34 @@ export const profileSetting: ProfileConfig = [
     content: "settings",
   },
 ];
+
+export const HelpScreenSettings: ProfileConfig = [
+  {
+    key: "Terms and Conditions",
+    name: "Terms and Conditions",
+    leftIcon: "document-text-outline",
+    rightIcon: "chevron-forward",
+    hrefLink: "",
+  },
+  {
+    key: "Privacy Policy",
+    name: "Privacy Policy",
+    leftIcon: "document-text-outline",
+    rightIcon: "chevron-forward",
+    hrefLink: "",
+  },
+  {
+    key: "Frequently Asked Questions",
+    name: "Frequently Asked Questions",
+    leftIcon: "help-circle-outline",
+    rightIcon: "chevron-forward",
+    hrefLink: "",
+  },
+  {
+    key: "Send feedback",
+    name: "Send feedback",
+    leftIcon: "mail-outline",
+    rightIcon: "chevron-forward",
+    hrefLink: "",
+  },
+];
