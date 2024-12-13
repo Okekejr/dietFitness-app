@@ -13,6 +13,8 @@ import {
   Alert,
   Image,
   Button,
+  Linking,
+  ScrollView,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
@@ -183,31 +185,56 @@ export default function PersonalProfile() {
           <Button title="Upload Picture" onPress={pickImage} />
         </View>
 
-        <View style={[styles.categoryContainer, { borderColor: iconColor }]}>
-          <FlatList
-            data={profileConfig}
-            keyExtractor={(item) => item.name}
-            renderItem={({ item, index }) => (
-              <View style={styles.categoryBox}>
-                <CustomText style={[styles.boxHeader, { color: subTextColor }]}>
-                  {item.name}
-                </CustomText>
-                <CustomText style={[styles.boxText, { color: textColor }]}>
-                  {item.data} {measurement(item.key)}
-                </CustomText>
-                {index < profileConfig.length - 1 ? (
-                  <View style={styles.dividerContainer}>
-                    <View
-                      style={[styles.line, { backgroundColor: iconColor }]}
-                    />
-                  </View>
-                ) : (
-                  ""
-                )}
-              </View>
-            )}
-          />
-        </View>
+        <ScrollView>
+          {/* Disclaimer */}
+          <View style={styles.disclaimerContainer}>
+            <CustomText style={styles.disclaimerText}>
+              This information is only used to help{" "}
+              <CustomText style={styles.boldText}>
+                personalise your plan
+              </CustomText>{" "}
+              to be right for you.{" "}
+              <CustomText
+                style={styles.linkText}
+                onPress={() =>
+                  Linking.openURL("https://example.com/learn-more")
+                }
+              >
+                Learn More
+              </CustomText>
+              .
+            </CustomText>
+          </View>
+
+          <View style={[styles.categoryContainer, { borderColor: iconColor }]}>
+            <FlatList
+              data={profileConfig}
+              scrollEnabled={false}
+              keyExtractor={(item) => item.name}
+              renderItem={({ item, index }) => (
+                <View style={styles.categoryBox}>
+                  <CustomText
+                    style={[styles.boxHeader, { color: subTextColor }]}
+                  >
+                    {item.name}
+                  </CustomText>
+                  <CustomText style={[styles.boxText, { color: textColor }]}>
+                    {item.data} {measurement(item.key)}
+                  </CustomText>
+                  {index < profileConfig.length - 1 ? (
+                    <View style={styles.dividerContainer}>
+                      <View
+                        style={[styles.line, { backgroundColor: iconColor }]}
+                      />
+                    </View>
+                  ) : (
+                    ""
+                  )}
+                </View>
+              )}
+            />
+          </View>
+        </ScrollView>
       </View>
     </SafeAreaView>
   );
@@ -271,5 +298,27 @@ const styles = StyleSheet.create({
   line: {
     flex: 1,
     height: 1,
+  },
+  disclaimerContainer: {
+    backgroundColor: "#f0f4f8",
+    borderLeftWidth: 4,
+    borderLeftColor: "#3b82f6",
+    padding: 10,
+    marginVertical: 10,
+    borderRadius: 6,
+    paddingBottom: 15,
+  },
+  disclaimerText: {
+    fontSize: 14,
+    color: "#4b5563",
+  },
+  boldText: {
+    fontWeight: "600",
+    color: "#111827",
+  },
+  linkText: {
+    color: "#3b82f6",
+    textDecorationLine: "underline",
+    fontWeight: "500",
   },
 });

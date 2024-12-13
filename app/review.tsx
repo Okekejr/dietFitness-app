@@ -135,9 +135,9 @@ export default function ReviewScreen() {
           <CustomText style={styles.disclaimerText}>
             We'd like this information to provide more accurate results, such as{" "}
             <CustomText style={styles.boldText}>
-              run distance, pace, and calories
+              run distance, activity level, and calories
             </CustomText>
-            . For coaching plans, this information, in addition to your age,
+            . For diet plans & meal plans, this information, in addition to your age,
             helps{" "}
             <CustomText style={styles.boldText}>
               personalise your plan

@@ -10,7 +10,6 @@ import {
   Alert,
   TouchableOpacity,
   TouchableWithoutFeedback,
-  ActivityIndicator,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from "expo-secure-store";
@@ -23,6 +22,8 @@ import { API_URL } from "@/constants/apiUrl";
 import Divider from "@/components/ui/divider";
 import { useUserData } from "@/context/userDataContext";
 import CustomText from "@/components/ui/customText";
+import { PasswordLess } from "@/components/login/passwordless";
+import { LoginWithPassword } from "@/components/login/loginWithPassword";
 
 // Open the browser session correctly (required for standalone apps)
 WebBrowser.maybeCompleteAuthSession();
@@ -262,143 +263,26 @@ export default function LoginScreen() {
           !userData?.name ||
           !userData?.biometric_enabled ||
           userData?.is_deleted ? (
-            <>
-              {/* Inputs with Labels */}
-              <View style={styles.inputContainer}>
-                <CustomText style={styles.label}>Email</CustomText>
-                <TextInput
-                  ref={emailInputRef}
-                  style={[
-                    styles.input,
-                    errors.email ? styles.errorInput : null,
-                  ]}
-                  placeholder="Email Address"
-                  placeholderTextColor="#c7c7c7"
-                  value={email}
-                  onChangeText={(text) => setEmail(text.trim())}
-                  onSubmitEditing={() => passwordInputRef.current?.focus()}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                />
-                {errors.email ? (
-                  <CustomText style={styles.errorText}>
-                    {errors.email}
-                  </CustomText>
-                ) : null}
-              </View>
-
-              <View style={styles.inputContainer}>
-                <View style={styles.passwordstyle}>
-                  <CustomText style={styles.passwordLabel}>Password</CustomText>
-                  <TouchableOpacity
-                    onPress={() => router.push("/forgotPassword")}
-                  >
-                    <CustomText style={styles.signupLink}>
-                      Forgot password?
-                    </CustomText>
-                  </TouchableOpacity>
-                </View>
-                <View style={styles.passwordInputContainer}>
-                  <TextInput
-                    ref={passwordInputRef}
-                    style={[
-                      styles.passwordInput,
-                      errors.password ? styles.errorInput : null,
-                    ]}
-                    placeholder="Password"
-                    placeholderTextColor="#c7c7c7"
-                    secureTextEntry={!isPasswordVisible}
-                    value={password}
-                    onChangeText={setPassword}
-                    onSubmitEditing={() =>
-                      handleLogin({
-                        email: email || "",
-                        password: password,
-                      })
-                    }
-                  />
-                  {/* Eye icon inside input */}
-                  <TouchableOpacity
-                    onPress={() => setPasswordVisible((prev) => !prev)}
-                  >
-                    <Ionicons
-                      name={isPasswordVisible ? "eye" : "eye-off"}
-                      size={24}
-                      color="gray"
-                      style={styles.eyeIcon}
-                    />
-                  </TouchableOpacity>
-                </View>
-                {errors.password ? (
-                  <CustomText style={styles.errorText}>
-                    {errors.password}
-                  </CustomText>
-                ) : null}
-              </View>
-
-              {/* Login Button */}
-              <TouchableOpacity
-                style={[
-                  styles.loginButton,
-                  isButtonDisabled && styles.disabledButton,
-                ]}
-                onPress={() =>
-                  handleLogin({
-                    email: email || "",
-                    password: password,
-                  })
-                }
-                disabled={loading}
-              >
-                {loading ? (
-                  <ActivityIndicator color="#fff" />
-                ) : (
-                  <CustomText style={styles.loginButtonText}>Log In</CustomText>
-                )}
-              </TouchableOpacity>
-            </>
+            <LoginWithPassword
+              setEmail={setEmail}
+              setPassword={setPassword}
+              handleLogin={handleLogin}
+              setPasswordVisible={setPasswordVisible}
+              passwordInputRef={passwordInputRef}
+              emailInputRef={emailInputRef}
+              email={email}
+              password={password}
+              isPasswordVisible={isPasswordVisible}
+              isButtonDisabled={isButtonDisabled}
+              errors={errors}
+              loading={loading}
+            />
           ) : (
-            <View style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              <CustomText style={styles.headerTitle}>
-                Welcome back {userData?.name}
-              </CustomText>
-
-              <TouchableOpacity
-                style={styles.loginButton}
-                onPress={() => handleLoginWithBiometrics()}
-              >
-                <View
-                  style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <CustomText
-                    style={[
-                      styles.loginButtonText,
-                      { flex: 1, paddingLeft: 30 },
-                    ]}
-                  >
-                    Log In
-                  </CustomText>
-                  <Ionicons
-                    name="finger-print-outline"
-                    size={20}
-                    color="#fff"
-                    style={{ marginRight: 10 }}
-                  />
-                </View>
-              </TouchableOpacity>
-
-              <TouchableOpacity onPress={() => setLoginPassword(true)}>
-                <CustomText style={styles.signupLink}>
-                  Login with password
-                </CustomText>
-              </TouchableOpacity>
-            </View>
+            <PasswordLess
+              userData={userData}
+              setLoginPassword={setLoginPassword}
+              handleLoginWithBiometrics={handleLoginWithBiometrics}
+            />
           )}
 
           <Divider text="OR" />
@@ -424,55 +308,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#F5F7FA",
     padding: 20,
   },
-  passwordInputContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderColor: "gray",
-    borderWidth: 1,
-    borderRadius: 5,
-    height: 50,
-    paddingHorizontal: 10,
-  },
   headerText: {
     marginBottom: 30,
     fontSize: 20,
     color: "#000",
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontFamily: "HostGrotesk-Medium",
-    color: "#000",
-  },
-  passwordInput: {
-    flex: 1,
-    color: "#000",
-  },
-  errorInput: {
-    borderColor: "red",
-  },
-  errorText: {
-    color: "red",
-    fontSize: 12,
-    marginTop: 5,
-  },
-  eyeIcon: {
-    marginLeft: 10,
-  },
-  passwordLabel: {
-    fontSize: 14,
-    color: "#000",
-  },
-  passwordstyle: {
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginVertical: 5,
-  },
-  title: {
-    fontSize: 24,
-    marginBottom: 20,
-    textAlign: "center",
   },
   oauthContainer: {
     marginTop: 20,
@@ -499,40 +338,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#fff",
   },
-  inputContainer: {
-    marginBottom: 15,
-  },
-  label: {
-    fontSize: 14,
-    marginBottom: 5,
-    color: "#000",
-  },
-  input: {
-    height: 50,
-    borderColor: "gray",
-    borderWidth: 1,
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    color: "#000",
-  },
-  loginButton: {
-    backgroundColor: "#4F46E5",
-    paddingVertical: 15,
-    borderRadius: 5,
-    marginTop: 10,
-  },
-  disabledButton: {
-    backgroundColor: "#A0A0A0",
-  },
-  loginButtonText: {
-    color: "#fff",
-    textAlign: "center",
-    fontSize: 16,
-  },
   signUpButton: {
     paddingVertical: 15,
     borderRadius: 5,
     marginTop: 10,
     backgroundColor: "#000",
+  },
+  loginButtonText: {
+    color: "#fff",
+    textAlign: "center",
+    fontSize: 16,
   },
 });
