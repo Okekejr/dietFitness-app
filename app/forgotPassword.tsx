@@ -9,7 +9,7 @@ import {
 import { API_URL } from "@/constants/apiUrl";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { validateEmail } from "@/utils";
+import { clearAllStoredItems, validateEmail } from "@/utils";
 import CustomText from "@/components/ui/customText";
 
 export default function ForgotPasswordScreen() {
@@ -87,6 +87,7 @@ export default function ForgotPasswordScreen() {
       const data = await response.json();
       if (data.status === "OK") {
         Alert.alert("Success", "Password reset email sent.");
+        clearAllStoredItems();
         router.replace("/login");
       } else {
         throw new Error(data.message || "Failed to send reset email.");

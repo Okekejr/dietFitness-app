@@ -65,13 +65,23 @@ export default function LoginScreen() {
   const [isButtonDisabled, setButtonDisabled] = useState(true);
   const [loading, setLoading] = useState(false);
   const { refetchUserData } = useUserData();
+  const [stored, setStored] = useState<string | null>(null);
 
   const router = useRouter();
 
   useEffect(() => {
     // Enable button only if both fields are filled
     setButtonDisabled(!(email && password));
-  }, [email, password]);
+
+    const storedPassword = async () => {
+      const storedPassword = await SecureStore.getItemAsync(
+        "biometric_password"
+      );
+      setStored(storedPassword);
+    };
+
+    storedPassword();
+  }, [email, password, stored]);
 
   const validateInputs = () => {
     const newErrors = { email: "", password: "" };
@@ -258,11 +268,7 @@ export default function LoginScreen() {
             </TouchableOpacity>
           </View>
 
-          {loginPassword ||
-          !userData ||
-          !userData?.name ||
-          !userData?.biometric_enabled ||
-          userData?.is_deleted ? (
+          {loginPassword || !userData || stored === null ? (
             <LoginWithPassword
               setEmail={setEmail}
               setPassword={setPassword}

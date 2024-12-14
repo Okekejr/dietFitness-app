@@ -84,13 +84,20 @@ const ManageGroupCard: React.FC<ManageGroupCardProps> = ({
   > = useMutation({
     mutationFn: deleteClubMember,
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["userClub", userData?.user_id],
-      });
-      queryClient.invalidateQueries({ queryKey: ["clubMembers", clubId] });
-      router.push({
-        pathname: `/`,
-      });
+      if (isLeader) {
+        queryClient.invalidateQueries({
+          queryKey: ["userClub", userData?.user_id],
+        });
+        queryClient.invalidateQueries({ queryKey: ["clubMembers", clubId] });
+      } else {
+        queryClient.invalidateQueries({
+          queryKey: ["userClub", userData?.user_id],
+        });
+        queryClient.invalidateQueries({ queryKey: ["clubMembers", clubId] });
+        router.push({
+          pathname: `/`,
+        });
+      }
     },
     onError: () => {
       Alert.alert("Error", "Failed to remove user.");
@@ -98,7 +105,6 @@ const ManageGroupCard: React.FC<ManageGroupCardProps> = ({
   });
 
   const handleDelete = (userId: string, userName: string) => {
-    // Show confirmation alert before proceeding with deletion
     Alert.alert(
       "Confirm",
       isLeader

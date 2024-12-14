@@ -51,6 +51,4 @@ const styles = StyleSheet.create({
   },
 });
 
-// monterrey
-
 export default WelcomeScreen;

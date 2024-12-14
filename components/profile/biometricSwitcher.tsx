@@ -51,7 +51,6 @@ export const BiometricSwitcher = ({
     onSuccess: () => {
       // Invalidate and refetch the biometric query
       queryClient.invalidateQueries({ queryKey: ["biometric", userId] });
-      Alert.alert("Success", "Biometric setting updated successfully");
     },
     onError: () => {
       Alert.alert("Error", "Failed to update biometric setting");
