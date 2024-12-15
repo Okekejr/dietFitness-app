@@ -61,7 +61,7 @@ export const useProfile = ({ userData }: userProfileT) => {
             await SuperTokens.signOut();
 
             // Redirect to the login page
-            router.replace("/login");
+            router.replace("/welcome");
           } catch (error) {
             Alert.alert("Sign Out Failed", (error as Error).message);
           }

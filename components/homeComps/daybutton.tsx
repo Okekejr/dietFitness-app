@@ -52,7 +52,7 @@ export const RenderDayButton = ({
         <View
           style={[
             styles.borderIndicator,
-            { backgroundColor: day === selectedDay ? "green" : "#E0E0E0" },
+            { backgroundColor: day === selectedDay ? "red" : "#E0E0E0" },
           ]}
         />
         <CustomText style={styles.dayText}>Day {day}</CustomText>
@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   selectedCalendarCard: {
-    backgroundColor: "#E6F7E8",
+    backgroundColor: "#24EF7D",
     borderColor: "#4CAF50",
   },
   dayInfoContainer: {

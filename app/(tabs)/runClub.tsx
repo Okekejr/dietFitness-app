@@ -13,7 +13,6 @@ import {
   useMutation,
   UseMutationResult,
   useQuery,
-  useQueryClient,
 } from "@tanstack/react-query";
 import { useUserData } from "@/context/userDataContext";
 import { CreateClub } from "@/components/clubs/createClub";
