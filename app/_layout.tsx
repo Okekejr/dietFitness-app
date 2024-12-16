@@ -24,7 +24,10 @@ export default function RootLayout() {
     "HostGrotesk-LightItalic": require("../assets/fonts/HostGrotesk-LightItalic.ttf"),
     "HostGrotesk-Medium": require("../assets/fonts/HostGrotesk-Medium.ttf"),
     "HostGrotesk-Regular": require("../assets/fonts/HostGrotesk-Regular.ttf"),
-    "BagelFatOne-Regular": require("../assets/fonts/BagelFatOne-Regular.ttf"),
+    "MontserratAlt1-Light": require("../assets/fonts/MontserratAlt1-Light.ttf"),
+    "MontserratAlt1-Bold": require("../assets/fonts/MontserratAlt1-Bold.ttf"),
+    "MontserratAlt1-Medium": require("../assets/fonts/MontserratAlt1-Medium.ttf"),
+    "MontserratAlt1-Thin": require("../assets/fonts/MontserratAlt1-Thin.ttf"),
   });
 
   const router = useRouter();

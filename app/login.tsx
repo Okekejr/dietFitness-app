@@ -18,7 +18,7 @@ import * as AuthSession from "expo-auth-session";
 import * as WebBrowser from "expo-web-browser";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { API_URL } from "@/constants/apiUrl";
+import { API_URL, AppName } from "@/constants/apiUrl";
 import Divider from "@/components/ui/divider";
 import { useUserData } from "@/context/userDataContext";
 import CustomText from "@/components/ui/customText";
@@ -249,7 +249,7 @@ export default function LoginScreen() {
           contentContainerStyle={styles.container}
           keyboardShouldPersistTaps="handled"
         >
-          <CustomText style={styles.headerText}>Log in to our app</CustomText>
+          <CustomText style={styles.headerText}>Log in to {AppName}</CustomText>
           {/* OAuth Buttons */}
           <View style={styles.oauthContainer}>
             <TouchableOpacity
@@ -315,6 +315,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   headerText: {
+    fontFamily: "HostGrotesk-Medium",
     marginBottom: 30,
     fontSize: 20,
     color: "#000",

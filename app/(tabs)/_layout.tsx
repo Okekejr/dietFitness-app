@@ -31,11 +31,11 @@ export default function Layout() {
           setIsAuthenticated(true);
         } else {
           console.log("No session, redirecting to login");
-          router.replace({ pathname: "/welcome" });
+          router.replace({ pathname: "/login" });
         }
       } catch (error) {
         console.error("Error checking session:", error);
-        router.replace({ pathname: "/welcome" });
+        router.replace({ pathname: "/login" });
       }
     };
 
