@@ -80,18 +80,22 @@ export const useHomeQueries = ({
         userData.week_start_date = today.toISOString(); // Reset the month start date
         userData.current_workout_week = 1; // Reset to week 1
 
-        // Fetch past used workouts
-        const pastUsedWorkoutsResponse = await fetch(
-          `${API_URL}/api/user/getPastUsedWorkouts?userId=${userId}`
+        // Delete past used workouts
+        const deletePastUsedWorkoutResponse = await fetch(
+          `${API_URL}/api/user/deleteUsedWorkouts?userId=${userId}`,
+          {
+            method: "DELETE",
+          }
         );
 
-        if (!pastUsedWorkoutsResponse.ok) {
-          const errorData = await pastUsedWorkoutsResponse.json();
-          console.error("Error fetching past data:", errorData);
-          return [];
+        if (!deletePastUsedWorkoutResponse.ok) {
+          const errorData = await deletePastUsedWorkoutResponse.json();
+          console.error("Error deleting past used workouts:", errorData);
+          return;
         }
 
-        const pastUsedWorkouts = await pastUsedWorkoutsResponse.json();
+        // Set pastUsedWorkouts as an empty array
+        const pastUsedWorkouts: WorkoutsT[] = [];
 
         // Distribute the workouts and diets across the week
         const workoutsPerWeek = workoutDays(userData.activity_level);

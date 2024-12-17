@@ -49,13 +49,6 @@ export const ACHIEVEMENTS: AchievementsTypeT = [
     condition: (stats: OverviewStatsT) => stats.totalWorkouts >= 15,
   },
   {
-    id: "almost there",
-    name: "Almost there",
-    description: "20 workouts",
-    icon: "checkmark-done",
-    condition: (stats: OverviewStatsT) => stats.totalWorkouts >= 10,
-  },
-  {
     id: "champion",
     name: "Champion",
     description: "50 workouts",
@@ -91,7 +84,7 @@ export const MILESTONES = [
 export const STREAKS = [
   {
     id: "streak_3",
-    name: "3-Day Streak",
+    name: "Three-Day Warrior",
     description: "3 days in a row",
     icon: "calendar",
     condition: (stats: OverviewStatsT) => stats.streak >= 3,
@@ -105,14 +98,14 @@ export const STREAKS = [
   },
   {
     id: "streak_7",
-    name: "7-Day Streak",
+    name: "One-Week Streak",
     description: "7 days in a row",
     icon: "calendar-outline",
     condition: (stats: OverviewStatsT) => stats.streak >= 7,
   },
   {
     id: "streak_30",
-    name: "30-Day Streak",
+    name: "Consistency Champion",
     description: "30 days in a row",
     icon: "calendar-sharp",
     condition: (stats: OverviewStatsT) => stats.streak >= 30,

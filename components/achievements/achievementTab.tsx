@@ -17,7 +17,6 @@ import { useThemeColor } from "@/hooks/useThemeColor";
 
 const AchievementsTab = () => {
   const textColor = useThemeColor({}, "text");
-  const backgroundColor = useThemeColor({}, "background");
   const { userData } = useUserData();
   const userId = userData?.user_id ?? "";
 

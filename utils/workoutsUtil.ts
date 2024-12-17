@@ -1,11 +1,9 @@
-import { Href } from "expo-router";
-
 export type workoutCardsConfigT = {
   key: string;
   data: WorkoutsT[];
   cardName: string;
   bgImgLink: any;
-  cardLink: Href<string>;
+  cardLink: string;
 }[];
 
 import {
