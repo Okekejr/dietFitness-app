@@ -268,7 +268,10 @@ export default function LoginScreen() {
             </TouchableOpacity>
           </View>
 
-          {loginPassword || !userData || stored === null ? (
+          {loginPassword ||
+          !userData ||
+          userData?.is_deleted === true ||
+          stored === null ? (
             <LoginWithPassword
               setEmail={setEmail}
               setPassword={setPassword}
