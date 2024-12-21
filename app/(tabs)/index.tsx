@@ -65,7 +65,9 @@ export default function HomeScreen() {
         new Date()
       );
 
-      const currentDay = Math.min(daysSinceStart + 1, 7); // Ensure it doesn't exceed 7
+      // Reset to 1 after 7
+      const currentDay = (daysSinceStart % 7) + 1;
+
       setSelectedDay(currentDay);
 
       // Automatically scroll to the current day's card

@@ -49,6 +49,10 @@ export const useHomeQueries = ({
         today
       );
 
+      let currentWeek = userData.current_workout_week;
+
+      console.log(currentWeekNum, daysSinceWeekStart);
+
       setCurrentWeekNum(userData.current_workout_week);
 
       if (hasMonthPassed(userData.week_start_date)) {
@@ -129,22 +133,50 @@ export const useHomeQueries = ({
         console.log("A month hasn't passed yet.");
       }
 
-      // Fetch past used workouts and diets from the database
-      const pastUsedWorkoutsResponse = await fetch(
-        `${API_URL}/api/user/getPastUsedWorkouts?userId=${userId}`
-      );
+      const adjustedDay = ((daysSinceWeekStart - 1) % 7) + 1;
 
-      if (!pastUsedWorkoutsResponse.ok) {
-        const errorData = await pastUsedWorkoutsResponse.json();
-        console.error("Error fetching past data:", errorData);
-        return [];
+      console.log(adjustedDay);
+
+      if (adjustedDay === 1 && daysSinceWeekStart > 7) {
+        console.log("Starting a new week...");
+        currentWeek += 1; // Increment the week number
+        userData.current_workout_week = currentWeek;
+        userData.week_start_date = today.toISOString(); // Reset the start date for the new week
+
+        const pastUsedWorkoutsResponse = await fetch(
+          `${API_URL}/api/user/getPastUsedWorkouts?userId=${userId}`
+        );
+
+        const pastUsedWorkouts: WorkoutsT[] = pastUsedWorkoutsResponse.ok
+          ? await pastUsedWorkoutsResponse.json()
+          : [];
+
+        // Generate a new weekly schedule
+        const workoutsPerWeek = workoutDays(userData.activity_level);
+        const { assignedWorkouts, assignedDiets } =
+          distributeWorkoutsAndDietsAcrossWeek({
+            workoutPlan: userData.workout_plan,
+            dietPlan: userData.diet_plan,
+            workoutsPerWeek,
+            currentWeek,
+            pastUsedWorkouts,
+          });
+
+        const newWeeklySchedule = Array.from({ length: 7 }, (_, i) => ({
+          day: (daysSinceWeekStart % 7) + i + 1, // Reset days to 1–7
+          workouts: assignedWorkouts.filter((w) => w.day === i + 1),
+          diets: assignedDiets.filter((d) => d.day === i + 1),
+        }));
+
+        // Save the new schedule to the backend
+        await saveSchedule(userId, newWeeklySchedule, currentWeek, today);
+
+        // Update the local state
+        setSchedule(newWeeklySchedule);
+        setCurrentWeekNum(currentWeek);
       }
 
-      const pastUsedWorkouts: WorkoutsT[] = pastUsedWorkoutsResponse.ok
-        ? await pastUsedWorkoutsResponse.json()
-        : [];
-
-      // Fetch schedule for the current week
+      // Fetch and set the current schedule if it exists
       let scheduleResponse = await fetch(
         `${API_URL}/api/user/getSchedule?userId=${userId}`
       );
@@ -153,11 +185,8 @@ export const useHomeQueries = ({
         ? await scheduleResponse.json()
         : [];
 
-      let currentWeek = userData.current_workout_week;
-
-      // Check if no schedule exists
       if (!weeklySchedule || weeklySchedule.length === 0) {
-        // If schedule is empty, generate a new one
+        // Generate and save a new schedule if it doesn't exist
         const workoutsPerWeek = workoutDays(userData.activity_level);
         const { assignedWorkouts, assignedDiets } =
           distributeWorkoutsAndDietsAcrossWeek({
@@ -165,49 +194,18 @@ export const useHomeQueries = ({
             dietPlan: userData.diet_plan,
             workoutsPerWeek,
             currentWeek,
-            pastUsedWorkouts,
+            pastUsedWorkouts: [],
           });
 
-        // Generate the new weekly schedule
         weeklySchedule = Array.from({ length: 7 }, (_, i) => ({
           day: i + 1,
           workouts: assignedWorkouts.filter((w) => w.day === i + 1),
           diets: assignedDiets.filter((d) => d.day === i + 1),
         }));
 
-        // Save the new schedule
         await saveSchedule(userId, weeklySchedule, currentWeek, today);
       }
 
-      if (
-        daysSinceWeekStart >= 7 &&
-        currentWeek > userData.current_workout_week
-      ) {
-        currentWeek += 1; // Increment the current week number
-        userData.week_start_date = today.toISOString();
-
-        const workoutsPerWeek = workoutDays(userData.activity_level);
-        const { assignedWorkouts, assignedDiets } =
-          distributeWorkoutsAndDietsAcrossWeek({
-            workoutPlan: userData.workout_plan,
-            dietPlan: userData.diet_plan,
-            workoutsPerWeek,
-            currentWeek,
-            pastUsedWorkouts,
-          });
-
-        // Generate the new weekly schedule
-        weeklySchedule = Array.from({ length: 7 }, (_, i) => ({
-          day: i + 1,
-          workouts: assignedWorkouts.filter((w) => w.day === i + 1),
-          diets: assignedDiets.filter((d) => d.day === i + 1),
-        }));
-
-        // Save the new schedule
-        await saveSchedule(userId, weeklySchedule, currentWeek, today);
-      }
-
-      // Set the fetched or newly generated schedule
       setSchedule(weeklySchedule);
     } catch (error) {
       console.error("Error generating or fetching schedule:", error);
@@ -215,7 +213,6 @@ export const useHomeQueries = ({
       setLoading(false);
     }
   };
-
   const saveSchedule = async (
     userId: string,
     schedule: {

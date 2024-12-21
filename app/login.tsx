@@ -269,7 +269,7 @@ export default function LoginScreen() {
           </View>
 
           {loginPassword ||
-          !userData ||
+          !userData || !userData.biometric_enabled ||
           userData?.is_deleted === true ||
           stored === null ? (
             <LoginWithPassword
