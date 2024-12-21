@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
-  View,
   TextInput,
   StyleSheet,
   Keyboard,
@@ -14,9 +13,7 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from "expo-secure-store";
 import * as LocalAuthentication from "expo-local-authentication";
-import * as AuthSession from "expo-auth-session";
 import * as WebBrowser from "expo-web-browser";
-import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { API_URL, AppName } from "@/constants/apiUrl";
 import Divider from "@/components/ui/divider";
@@ -27,26 +24,6 @@ import { LoginWithPassword } from "@/components/login/loginWithPassword";
 
 // Open the browser session correctly (required for standalone apps)
 WebBrowser.maybeCompleteAuthSession();
-
-// Define provider types
-type OAuthProvider = "apple";
-
-// Define discovery documents for providers
-const discovery: Record<OAuthProvider, AuthSession.DiscoveryDocument> = {
-  apple: {
-    authorizationEndpoint: "https://github.com/login/oauth/authorize",
-    tokenEndpoint: "https://github.com/login/oauth/access_token",
-  },
-};
-
-// Client IDs for OAuth providers
-const clientIds: Record<OAuthProvider, string> = {
-  apple: "your-github-client-id",
-};
-
-const redirectUri = AuthSession.makeRedirectUri({
-  scheme: "myapp",
-});
 
 interface loginProps {
   email: string;
@@ -219,26 +196,6 @@ export default function LoginScreen() {
     }
   };
 
-  // Handle OAuth login
-  const handleOAuthLogin = async (provider: OAuthProvider) => {
-    const config: AuthSession.AuthRequestConfig = {
-      clientId: clientIds[provider],
-      scopes: ["openid", "profile", "email"],
-      redirectUri,
-    };
-
-    const authRequest = new AuthSession.AuthRequest(config);
-    const result = await authRequest.promptAsync(discovery[provider]);
-
-    if (result.type === "success" && result.params.access_token) {
-      await AsyncStorage.setItem("accessToken", result.params.access_token);
-      Alert.alert(`${provider} Login Successful!`);
-      router.replace("/");
-    } else {
-      Alert.alert(`${provider} Login Failed`, result.type);
-    }
-  };
-
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -250,26 +207,10 @@ export default function LoginScreen() {
           keyboardShouldPersistTaps="handled"
         >
           <CustomText style={styles.headerText}>Log in to {AppName}</CustomText>
-          {/* OAuth Buttons */}
-          <View style={styles.oauthContainer}>
-            <TouchableOpacity
-              style={styles.oauthButton}
-              onPress={() => handleOAuthLogin("apple")}
-            >
-              <Ionicons
-                name="logo-apple"
-                size={20}
-                color="#fff"
-                style={styles.oauthIcon}
-              />
-              <CustomText style={styles.oauthButtonText}>
-                Login with Apple
-              </CustomText>
-            </TouchableOpacity>
-          </View>
 
           {loginPassword ||
-          !userData || !userData.biometric_enabled ||
+          !userData ||
+          !userData.biometric_enabled ||
           userData?.is_deleted === true ||
           stored === null ? (
             <LoginWithPassword
@@ -328,26 +269,6 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   signupLink: { color: "blue", textAlign: "right" },
-  oauthButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#000",
-    borderColor: "#000",
-    borderWidth: 1,
-    borderRadius: 5,
-    paddingVertical: 12,
-    paddingHorizontal: 10,
-    marginBottom: 10,
-  },
-  oauthIcon: {
-    marginRight: 10,
-  },
-  oauthButtonText: {
-    textAlign: "center",
-    flex: 1, // Center text inside the button
-    fontSize: 16,
-    color: "#fff",
-  },
   signUpButton: {
     paddingVertical: 15,
     borderRadius: 5,

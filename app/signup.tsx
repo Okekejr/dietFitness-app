@@ -133,20 +133,6 @@ export default function SignupScreen() {
           keyboardShouldPersistTaps="handled"
         >
           <CustomText style={styles.headerText}>Create an account</CustomText>
-          {/* OAuth Buttons */}
-          <View style={styles.oauthContainer}>
-            <TouchableOpacity style={styles.oauthButton}>
-              <Ionicons
-                name="logo-apple"
-                size={20}
-                color="#fff"
-                style={styles.oauthIcon}
-              />
-              <CustomText style={styles.oauthButtonText}>
-                Sign up with Apple
-              </CustomText>
-            </TouchableOpacity>
-          </View>
 
           {/* Inputs with Labels */}
           <View style={styles.inputContainer}>
@@ -293,32 +279,8 @@ const styles = StyleSheet.create({
     flex: 1,
     color: "#000",
   },
-  oauthContainer: {
-    marginTop: 20,
-    marginBottom: 30,
-  },
   eyeIcon: {
     marginLeft: 10,
-  },
-  oauthButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#000",
-    borderColor: "#000",
-    borderWidth: 1,
-    borderRadius: 5,
-    paddingVertical: 12,
-    paddingHorizontal: 10,
-    marginBottom: 10,
-  },
-  oauthIcon: {
-    marginRight: 10,
-  },
-  oauthButtonText: {
-    textAlign: "center",
-    flex: 1,
-    fontSize: 16,
-    color: "#fff",
   },
   headerText: {
     fontWeight: "bold",

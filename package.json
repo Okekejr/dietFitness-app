@@ -81,7 +81,8 @@
     "react-native-youtube-iframe": "^2.3.0",
     "supertokens-react-native": "^5.1.2",
     "expo-crypto": "~14.0.1",
-    "react-native-svg": "15.8.0"
+    "react-native-svg": "15.8.0",
+    "expo-apple-authentication": "~7.1.2"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
