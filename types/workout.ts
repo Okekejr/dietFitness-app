@@ -3,7 +3,7 @@ export interface WorkoutsT {
   id: number;
   name: string;
   category_id: number;
-  video_url: string;
+  video_url?: string;
   duration: number;
   description: string;
   intensity: string;
@@ -21,7 +21,7 @@ export interface WorkoutsFav {
   id: number;
   name: string;
   category_id: number;
-  video_url: string;
+  video_url?: string;
   duration: number;
   intensity: string;
   muscle_gained: number;

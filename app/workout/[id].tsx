@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
   View,
@@ -24,6 +24,7 @@ import { ResizeMode, Video } from "expo-av";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import * as Calendar from "expo-calendar";
 import { useWorkoutId } from "@/hooks/useWorkoutId";
+import AddCustomActivity from "@/components/customActivity/customActivityModal";
 
 const { height, width } = Dimensions.get("window");
 
@@ -66,6 +67,8 @@ const WorkoutDetailsScreen = () => {
   const backgroundColor = useThemeColor({}, "background");
   const subTextColor = useThemeColor({}, "subText");
   const iconTextColor = useThemeColor({}, "icon");
+  const [customActivityModalVisible, setCustomActivityModalVisible] =
+    useState(false);
 
   useEffect(() => {
     (async () => {
@@ -103,6 +106,10 @@ const WorkoutDetailsScreen = () => {
       fetchFavoritesStatus();
     }
   }, [workout]);
+
+  const handleAddCustomActivity = () => {
+    setCustomActivityModalVisible(true);
+  };
 
   if (loading) {
     return (
@@ -285,14 +292,32 @@ const WorkoutDetailsScreen = () => {
       </ScrollView>
 
       <Animated.View style={[styles.videoHoverButton, { top: slideAnim }]}>
-        <TouchableOpacity
-          onPress={handleEnterFullscreen}
-          style={[styles.startVideoHover, { backgroundColor: textColor }]}
-        >
-          <CustomText style={[styles.videoText, { color: backgroundColor }]}>
-            Start Workout
-          </CustomText>
-        </TouchableOpacity>
+        {workout.video_url !== null ? (
+          <TouchableOpacity
+            onPress={handleEnterFullscreen}
+            style={[styles.startVideoHover, { backgroundColor: textColor }]}
+          >
+            <CustomText style={[styles.videoText, { color: backgroundColor }]}>
+              Start Workout
+            </CustomText>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity
+            onPress={() => handleAddCustomActivity()}
+            style={[styles.startVideoHover, { backgroundColor: textColor }]}
+          >
+            <CustomText style={[styles.videoText, { color: backgroundColor }]}>
+              Mark Workout Complete
+            </CustomText>
+          </TouchableOpacity>
+        )}
+
+        <Modal visible={customActivityModalVisible} animationType="slide">
+          <AddCustomActivity
+            onClose={() => setCustomActivityModalVisible(false)}
+          />
+        </Modal>
+
         <View style={[styles.dotHover, { backgroundColor: textColor }]}></View>
         <TouchableOpacity
           onPress={() => setIsSchedule(true)}
