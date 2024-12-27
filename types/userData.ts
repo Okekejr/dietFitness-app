@@ -19,6 +19,7 @@ export interface UserDataT {
   current_workout_week: number;
   week_start_date: string;
   last_activity_date: Date;
+  last_reset_date: string | null;
   streak: number;
   diet_plan: DietPlanEntity[];
   biometric_enabled: boolean;

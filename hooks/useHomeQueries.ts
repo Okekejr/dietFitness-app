@@ -40,12 +40,12 @@ export const useHomeQueries = ({
     try {
       setLoading(true);
       const today = new Date();
-      const formattedWeekStartDate = userData.week_start_date
-        ? new Date(userData.week_start_date).toISOString()
-        : today.toISOString();
+      const weekStartDate = userData.week_start_date
+        ? new Date(userData.week_start_date)
+        : today;
 
       const daysSinceWeekStart = calculateDaysBetweenDates(
-        new Date(formattedWeekStartDate),
+        weekStartDate,
         today
       );
 
@@ -133,15 +133,25 @@ export const useHomeQueries = ({
         console.log("A month hasn't passed yet.");
       }
 
-      const adjustedDay = ((daysSinceWeekStart - 1) % 7) + 1;
+      const adjustedDay = ((daysSinceWeekStart % 7) + 7) % 7 || 7; // Map to 1-7
+      console.log(adjustedDay, daysSinceWeekStart);
 
-      console.log(adjustedDay);
+      // Ensure only one reset per day
+      const lastResetDate = new Date(userData.last_reset_date || 0)
+        .toISOString()
+        .split("T")[0];
+      const todayDate = today.toISOString().split("T")[0];
 
-      if (adjustedDay === 1 && daysSinceWeekStart > 7) {
+      if (
+        adjustedDay === 1 &&
+        daysSinceWeekStart > 7 &&
+        lastResetDate !== todayDate
+      ) {
         console.log("Starting a new week...");
         currentWeek += 1; // Increment the week number
         userData.current_workout_week = currentWeek;
         userData.week_start_date = today.toISOString(); // Reset the start date for the new week
+        userData.last_reset_date = today.toISOString();
 
         const pastUsedWorkoutsResponse = await fetch(
           `${API_URL}/api/user/getPastUsedWorkouts?userId=${userId}`
