@@ -67,6 +67,9 @@ A comprehensive mobile application designed to promote healthy lifestyles throug
 - **Auth Screens**:
 ![authScreens](https://github.com/user-attachments/assets/2c9da72e-e8f5-40ac-8651-0819be9319ef)
 
+- **Diet/Workout Screens**:
+![dietScreens](https://github.com/user-attachments/assets/11769308-081b-458c-a81f-909cea70ab3d)
+
 - **Onboarding Screens**:
 ![onboarding](https://github.com/user-attachments/assets/9ac0ae7e-8d4e-43ed-9ce4-540b7622f9c8)
 
